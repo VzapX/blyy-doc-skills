@@ -1,0 +1,29 @@
+# Changelog
+
+本文件记录所有重要的版本变更，格式遵循 [Keep a Changelog](https://keepachangelog.com/)。
+
+<!-- Phase 2 自动填充：从 Git 标签和提交记录生成 -->
+
+## [Unreleased]
+
+### Added
+- <!-- 新增功能 -->
+
+### Changed
+- <!-- 变更内容 -->
+
+### Fixed
+- <!-- 修复内容 -->
+
+<!-- 
+版本记录模板：
+
+## [x.y.z] - YYYY-MM-DD
+
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+-->

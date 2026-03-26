@@ -1,0 +1,78 @@
+---
+last_updated: {{DATE}}
+change_triggers:
+  - 核心模块调整
+  - 数据流调整
+  - 文件迁移/重命名
+---
+
+# 架构文档
+
+## 文档索引
+
+| 文档 | 内容 | 适用场景 |
+|------|------|---------| 
+| **本文档** | 系统概览 + 架构图 | 了解项目做什么、组件如何协作 |
+| [code-map.md](code-map.md) | 代码地图 | 改某功能时查对应文件 |
+| [modules.md](modules.md) | 模块说明 | 了解各模块的职责与边界 |
+| [core-flow.md](core-flow.md) | 核心流程 | 理解主要业务流程 |
+| [data-model.md](data-model.md) | 数据模型 | 了解公共数据结构与模块索引 |
+| [features.md](features.md) | 功能列表 + 术语表 | 查看已实现功能与概念定义 |
+
+### 相关文档
+
+| 文档 | 内容 |
+|------|------|
+| [config.md](config.md) | 完整配置参考 |
+| [deployment.md](deployment.md) | 部署流程 |
+| [runbook.md](runbook.md) | 运维手册 |
+| [DECISIONS.md](DECISIONS.md) | 架构决策记录 |
+| [doc-maintenance.md](doc-maintenance.md) | 文档维护规则（AI 工具专用） |
+
+---
+
+## 系统概览
+
+<!-- Phase 2 自动填充：基于项目分析生成 -->
+
+### 核心目标
+
+<!-- TODO: 请补充核心目标 -->
+
+### 系统边界
+
+**In scope：**
+<!-- Phase 2 自动填充 -->
+
+**Out of scope：**
+<!-- TODO: 请补充 -->
+
+### 运行形态
+
+<!-- Phase 2 自动填充：从构建命令推断 -->
+
+### 外部依赖
+
+<!-- Phase 2 自动填充：从项目文件推断 -->
+
+---
+
+## 架构图
+
+### 组件视图
+
+```mermaid
+flowchart LR
+    %% Phase 2 自动填充：基于模块识别结果生成
+    subgraph Core[核心模块]
+        S1[Service1]
+    end
+```
+
+### 数据流
+
+```mermaid
+flowchart TD
+    %% Phase 2 自动填充
+    INPUT[输入] --> PROCESS[处理] --> OUTPUT[输出]
+```

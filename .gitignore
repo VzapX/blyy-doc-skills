@@ -1,0 +1,22 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Editor/IDE
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.user
+*.suo
+
+# Init-docs working directory (generated in target projects)
+.init-docs/

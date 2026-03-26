@@ -1,0 +1,39 @@
+# Repository Guidelines
+
+<!-- Phase 2 自动填充：项目一句话描述 -->
+
+## Project Structure
+
+<!-- Phase 2 自动填充：从目录树生成 -->
+```
+{{PROJECT_STRUCTURE}}
+```
+
+## Build, Test, and Development Commands
+
+```bash
+# build
+{{BUILD_COMMAND}}
+
+# run
+{{RUN_COMMAND}}
+
+# test
+{{TEST_COMMAND}}
+```
+
+## Code Conventions
+
+<!-- Phase 2 自动填充：从项目文件推断语言和编码规范 -->
+- {{LANGUAGE}} targets {{FRAMEWORK}}
+- Indentation: {{INDENT_STYLE}}
+- Naming: 遵循语言标准命名规范
+
+## Documentation Maintenance Rules
+
+AI 工具在修改代码时必须遵循文档维护规则，详见 [docs/doc-maintenance.md](docs/doc-maintenance.md)。
+
+## Security & Configuration
+
+<!-- Phase 2 自动填充：从配置文件推断 -->
+- Do not commit secrets

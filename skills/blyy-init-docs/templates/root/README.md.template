@@ -1,0 +1,47 @@
+# {{PROJECT_NAME}}
+
+<!-- TODO: 请补充项目一句话简介 -->
+
+## 功能特性
+
+<!-- Phase 2 自动填充：基于 features.md 生成摘要 -->
+
+## 快速开始
+
+### 环境要求
+
+<!-- Phase 2 自动填充：从项目文件推断 -->
+- {{RUNTIME}} {{VERSION}}
+
+### 安装
+
+```bash
+# Phase 2 自动填充：从项目文件推断安装命令
+{{INSTALL_COMMAND}}
+```
+
+### 运行
+
+```bash
+# Phase 2 自动填充
+{{RUN_COMMAND}}
+```
+
+## 项目结构
+
+```
+# Phase 2 自动填充：从目录树生成
+{{PROJECT_STRUCTURE}}
+```
+
+## 配置说明
+
+详见 [配置参考](docs/config.md)。
+
+## 文档
+
+完整文档请参阅 [架构文档](docs/ARCHITECTURE.md)。
+
+## 许可证
+
+<!-- TODO: 请补充许可证类型 -->

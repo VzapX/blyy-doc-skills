@@ -1,0 +1,52 @@
+---
+last_updated: {{DATE}}
+change_triggers:
+  - 文档维护规则变更
+---
+
+# 文档维护规则
+
+> 本文档面向 AI 工具。人类开发者可跳过此文件。
+>
+> 返回 [架构文档](ARCHITECTURE.md)
+
+AI 工具在修改代码时必须遵循以下规则同步维护文档。
+
+## Rule 1: 触发式文档同步
+
+| 代码变更 | 需更新的文档 |
+|---------|------------|
+| 新增/重命名/删除源文件 | `docs/code-map.md` |
+| 新增/修改配置项 | `docs/config.md` |
+| 组件关系或数据流变化 | `docs/ARCHITECTURE.md` |
+| 服务/模块职责变更 | `docs/modules.md`（或模块级 `README.md`） |
+| 业务流程变化 | `docs/core-flow.md`（或模块级 `flow.md`） |
+| 数据库表结构变更 | `docs/data-model.md`（或模块级 `data-model.md`） |
+| 新增/移除功能 | `docs/features.md` |
+| 构建/运行/测试命令变化 | `AGENTS.md` + `README.md` |
+| 新增架构决策 | `docs/DECISIONS.md` |
+| 发现新的运维故障模式 | `docs/runbook.md` |
+| 发布新版本 | `CHANGELOG.md` |
+| 部署流程变化 | `docs/deployment.md` |
+
+## Rule 2: 代码地图准确性
+
+- 新增 service/class → 在 `docs/code-map.md` 对应表格加一行
+- 重命名/移动文件 → 更新 `docs/code-map.md` 所有引用
+- 删除文件 → 从 `docs/code-map.md` 移除
+- 结构变更后扫描代码地图中是否有死引用
+
+## Rule 3: 提交前验证
+
+- [ ] `docs/code-map.md` 中所有文件路径存在
+- [ ] `docs/config.md` 中所有配置项与代码一致
+- [ ] 修改过的文档 `last_updated` 已更新
+- [ ] 无断链引用
+- [ ] 新增模块已在 `docs/modules.md` 注册
+- [ ] 模块级文档已更新（如适用）
+
+## Rule 4: 文档比例约束
+
+- 不主动创建独立于现有架构的新文档文件
+- 拆分现有文档以改善可读性属于正常维护
+- 优先在现有文件中增加章节，而非新建文件
