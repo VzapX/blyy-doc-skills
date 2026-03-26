@@ -150,7 +150,7 @@ for tool in "${tools[@]}"; do
 
         file_count=$(find "$dest" -type f | wc -l)
         echo "[OK]   $skill -> $dest ($file_count 个文件)"
-        ((installed_count++))
+        installed_count=$((installed_count + 1))
     done
 done
 
