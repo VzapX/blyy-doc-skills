@@ -58,7 +58,9 @@ AI 工具在执行**任何代码修改任务**后，应自动触发 blyy-doc-syn
 □ 无断链引用（文档间交叉引用有效）
 □ 新增模块已在 modules.md 注册
 □ data-model.md 模块索引完整
+□ database/ schema 文件与代码中的表结构一致
 □ ARCHITECTURE.md 文档索引覆盖所有文档
+□ 新增/修改的 API 已在 api-reference.md 中更新（若存在）
 ```
 
 ### 防线 3: 定期审计（兜底）
@@ -72,6 +74,10 @@ AI 工具在执行**任何代码修改任务**后，应自动触发 blyy-doc-syn
 5. 检查 `config.md` 是否与实际配置类一致
 6. 检查模块级文档是否与模块代码一致
 7. 检查 `data-model.md` 索引是否覆盖所有模块
+8. 检查 `database/` 下的 schema 文件是否与实际表结构一致
+9. 检查 `testing.md` 测试策略是否反映当前测试框架和覆盖率要求
+10. 检查 `monitoring.md`（若存在）监控指标和告警规则是否与实际配置一致
+11. 检查 `api-reference.md`（若存在）是否覆盖所有当前 API 端点
 
 ## 资源文件
 

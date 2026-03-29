@@ -28,6 +28,13 @@ AI 工具在修改代码时必须遵循以下规则同步维护文档。
 | 发现新的运维故障模式 | `docs/runbook.md` |
 | 发布新版本 | `CHANGELOG.md` |
 | 部署流程变化 | `docs/deployment.md` |
+| 测试策略/覆盖率要求变更 | `docs/testing.md` |
+| 监控指标/告警规则变更 | `docs/monitoring.md`（若存在） |
+| 数据库表结构变更（公共） | `docs/data-model.md` + `docs/database/` 下对应 schema |
+| 数据库表结构变更（模块内） | 模块级 `data-model.md` + 模块级 `database/` 下对应 schema |
+| 缓存 key/结构变更 | `docs/data-model.md`（非关系型数据模型章节） |
+| 消息/事件 schema 变更 | `docs/data-model.md`（消息/事件 Schema 章节） |
+| API 认证方式变更 | `docs/api-reference.md`（若存在） |
 
 ## Rule 2: 代码地图准确性
 
@@ -44,6 +51,8 @@ AI 工具在修改代码时必须遵循以下规则同步维护文档。
 - [ ] 无断链引用
 - [ ] 新增模块已在 `docs/modules.md` 注册
 - [ ] 模块级文档已更新（如适用）
+- [ ] 数据库 schema 变更已同步到 `docs/database/` 或模块级 `database/`
+- [ ] 新增/修改的 API 已在 `docs/api-reference.md` 中更新（若存在）
 
 ## Rule 4: 文档比例约束
 

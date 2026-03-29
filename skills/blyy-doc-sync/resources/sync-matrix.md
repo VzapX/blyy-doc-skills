@@ -28,6 +28,15 @@
 | 发布新版本 | `CHANGELOG.md` | 新增版本条目 |
 | 部署流程变化 | `docs/deployment.md` | 更新部署步骤 |
 | API 接口变更 | `docs/api-reference.md` | 更新接口列表 |
+| API 认证/限流策略变更 | `docs/api-reference.md` | 更新认证与限流章节 |
+| 公共数据库表新增/修改 | `docs/data-model.md` + `docs/database/` | 更新公共模型 + 同步 schema 文件 |
+| 模块数据库表新增/修改 | `docs/modules/<name>/data-model.md` + `docs/modules/<name>/database/` | 更新模块模型 + 同步 schema 文件 |
+| 缓存 key/结构变更 | `docs/data-model.md` | 更新非关系型数据模型章节 |
+| 消息/事件 schema 变更 | `docs/data-model.md` | 更新消息/事件 Schema 章节 |
+| 测试策略/框架变更 | `docs/testing.md` | 更新测试分层和工具信息 |
+| 测试覆盖率要求变更 | `docs/testing.md` | 更新覆盖率要求 |
+| 监控指标变更 | `docs/monitoring.md`（若存在） | 更新核心指标表 |
+| 告警规则变更 | `docs/monitoring.md`（若存在） | 更新告警规则表 |
 | 新增/修改文档文件 | `docs/ARCHITECTURE.md` | 更新文档索引 |
 
 ## YAML 元数据更新规则
