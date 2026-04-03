@@ -96,6 +96,30 @@
 ### 填充原则
 
 1. **穷举式枚举，禁止节选**：文档中所有列表型内容（实体类列表、配置项列表、API 端点列表、模块列表、数据库表列表等）必须**穷举**项目中的所有条目。严禁仅列举「代表性示例」后加省略号。若项目有 30 个实体类，文档中必须列出全部 30 个，每个一行。子代理在输出分析素材时同样遵守此原则。此要求适用于表格行、列表项等所有枚举性内容
+
+   **强制执行机制 — 确定性清单预扫描**：「穷举式枚举」原则通过以下确定性机制保证执行，而非仅依赖 AI 的阅读能力：
+   1. Phase 2 开始前，主 agent 使用 **shell 命令**（`fd`/`rg`，非 AI 阅读）生成项目的完整文件清单（按类别分类），建立确定性基线数量
+   2. 每个子代理接收其负责范围内的**文件清单作为强制检查表**，指令要求逐一核对
+   3. 子代理输出必须包含**检查表覆盖率**（如 `23/23 ✓`），未覆盖的文件必须说明原因
+   4. Phase 3 验证时，将文档中的条目数与预扫描清单条目数**逐一比对**，而非重新扫描代码（避免再次遗漏）
+
+   **确定性清点命令矩阵**（按技术栈选用）：
+
+   | 技术栈 | 实体/模型清点 | 控制器/路由清点 | 服务清点 | 配置清点 |
+   |--------|-------------|---------------|---------|---------|
+   | C# / .NET | `fd -e cs -p "Entity\|Model" --type f` | `fd -e cs -p "Controller" --type f` | `fd -e cs -p "Service" --type f` | `fd "appsettings" --type f` |
+   | Java / Spring | `rg -l "@Entity\|@Table" --type java` | `rg -l "@RestController\|@Controller" --type java` | `rg -l "@Service" --type java` | `fd "application" -e yml -e yaml -e properties` |
+   | Python | `rg "class.*Model" -l --type py` | `fd "views.py\|routers" --type f -e py` | `fd "services" --type f -e py` | `fd "settings.py\|config.py\|.env" --type f` |
+   | Go | `fd "_model.go\|model.go" --type f` | `fd "handler\|routes" -e go --type f` | `fd "service" -e go --type f` | `fd "config" -e go -e yaml -e toml` |
+   | Node.js / TS | `fd -e ts -p "entity\|model" --type f` | `fd -e ts -p "controller" --type f` | `fd -e ts -p "service" --type f` | `fd "config" -e ts -e js --type f` |
+   | Ruby / Rails | `fd -e rb --type f app/models/` | `fd -e rb --type f app/controllers/` | `fd -e rb --type f app/services/` | `fd "database.yml\|credentials" --type f` |
+   | PHP / Laravel | `fd -e php --type f app/Models/` | `fd -e php --type f app/Http/Controllers/` | `fd -e php --type f app/Services/` | `fd -e php --type f config/` |
+   | Rust | `fd "model\|schema" -e rs --type f` | `fd "handler\|routes" -e rs --type f` | `fd "service" -e rs --type f` | `fd "config" -e rs -e toml` |
+
+   清单持久化位置：
+   - 标准模式：`docs/.init-temp/inventory.md`
+   - 大型项目模式：`.init-docs/inventory.md`
+
 2. **基于代码事实**：只填充能从代码中确认的信息，不臆测不编造
 3. **不确定必澄清（批量模式）**：对准确性/完整性存在不确定的内容（业务流程、模块边界、设计决策、数据流向等），**必须先向用户澄清确认后再写入**，不得自行推测。但澄清方式采用**批量模式**：
    - 所有子代理完成后，主 agent 将不确定项按类别分组（模块边界类、业务流程类、数据模型类、配置类等），**一次性**呈现给用户
@@ -104,6 +128,48 @@
    - **禁止在填充过程中逐条打断用户** — 先收集，后批量
 4. **保留占位符**：无法推断且用户暂未确认的部分使用 `<!-- TODO: 请补充 xxx -->` 标记
 5. **更新元数据**：所有文档的 `last_updated` 设为生成当天
+
+### 三级事实分类（Three-Tier Fact Classification）
+
+所有写入文档的内容必须按以下三个级别分类，确保文档内容的可信度透明可控：
+
+| 级别 | 定义 | 来源示例 | 处理方式 |
+|------|------|---------|---------|
+| **T1 — 确定性事实** | 直接从代码/文件名/配置中提取，无需推断 | shell 命令输出、文件名、类名、配置值、代码中的字面量、依赖版本号 | 直接写入文档，无需标记 |
+| **T2 — 高置信推断** | 从代码模式中高置信推断，错误概率 < 10% | 命名约定推断（OrderService → 负责订单逻辑）、标准框架模式推断、依赖关系推断 | 直接写入文档，无需标记 |
+| **T3 — 推测性内容** | 无法仅从代码确认，需要业务知识或设计意图 | 业务流程顺序、设计决策的动机、模块边界的"为什么"、性能/安全意图、非标准命名的语义 | 标记 `<!-- UNVERIFIED: {简述} -->` + 加入澄清批次 |
+
+**分类示例：**
+
+| 内容 | 级别 | 理由 |
+|------|------|------|
+| "项目包含 23 个实体类" | T1 | 来自 `fd` 命令清点结果 |
+| "数据库类型: PostgreSQL" | T1 | 来自配置文件或依赖声明 |
+| "OrderService 负责订单业务逻辑" | T2 | 类名 + 方法签名（CreateOrder, UpdateOrder）推断 |
+| "Auth 模块处理认证和授权" | T2 | 标准命名 + 框架模式 |
+| "订单创建后先扣库存再扣款" | T3 | 代码中存在调用链但执行顺序的业务语义需确认 |
+| "选择 Redis 是为了高并发缓存" | T3 | 设计动机无法从代码推断 |
+| "该模块计划在 v3.0 重构" | T3 | 路线图信息不在代码中 |
+
+**规则：**
+
+1. 子代理在输出分析素材时，**必须**为每个条目标注 T1/T2/T3 级别
+2. T1 和 T2 内容可直接写入文档
+3. **T3 内容禁止直接写入正式文档内容** — 必须用 `<!-- UNVERIFIED: {简述} -->` 注释包裹，同时加入填充前审查关卡的澄清批次
+4. 用户在审查关卡中确认的 T3 → 升级为 T2，移除 `UNVERIFIED` 标记
+5. 用户纠正的 T3 → 按用户输入修正后写入
+6. 用户跳过的 T3 → 保留 `<!-- UNVERIFIED -->` 标记在文档中
+7. Phase 3 验证时，统计文档中 `<!-- UNVERIFIED -->` 的数量，作为文档可信度指标
+
+**子代理输出格式要求：**
+
+每个分析条目必须包含事实级别标注：
+
+| # | 条目 | 级别 | 代码依据 | 描述 |
+|---|------|------|---------|------|
+| 1 | OrderEntity | T1 | 文件 `Models/OrderEntity.cs` 存在 | 订单实体类，包含 Id, Status, Total 等字段 |
+| 2 | OrderService 负责订单 CRUD | T2 | 类名 + 方法签名 `CreateOrder`/`UpdateOrder` | 从命名和方法推断 |
+| 3 | 订单创建后自动通知仓库 | T3 | `OrderService.Create()` 末尾调用了 `NotificationService` | 不确定是通知仓库还是通知用户 |
 
 ### 技术栈识别
 
@@ -237,9 +303,147 @@ fd -e svelte -e ts "(layout|page|store)" --type f
 | 测试项目 | 名称含 `Tests`/`Test`/`test`/`spec`、目录为 `tests/`/`__tests__/` | 隶属被测项目 |
 | 共享库 | 名称含 `Common`/`Shared`/`Core`/`Utils`/`Lib`，被多项目引用 | 独立模块 |
 | 文档/工具 | 名称含 `docs`/`tools`/`scripts` | 通常跳过 |
-| 业务项目 | 其他 | 进入 Step 3 |
+| 业务项目 | 其他 | 进入 Step 2.5 |
+
+#### Step 2.5 — 架构布局检测（分层 vs 领域）
+
+在识别子模块之前，必须先判断项目的代码组织模式。不同的组织模式需要不同的模块识别策略。
+
+**检测方法：**
+
+1. 列出项目源代码目录下的所有顶层子目录（排除构建产物、配置、工具目录）
+2. 将每个目录名与以下两类关键词对比分类：
+
+| 类别 | 关键词（不区分大小写） |
+|------|---------------------|
+| **技术层关键词** | Controllers, Services, Repositories, Models, Entities, Handlers, Middleware, Infrastructure, Domain, Application, Persistence, Presentation, DTOs, ViewModels, Validators, Providers, Mappers, Helpers, Utils, Common, Shared, Extensions, Filters, Interceptors, Guards, Pipes, Decorators |
+| **业务域关键词** | 非技术层关键词的业务语义词（如 Orders, Users, Products, Auth, Payment, Inventory, Notification, Billing, Shipping 等） |
+
+3. 判断矩阵：
+
+| 顶层目录主要是... | 架构模式 | 模块策略 |
+|------------------|---------|---------|
+| 业务域目录（如 `Orders/`, `Users/`, `Auth/`） | 领域组织 | 直接用 Step 3 的目录级识别 |
+| 技术层目录（如 `Controllers/`, `Services/`, `Models/`） | 分层架构 | **必须**执行 Step 2.6 跨层业务领域提取 |
+| 混合或不确定 | 混合架构 | 检查技术层目录内是否有二级业务子目录；若有则按二级目录识别；若仍不确定，向用户展示候选方案让其选择 |
+
+> **重要**：大量真实项目采用分层架构，模块不是按目录划分而是按业务概念跨层存在。如果跳过此步直接用目录识别，会错误地将 `Controllers`、`Services`、`Models` 识别为模块，而非 `订单`、`用户`、`支付` 等业务模块。
+
+#### Step 2.6 — 跨层业务领域提取（分层架构专用）
+
+> 仅当 Step 2.5 检测到**分层架构**时执行。
+
+**目标：** 从分散在各技术层目录中的文件命名中提取业务概念，将同一业务概念的跨层文件聚合为一个模块。
+
+**算法步骤：**
+
+1. 对每个技术层目录（Controllers/, Services/, Models/, Repositories/ 等），列出所有源文件名
+2. 从文件名中剥离技术层后缀，提取业务概念前缀：
+   - `OrderController.cs` → `Order`
+   - `OrderService.cs` → `Order`
+   - `UserRepository.cs` → `User`
+   - `PaymentModel.cs` → `Payment`
+
+3. 各技术栈后缀剥离规则：
+
+| 技术栈 | 剥离后缀（不区分大小写） |
+|--------|----------------------|
+| C# / .NET | Controller, Service, Repository, Model, Entity, Handler, Validator, DTO, ViewModel, Options, Extensions, Manager, Provider, Factory, Middleware, Filter, Attribute, Profile |
+| Java / Spring | Controller, Service, ServiceImpl, Repository, Entity, DTO, VO, Mapper, Config, Converter, Listener, Aspect, Interceptor, Handler |
+| Python | View, ViewSet, Serializer, Model, Form, Admin, Signal, Task, Command, Manager, Mixin, Filter |
+| Go | Handler, Service, Repository, Model, Store, Controller, Middleware, Router |
+| Node.js / TS | Controller, Service, Module, Entity, DTO, Guard, Pipe, Interceptor, Middleware, Gateway, Resolver, Subscriber |
+| Ruby / Rails | Controller, Model, Serializer, Service, Job, Mailer, Policy, Decorator |
+| PHP / Laravel | Controller, Model, Service, Repository, Request, Resource, Policy, Event, Listener, Job, Mail, Notification |
+
+4. 统计每个业务概念出现在多少个技术层中：
+
+| 业务概念 | 出现的技术层 | 层数 |
+|---------|------------|------|
+| Order | Controller, Service, Repository, Model | 4 |
+| User | Controller, Service, Model | 3 |
+| Payment | Service, Model | 2 |
+| Startup | — (无层后缀) | 0 |
+
+5. **模块候选规则**：
+   - 出现在 **2+ 个**技术层中的业务概念 = **一个模块候选**
+   - 仅出现在 1 个层中的 = 归入「公共/共享」模块或暂不归类
+   - 无法剥离后缀的文件（如 `Program.cs`、`Startup.cs`） = 基础设施文件，不参与模块划分
+
+6. **确定性 shell 命令执行**（不依赖 AI 阅读代码）：
+
+```bash
+# C# / .NET 示例
+fd -e cs --type f Controllers/ Services/ Models/ Repositories/ | \
+  xargs -I{} basename {} .cs | \
+  sed -E 's/(Controller|Service|Repository|Model|Entity|Handler|Validator|DTO|ViewModel|Options|Manager|Provider)$//' | \
+  sort | uniq -c | sort -rn
+
+# Java / Spring 示例
+fd -e java --type f controller/ service/ model/ repository/ | \
+  xargs -I{} basename {} .java | \
+  sed -E 's/(Controller|Service|ServiceImpl|Repository|Entity|DTO|VO|Mapper)$//' | \
+  sort | uniq -c | sort -rn
+
+# Python 示例
+fd -e py --type f views/ serializers/ models/ | \
+  xargs -I{} basename {} .py | \
+  sed -E 's/(View|ViewSet|Serializer|Model|Form|Admin)$//' | \
+  sort | uniq -c | sort -rn
+
+# Go 示例
+fd -e go --type f handler/ service/ model/ repository/ | \
+  xargs -I{} basename {} .go | \
+  sed -E 's/(Handler|Service|Repository|Model|Store)$//' | \
+  sort | uniq -c | sort -rn
+
+# Node.js / TS 示例（NestJS 等）
+fd -e ts --type f controllers/ services/ entities/ | \
+  xargs -I{} basename {} .ts | \
+  sed -E 's/\.(controller|service|entity|module|dto|guard|pipe)$//' | \
+  sort | uniq -c | sort -rn
+
+# Ruby / Rails 示例
+fd -e rb --type f app/controllers/ app/models/ app/services/ | \
+  xargs -I{} basename {} .rb | \
+  sed -E 's/(Controller|Model|Service|Serializer|Job|Policy)$//' | \
+  sort | uniq -c | sort -rn
+
+# PHP / Laravel 示例
+fd -e php --type f app/Http/Controllers/ app/Models/ app/Services/ | \
+  xargs -I{} basename {} .php | \
+  sed -E 's/(Controller|Model|Service|Repository|Request|Resource|Policy)$//' | \
+  sort | uniq -c | sort -rn
+```
+
+命令输出示例：
+```
+   4 Order
+   3 User
+   2 Payment
+   1 Startup
+   1 Program
+```
+
+7. **向用户展示模块候选清单**（必须确认）：
+
+```
+📊 跨层业务领域分析结果：
+
+| 模块候选 | 覆盖层数 | 涉及文件 |
+|---------|---------|---------|
+| Order | 4 层 | OrderController, OrderService, OrderRepository, OrderModel |
+| User | 3 层 | UserController, UserService, UserModel |
+| Payment | 2 层 | PaymentService, PaymentModel |
+
+未归类文件：Program.cs, Startup.cs → 归入基础设施
+
+请确认以上模块划分是否正确，或提出调整。
+```
 
 #### Step 3 — 子模块识别（第二级）
+
+> **前置条件**：执行 Step 3 前必须先完成 Step 2.5（架构布局检测）。若 Step 2.5 检测到**分层架构**，必须使用 Step 2.6 的跨层提取结果作为模块清单，**跳过**下方的目录级识别。仅当检测到**领域组织**或**混合架构**时，才使用下方规则。
 
 判断项目内部是否需进一步拆分：
 
@@ -268,8 +472,9 @@ fd -e svelte -e ts "(layout|page|store)" --type f
 | **六边形/Clean 架构** | 存在 `domain/`（或 `core/`）+ `ports/`（或 `interfaces/`）+ `adapters/`（或 `infrastructure/`） | 按业务能力（非分层）划分模块；`domain` 内的聚合根/限界上下文为模块边界 |
 | **DDD 限界上下文** | 目录名含 `bounded-context`、`context/`；或有明确的上下文映射图 | 每个限界上下文为一个模块 |
 | **嵌套 Monorepo** | 多层嵌套如 `packages/core/modules/auth/` | **最深匹配规则**：在嵌套层中找到最深的项目标记文件（`package.json`、`.csproj` 等）所在层级作为模块边界 |
+| **分层架构（Layered）** | 顶层目录为 `Controllers/`、`Services/`、`Models/`、`Repositories/` 等技术层目录；文件名中包含业务概念前缀（如 `OrderController`、`UserService`） | 使用 Step 2.6 跨层业务领域提取算法；每个在 2+ 层中出现的业务概念 = 一个模块 |
 
-**判断优先级**：先检查是否匹配高级架构模式（Step 4），再回退到标准的 Step 1-3 流程。若无法确定，向用户展示候选模块划分方案让其选择。
+**判断优先级**：先执行 Step 2.5 架构布局检测，再检查是否匹配高级架构模式（Step 4），最后回退到标准的 Step 1-3 流程。若无法确定，向用户展示候选模块划分方案让其选择。
 
 ### 配置识别策略
 
@@ -306,6 +511,49 @@ fd -e svelte -e ts "(layout|page|store)" --type f
 2. 若匹配结果不确定（如全栈 vs 纯后端），向用户确认
 3. **「可跳过」不等于「禁止生成」** — 用户明确要求时仍应生成
 4. 无论项目类型，`ARCHITECTURE.md`、`code-map.md`、`modules.md`、`doc-maintenance.md` 始终生成
+
+### 模板条件化生成清单
+
+Phase 1 骨架生成时，根据项目类型决定哪些模板实例化。以下为各文档的生成条件：
+
+| 文档 | 生成条件 | 渐进层级 |
+|------|---------|---------|
+| `README.md` | 始终生成 | Layer 1 |
+| `AGENTS.md` / AI 上下文 | 始终生成 | Layer 1 |
+| `ARCHITECTURE.md` | 始终生成 | Layer 1 |
+| `modules.md` | 始终生成 | Layer 1 |
+| `code-map.md` | 始终生成 | Layer 1 |
+| `modules/<name>/*` | 每个识别到的模块 | Layer 2 |
+| `core-flow.md` | 始终生成 | Layer 3 |
+| `config.md` | 始终生成 | Layer 3 |
+| `data-model.md` | 项目有数据库或 ORM | Layer 3 |
+| `features.md` | 始终生成 | Layer 3 |
+| `DECISIONS.md` | 始终生成 | Layer 3 |
+| `database/` | 项目有数据库 | Layer 3 |
+| `CHANGELOG.md` | 始终生成（内容用户可选） | Layer 3 |
+| `deployment.md` | 非 CLI/库项目 | Layer 4 |
+| `testing.md` | 项目有测试目录或测试框架 | Layer 4 |
+| `runbook.md` | 非 CLI/库/前端 SPA 项目 | Layer 4 |
+| `monitoring.md` | 项目有监控配置或为微服务 | Layer 4 |
+| `api-reference.md` | 项目有 API（控制器/路由） | Layer 4 |
+| `doc-maintenance.md` | 始终生成 | Layer 4 |
+| `CONTRIBUTING.md` | 用户确认后生成 | Layer 4 |
+| `SECURITY.md` | 用户确认后生成 | Layer 4 |
+
+**条件判断方法**（Phase 0/1 执行）：
+
+| 条件 | 判断命令 |
+|------|---------|
+| 项目有数据库 | 存在迁移文件、ORM 配置、`database.yml`、`*.dbcontext*` 等 |
+| 项目有 API | 存在控制器/路由文件（确定性清点结果中控制器数量 > 0） |
+| 项目有测试 | 存在 `tests/`、`__tests__/`、`*_test.*`、`*.spec.*` 等 |
+| 项目有监控 | 存在 `prometheus`、`grafana`、`datadog`、`newrelic` 相关配置 |
+| 非 CLI/库 | 不满足 CLI/库条件（无 `bin/` 入口、非 npm 包等） |
+
+**Phase 1 骨架生成时**：
+1. 根据上表自动判断，仅创建满足条件的文档骨架
+2. 向用户展示将要生成的文档清单，标注哪些被跳过及原因
+3. 用户可追加被跳过的文档（`「可跳过」不等于「禁止生成」`）
 
 ---
 
