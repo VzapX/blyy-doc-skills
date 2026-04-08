@@ -1,0 +1,71 @@
+---
+last_updated: {{DATE}}
+last_synced_commit: init
+audience: ai-and-human
+read_priority: 1
+max_lines: 250
+parent_doc: ARCHITECTURE.md
+code_anchors:
+applicable_project_types:
+  - backend-service
+  - microservice
+  - fullstack
+  - frontend-spa
+  - cli-tool
+  - library
+  - data-pipeline
+  - infrastructure
+change_triggers:
+  - 新增/重命名核心业务概念
+  - 新增/重命名核心实体类
+  - 业务术语与代码命名出现分歧
+---
+
+# 业务术语 ↔ 代码符号映射
+
+<!-- AI-READ-HINT
+PURPOSE: 用业务语言（用户提问中的中文术语）反向定位到代码符号。AI 处理用户用业务语言提的问题时第一个查的表。
+READ-WHEN: 用户用业务术语提问（如「订单」「鉴权」「支付」），AI 不确定对应代码位置时。
+SKIP-WHEN: 用户已经直接给出代码符号或文件名。
+PAIRED-WITH: features.md（功能列表）, modules/<m>/code-map.md（代码位置）
+-->
+
+> 返回 [架构文档](ARCHITECTURE.md)
+
+## 术语映射表
+
+> **AI-RULE：每个业务术语必须能反向定位到至少一个代码符号（类名/函数名/表名/常量名）。
+> 严禁在此表写"无对应代码"的纯业务术语 — 那种术语属于 features.md 或 README 的范畴。**
+
+<!-- Phase 2 自动填充：从模块代码 + 用户业务描述中提取核心业务概念 → 主要代码符号 -->
+
+| 业务术语 | 主要代码符号 | 符号类型 | 源文件 | 所属模块 |
+|---------|------------|---------|--------|---------|
+| <!-- 例：订单 --> | <!-- Order, OrderEntity, OrderDto --> | Entity / DTO / Service | `<!-- file -->` | <!-- 模块名 --> |
+| <!-- 例：用户鉴权 --> | <!-- AuthService, JwtMiddleware --> | Service / Middleware | `<!-- file -->` | <!-- 模块名 --> |
+
+## 同义词与缩写
+
+> 业务上同一概念可能在代码里有多个命名（如"用户" / "User" / "Customer" / "Account"），在此登记避免歧义。
+
+<!-- Phase 2 自动填充 -->
+
+| 业务术语 | 代码中的同义词 | 推荐使用 | 备注 |
+|---------|--------------|---------|------|
+| <!-- 用户 --> | <!-- User, Customer, Account --> | <!-- User --> | <!-- Customer 仅在 billing 模块使用 --> |
+
+## 缩写表
+
+<!-- Phase 2 自动填充：从代码命名扫描缩写（如 sku, sn, oid, uid）。仅列出实际出现在代码里的缩写。 -->
+
+| 缩写 | 全称 | 含义 |
+|------|------|------|
+| <!-- Phase 2 --> | | |
+
+---
+
+## 维护规则
+
+- 新增核心业务概念时**必须**在此表登记
+- 重命名核心实体/服务类时**必须**同步更新此表
+- doc-sync 防线 1 在检测到新增 `*Entity` / `*Service` / `*Controller` 文件时会提示更新此表

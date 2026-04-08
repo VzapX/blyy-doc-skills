@@ -1,92 +1,92 @@
 ---
 last_updated: {{DATE}}
+last_synced_commit: init
+audience: ai-and-human
+read_priority: 1
+max_lines: 150
+parent_doc:
+code_anchors:
+  - <!-- Phase 2 自动填充：项目入口文件路径（如 src/Program.cs、main.go） -->
+applicable_project_types:
+  - backend-service
+  - microservice
+  - fullstack
+  - frontend-spa
+  - cli-tool
+  - library
+  - data-pipeline
+  - infrastructure
 change_triggers:
-  - 核心模块调整
-  - 数据流调整
-  - 文件迁移/重命名
+  - 模块结构调整
+  - 文档结构变更
+  - 任务路由表调整
 ---
 
 # 架构文档
 
+<!-- AI-READ-HINT
+PURPOSE: 文档导航根节点。AI 每次任务都从此文档开始，按「任务路由表」决定下一步读哪些文档，避免一次性把所有文档读入上下文。
+READ-WHEN: 任何任务的开始（除非用户明确指定要读的文档）。
+SKIP-WHEN: 永不跳过。
+PAIRED-WITH: modules.md（模块清单）, code-map.md（代码导航）, glossary.md（术语映射）
+-->
+
+## 一句话定位
+
+<!-- Phase 2 自动填充：用 ≤30 字描述「这个项目是什么、解决什么问题」 -->
+
+## AI 任务路由表
+
+> AI 工具按任务类型选读最少必要文档，避免上下文窗口被无用信息吃满。
+
+| 任务类型 | 必读 | 按需读 | 不要读 |
+|---------|------|--------|--------|
+| 修复某模块 bug | `modules/<m>/README.md` → `flow.md` → `code-map.md` | `modules/<m>/data-model.md` | 其他模块、`core-flow.md` |
+| 新增功能 / API | `modules/<m>/code-map.md` + `api-reference.md`(若存在) | `data-model.md`(全局) | `runbook.md`、`deployment.md` |
+| 修改配置项 | `config.md` | 调用方模块文档 | 模块内业务流程文档 |
+| 排查线上故障 | `runbook.md` → `monitoring.md` | 相关模块 `flow.md` | `features.md`、`DECISIONS.md` |
+| 新增/修改数据库表 | `data-model.md`(模块或全局) → `database/` | `DECISIONS.md` | `runbook.md`、`monitoring.md` |
+| 理解整体架构 | 本文档 → `modules.md` | `core-flow.md`、`DECISIONS.md` | 模块内部文档 |
+| 用业务语言找代码 | `glossary.md` → 对应模块文档 | — | 全局参考型文档 |
+| 修复测试 / CI | `testing.md` | `AGENTS.md` | 业务文档 |
+| 写部署 / 发布脚本 | `deployment.md` | `config.md`、`monitoring.md` | 业务文档 |
+
 ## 文档索引
 
-| 文档 | 内容 | 适用场景 |
-|------|------|---------|
-| **本文档** | 系统概览 + 架构图 | 了解项目做什么、组件如何协作 |
-| [code-map.md](code-map.md) | 代码地图 | 改某功能时查对应文件 |
-| [modules.md](modules.md) | 模块说明 | 了解各模块的职责与边界 |
-| [core-flow.md](core-flow.md) | 核心流程 | 理解主要业务流程 |
-| [data-model.md](data-model.md) | 数据模型 | 了解公共数据结构与模块索引 |
-| [features.md](features.md) | 功能列表 + 术语表 | 查看已实现功能与概念定义 |
-| [testing.md](testing.md) | 测试策略 | 了解测试方法与覆盖范围 |
-| [monitoring.md](monitoring.md) | 监控与可观测性 | 了解监控、告警与可观测方案（按需） |
-
-### 相关文档
-
-| 文档 | 内容 |
-|------|------|
-| [config.md](config.md) | 完整配置参考 |
-| [deployment.md](deployment.md) | 部署流程 |
-| [runbook.md](runbook.md) | 运维手册 |
-| [api-reference.md](api-reference.md) | API 参考文档（按需） |
-| [database/](database/) | 数据库 Schema 定义 |
-| [DECISIONS.md](DECISIONS.md) | 架构决策记录 |
-| [doc-maintenance.md](doc-maintenance.md) | 文档维护规则（AI 工具专用） |
+| 文档 | 目的 | Layer |
+|------|------|-------|
+| [modules.md](modules.md) | 模块注册表 + 模块间依赖 | 1 |
+| [code-map.md](code-map.md) | 项目目录地图 + 各模块代码地图索引 | 1 |
+| [glossary.md](glossary.md) | 业务术语 ↔ 代码符号映射 | 1 |
+| [modules/](modules/) | 模块级文档（README/flow/code-map/data-model/database） | 2 |
+| [core-flow.md](core-flow.md) | 跨模块核心业务流程 | 3 |
+| [config.md](config.md) | 完整配置参考 | 3 |
+| [data-model.md](data-model.md) | 公共数据模型 + 模块索引 | 3 |
+| [features.md](features.md) | 功能列表与状态 | 3 |
+| [DECISIONS.md](DECISIONS.md) | 架构决策记录（ADR） | 3 |
+| [database/](database/) | 公共数据库 schema | 3 |
+| [deployment.md](deployment.md) | 部署流程（按需） | 4 |
+| [testing.md](testing.md) | 测试策略（按需） | 4 |
+| [runbook.md](runbook.md) | 运维手册（按需） | 4 |
+| [monitoring.md](monitoring.md) | 监控与可观测性（按需） | 4 |
+| [api-reference.md](api-reference.md) | API 参考（按需） | 4 |
+| [doc-maintenance.md](doc-maintenance.md) | 文档维护规则（AI 工具用） | 4 |
 
 ### 根目录文档
 
-| 文档 | 内容 |
+| 文档 | 目的 |
 |------|------|
 | [README.md](../README.md) | 项目入口与快速开始 |
 | [AGENTS.md](../AGENTS.md) | AI 工具与开发者指南 |
 | [CHANGELOG.md](../CHANGELOG.md) | 版本变更记录 |
 
-<!-- 注意：若生成了可选文档（api-reference.md、monitoring.md、CONTRIBUTING.md、SECURITY.md），必须将其加入上方索引 -->
+<!-- 注意：若生成了 CONTRIBUTING.md / SECURITY.md 或任何额外文档，必须加入上方索引并标注 Layer。 -->
 
----
-
-## 系统概览
-
-<!-- Phase 2 自动填充：基于项目分析生成 -->
-
-### 核心目标
-
-<!-- TODO: 请补充核心目标 -->
-
-### 系统边界
-
-**In scope：**
-<!-- Phase 2 自动填充 -->
-
-**Out of scope：**
-<!-- TODO: 请补充 -->
-
-### 运行形态
-
-<!-- Phase 2 自动填充：从构建命令推断 -->
-
-### 外部依赖
-
-<!-- Phase 2 自动填充：从项目文件推断 -->
-
----
-
-## 架构图
-
-### 组件视图
+## 顶层组件图
 
 ```mermaid
 flowchart LR
-    %% Phase 2 自动填充：基于模块识别结果生成
-    subgraph Core[核心模块]
-        S1[Service1]
-    end
-```
-
-### 数据流
-
-```mermaid
-flowchart TD
-    %% Phase 2 自动填充
-    INPUT[输入] --> PROCESS[处理] --> OUTPUT[输出]
+    %% AI-RULE: 此图必须基于实际模块识别结果生成，仅展示顶层模块（≤8 个节点）。
+    %% 详细组件视图（含中间件/外部服务）请放在 modules.md 的「模块间依赖」章节。
+    %% 若无法生成 ≥3 个真实节点，删除整个代码块。
 ```

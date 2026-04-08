@@ -37,17 +37,54 @@
 | 测试覆盖率要求变更 | `docs/testing.md` | 更新覆盖率要求 |
 | 监控指标变更 | `docs/monitoring.md`（若存在） | 更新核心指标表 |
 | 告警规则变更 | `docs/monitoring.md`（若存在） | 更新告警规则表 |
-| 新增/修改文档文件 | `docs/ARCHITECTURE.md` | 更新文档索引 |
+| 新增/重命名核心实体类 | `docs/glossary.md` | 在「业务术语 ↔ 代码符号」表新增/更新映射行 |
+| 新增/废弃业务术语 | `docs/glossary.md` | 更新术语表，废弃项标注 deprecated |
+| 引入新缩写或别名 | `docs/glossary.md` | 在「同义词/缩写」段补充 |
+| 新增/修改文档文件 | `docs/ARCHITECTURE.md` | 更新文档索引和 AI 任务路由表 |
+| 模块入向/出向依赖变化 | `docs/modules/<name>/README.md` + `docs/modules.md` | 更新依赖表两端 |
 
 ## YAML 元数据更新规则
 
-每次更新文档时，必须同步更新 YAML front matter 中的 `last_updated` 字段：
+每次更新文档时，必须同步更新 YAML front matter 中的字段：
 
 ```yaml
 ---
-last_updated: YYYY-MM-DD  # ← 更新为当天日期
+last_updated: YYYY-MM-DD              # ← 更新为当天日期
+last_synced_commit: <git rev-parse HEAD>  # ← 更新为当前 commit hash
+code_anchors:                          # ← 若变更涉及文件移动/重命名，同步更新
+  - src/path/to/dir
 ---
 ```
+
+> `last_synced_commit` 是防线 1 增量识别变更范围的关键字段，**禁止省略更新**。
+
+## 结构化 TODO/UNVERIFIED 标记格式
+
+文档中的占位符必须使用结构化格式（详见 `blyy-init-docs/resources/doc-guide.md` 七、Front Matter 字段标准）：
+
+```markdown
+<!-- TODO[priority,type,owner]: 简述 -->
+<!-- UNVERIFIED: 简述 -->
+```
+
+- `priority` ∈ `{p0, p1, p2, p3}`
+- `type` ∈ `{fact, decision, owner, review}`
+- `owner` 为责任人或 `unassigned`
+
+防线 1 Step 4 按 priority 顺序处理；防线 3 Step 4 按上述维度聚合统计。
+
+## 列表型字段「代码位置」列同步规则
+
+所有文档中的列表型字段（实体表、文件清单、流程步骤、API 端点、配置项等）都包含「源文件」/「定义位置」/「代码位置」列，使用 `path/to/file.ext:line` 格式。
+
+代码变更时必须同步：
+
+| 变更 | 同步动作 |
+|------|---------|
+| 文件重命名/移动 | grep 所有文档中旧路径 → 替换为新路径 |
+| 类/函数重命名 | 同上 |
+| 行号大幅偏移（> 50 行） | 防线 3 时更新（防线 1 不强制，避免噪音） |
+| 文件删除 | 该文件相关行从文档中移除，并扫描死引用 |
 
 ## 死引用扫描规则
 

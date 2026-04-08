@@ -1,31 +1,68 @@
 ---
 last_updated: {{DATE}}
+last_synced_commit: init
+audience: ai-and-human
+read_priority: 1
+max_lines: 200
+parent_doc: ARCHITECTURE.md
+code_anchors:
+  - <!-- Phase 2 自动填充：各模块根目录 -->
+applicable_project_types:
+  - backend-service
+  - microservice
+  - fullstack
+  - frontend-spa
+  - cli-tool
+  - library
+  - data-pipeline
+  - infrastructure
 change_triggers:
   - 新增/删除模块
   - 模块职责变更
+  - 模块间依赖变化
 ---
 
 # 模块说明
+
+<!-- AI-READ-HINT
+PURPOSE: 模块注册表 + 模块间依赖。AI 在确定要操作哪个模块前的"目录页"。
+READ-WHEN: 用户提到「某个业务模块 / 模块边界 / 模块依赖」或不确定该改哪个模块。
+SKIP-WHEN: 已经明确目标模块（直接读 modules/<m>/README.md 更高效）。
+PAIRED-WITH: code-map.md（代码导航）, ARCHITECTURE.md（任务路由表）
+-->
 
 > 返回 [架构文档](ARCHITECTURE.md)
 
 ## 模块注册表
 
-<!-- Phase 2 自动填充：识别顶层模块/命名空间生成 -->
+<!-- Phase 2 自动填充：识别两级模块结构生成 -->
 
-| 模块 | 职责（一句话） | 模块文档 | 负责人 |
-|------|---------------|---------|--------|
-| <!-- Phase 2 --> | | [→ 详情](modules/<name>/README.md) | |
+| 模块 | 职责（一句话） | 代码根目录 | 模块文档 |
+|------|---------------|-----------|---------|
+| <!-- Phase 2 --> | | `<!-- dir/path -->` | [→ 详情](modules/<name>/README.md) |
 
 ## 模块间依赖
 
 ```mermaid
 graph LR
-    %% Phase 2 自动填充：基于模块引用关系生成
+    %% AI-RULE: 此图基于实际代码引用关系生成（imports / 依赖注入 / 包引用）。
+    %% 仅展示模块间的有向依赖，禁止编造。若无法生成 ≥2 条真实依赖，删除整个代码块。
 ```
+
+### 依赖关系明细
+
+<!-- Phase 2 自动填充：从代码静态扫描结果生成 -->
+
+| 上游模块 | 依赖于 | 调用方式 | 代码示例位置 |
+|---------|--------|---------|------------|
+| <!-- Phase 2 --> | | <!-- 直接调用 / 事件 / 共享数据 / HTTP --> | `<!-- file:line -->` |
 
 ## 模块边界约定
 
-<!-- TODO: 请补充模块间通信规范 -->
-- 模块间通过明确的接口/服务调用
-- 禁止跨模块直接访问内部类
+> AI 修改代码时必须遵守的硬约束。
+
+- 模块间通过明确的接口/服务调用，禁止跨模块直接访问内部类
+- 跨模块数据共享必须通过：① 公共数据模型（`docs/data-model.md`）② 事件/消息 ③ 共享 API
+- 新增模块前必须先在本文档登记 + 创建 `modules/<name>/` 文档骨架
+
+<!-- TODO[p2,design-rationale,dev-team]: 若项目有额外的模块边界规范（如 DDD 限界上下文、Clean Architecture 分层），补充于此。 -->

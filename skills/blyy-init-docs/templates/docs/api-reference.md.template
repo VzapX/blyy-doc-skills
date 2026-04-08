@@ -1,5 +1,16 @@
 ---
 last_updated: {{DATE}}
+last_synced_commit: init
+audience: ai-and-human
+read_priority: 4
+max_lines: 300
+parent_doc: ARCHITECTURE.md
+code_anchors:
+  - <!-- Phase 2 自动填充：控制器/路由/Handler 目录路径 -->
+applicable_project_types:
+  - backend-service
+  - microservice
+  - fullstack
 change_triggers:
   - API 接口变更
   - API 认证方式变更
@@ -8,213 +19,94 @@ change_triggers:
 
 # API 参考
 
+<!-- AI-READ-HINT
+PURPOSE: 查询当前对外暴露的 HTTP/RPC 接口及其代码位置。
+READ-WHEN: 用户提到「调用 API / 新增接口 / 接口报错 / 接口契约」。
+SKIP-WHEN: 修改业务内部逻辑、写测试、调整配置。
+PAIRED-WITH: features.md（功能与接口的对应）, modules/<m>/code-map.md（接口实现位置）
+-->
+
 > 返回 [架构文档](ARCHITECTURE.md)
 
-## API 概览
+## 基础信息
 
-<!-- Phase 2 自动填充：扫描公共 API / 控制器生成 -->
+<!-- Phase 2 自动填充：从入口点/路由配置/中间件提取 -->
 
-### 基础信息
-
-- **Base URL**：<!-- TODO: 请补充 -->
-- **认证方式**：<!-- TODO: 请补充 -->
-- **响应格式**：JSON
-
-## 认证与鉴权
-
-本节描述系统支持的认证机制。根据项目实际情况保留适用的方式，删除不需要的部分。
-
-### OAuth2
-
-<!-- TODO: 请补充 OAuth2 授权流程及适用场景 -->
-
-| 配置项 | 值 |
-|--------|----|
-| Authorization Endpoint | <!-- TODO: 请补充 --> |
-| Token Endpoint | <!-- TODO: 请补充 --> |
-| Scopes | <!-- TODO: 请补充 --> |
-| Grant Types | <!-- TODO: 请补充（如 authorization_code / client_credentials） --> |
-
-**获取 Token 示例：**
-
-```bash
-# <!-- TODO: 请补充实际请求示例 -->
-curl -X POST {{TOKEN_ENDPOINT}} \
-  -d "grant_type=client_credentials" \
-  -d "client_id={{CLIENT_ID}}" \
-  -d "client_secret={{CLIENT_SECRET}}"
-```
-
-### API Key
-
-<!-- TODO: 请补充 API Key 的签发方式与使用说明 -->
-
-- **传递方式**：<!-- TODO: 请补充（如 Header: `X-API-Key` / Query Parameter） -->
-- **Key 轮换策略**：<!-- TODO: 请补充 -->
-
-### JWT（JSON Web Token）
-
-<!-- TODO: 请补充 JWT 签发与验证流程 -->
-
-| 配置项 | 值 |
-|--------|----|
-| 签发者（Issuer） | <!-- TODO: 请补充 --> |
-| 有效期（TTL） | <!-- TODO: 请补充 --> |
-| 签名算法 | <!-- TODO: 请补充（如 RS256 / HS256） --> |
-| 刷新机制 | <!-- TODO: 请补充 --> |
-
-### 双向 TLS（mTLS）
-
-<!-- TODO: 请补充 mTLS 适用场景与证书管理方式 -->
-
-- **CA 证书管理**：<!-- TODO: 请补充 -->
-- **客户端证书要求**：<!-- TODO: 请补充 -->
-- **证书轮换流程**：<!-- TODO: 请补充 -->
+| 项 | 值 |
+|----|----|
+| Base URL | <!-- Phase 2 --> |
+| 认证方式 | <!-- Phase 2 自动填充：从代码扫描结果填写实际认证机制名称（如 JWT / OAuth2 / API Key / mTLS / 无） --> |
+| 响应格式 | <!-- Phase 2 自动填充：JSON / Protobuf / XML --> |
+| 错误码格式 | <!-- Phase 2 自动填充：从异常处理中间件提取 --> |
 
 ## 接口列表
 
-<!-- Phase 2 自动填充 -->
+> **填充规则**：每行一个接口，必须包含「代码位置」列。子代理输出时禁止使用「代表性示例」+ 省略号，必须穷举所有控制器/路由文件。
 
-### 模块 1
+<!-- Phase 2 自动填充：扫描公共 API / 控制器生成。按模块分组列出。 -->
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| <!-- Phase 2 自动填充 --> | | | |
+### <!-- Phase 2: 模块名 -->
 
-## 限流与配额
+| 方法 | 路径 | 说明 | 认证 | 代码位置 |
+|------|------|------|------|---------|
+| <!-- Phase 2 --> | | | | `<!-- file:line -->` |
 
-### 限流策略
-
-<!-- TODO: 请补充项目采用的限流算法及整体策略说明 -->
-
-| 维度 | 限制 | 窗口 | 说明 |
-|------|------|------|------|
-| 全局请求速率 | <!-- TODO: 请补充 --> | <!-- TODO: 请补充 --> | <!-- TODO: 请补充 --> |
-| 单用户请求速率 | <!-- TODO: 请补充 --> | <!-- TODO: 请补充 --> | <!-- TODO: 请补充 --> |
-| 单 IP 请求速率 | <!-- TODO: 请补充 --> | <!-- TODO: 请补充 --> | <!-- TODO: 请补充 --> |
-
-### 配额
-
-<!-- Phase 2 自动填充：读取限流配置 -->
-
-| 资源 | 免费额度 | 付费额度 | 超限行为 |
-|------|----------|----------|----------|
-| <!-- TODO: 请补充 --> | | | |
-
-### 限流响应头
-
-当请求受到限流控制时，响应中将包含以下 Header：
-
-| Header | 说明 |
-|--------|------|
-| `X-RateLimit-Limit` | 当前窗口允许的最大请求数 |
-| `X-RateLimit-Remaining` | 当前窗口剩余可用请求数 |
-| `X-RateLimit-Reset` | 窗口重置的 Unix 时间戳 |
-| `Retry-After` | 被限流后建议的重试等待秒数 |
-
-限流触发时返回 HTTP `429 Too Many Requests`。
-
-## 版本策略
-
-### 版本控制方式
-
-<!-- TODO: 请补充项目采用的版本控制方案 -->
-
-- **版本标识位置**：<!-- TODO: 请补充（如 URL 路径 `/v1/`、Header `Accept-Version`、Query Parameter `?version=`） -->
-- **当前版本**：<!-- TODO: 请补充 -->
-- **最低兼容版本**：<!-- TODO: 请补充 -->
-
-### 版本生命周期
-
-| 版本 | 状态 | 发布日期 | 废弃日期 | 下线日期 |
-|------|------|----------|----------|----------|
-| <!-- TODO: 请补充 --> | | | | |
-
-### 废弃策略
-
-<!-- TODO: 请补充版本废弃与下线的具体策略 -->
-
-1. **废弃通知**：接口被标记为废弃后，将通过 <!-- TODO: 请补充通知渠道 --> 通知所有调用方。
-2. **过渡期**：废弃后至少保留 <!-- TODO: 请补充时长 --> 的兼容过渡期。
-3. **下线（Sunset）**：过渡期结束后接口将返回 HTTP `410 Gone`。
-
-废弃接口将在响应中添加以下 Header：
-
-| Header | 说明 |
-|--------|------|
-| `Deprecation` | 废弃日期（RFC 7234 格式） |
-| `Sunset` | 计划下线日期 |
-| `Link` | 指向替代接口的文档链接 |
-
-## Webhook / 事件回调
-
-### 概述
-
-<!-- TODO: 请补充 Webhook 的整体用途与适用场景 -->
-
-### 回调端点注册
-
-<!-- TODO: 请补充 Webhook 注册方式（管理后台 / API 配置） -->
-
-- **注册接口**：<!-- TODO: 请补充 -->
-- **支持协议**：HTTPS（<!-- TODO: 请补充是否强制 TLS 及最低版本要求 -->）
-- **签名验证**：<!-- TODO: 请补充签名算法（如 HMAC-SHA256）及验证方式 -->
-
-### 事件类型
-
-<!-- Phase 2 自动填充：扫描事件定义 -->
-
-| 事件类型 | 说明 | 触发条件 |
-|----------|------|----------|
-| <!-- TODO: 请补充 --> | | |
-
-### 回调 Payload 格式
-
-```json
-{
-  "event_id": "唯一事件 ID",
-  "event_type": "事件类型",
-  "timestamp": "ISO 8601 时间戳",
-  "data": {
-    // <!-- TODO: 请补充业务数据结构 -->
-  },
-  "signature": "请求签名"
-}
-```
-
-### 重试策略
-
-<!-- TODO: 请补充重试策略的具体参数 -->
-
-| 配置项 | 值 |
-|--------|----|
-| 最大重试次数 | <!-- TODO: 请补充 --> |
-| 重试间隔策略 | <!-- TODO: 请补充（如指数退避） --> |
-| 超时时间 | <!-- TODO: 请补充 --> |
-| 成功判定 | HTTP `2xx` |
-| 失败通知 | <!-- TODO: 请补充（重试耗尽后的告警方式） --> |
-
-## 通用约定
+## 错误响应
 
 ### 错误响应格式
 
 ```json
-{
-  "code": 400,
-  "message": "错误描述",
-  "details": {}
-}
+// AI-RULE: 此处必须替换为项目实际的错误响应格式（从异常处理中间件 / Exception Handler 提取）。
+// 若项目无统一格式，列出主要错误响应示例。
 ```
 
 ### HTTP 状态码
 
-| 状态码 | 含义 |
-|--------|------|
-| 200 | 成功 |
-| 400 | 请求参数错误 |
-| 401 | 未认证 |
-| 403 | 无权限 |
-| 404 | 资源不存在 |
-| 410 | 资源已下线（接口废弃后下线） |
-| 429 | 请求过于频繁（触发限流） |
-| 500 | 服务器内部错误 |
+<!-- Phase 2 自动填充：仅列出项目实际使用的状态码（从异常处理代码扫描）。不要预填通用列表。 -->
+
+| 状态码 | 含义 | 触发场景 |
+|--------|------|---------|
+| <!-- Phase 2 --> | | |
+
+---
+
+## 高级章节（按检测到的特性条件包含）
+
+> **AI-RULE：以下子章节为可选模块，仅当 Phase 2 在代码中检测到对应特性时才保留对应章节，否则整段删除。禁止预填假数据。**
+
+<!-- INCLUDE-IF: oauth2|jwt|api-key|mtls 等认证机制被检测到 -->
+
+### 认证与鉴权详解
+
+<!-- Phase 2 自动填充：仅描述代码中实际使用的认证机制。多种机制并存时分多个子节描述。
+检测来源示例：
+- JWT: 存在 JwtBearer 中间件配置 / `[Authorize]` + JWT 配置 / `jsonwebtoken` 依赖
+- OAuth2: 存在 OAuth 中间件 / oauth client 配置
+- API Key: 存在 ApiKey 中间件 / `X-API-Key` header 处理代码
+- mTLS: TLS 配置中启用 RequireClientCertificate
+-->
+
+<!-- INCLUDE-IF: 检测到限流中间件 / 配置 -->
+
+### 限流与配额
+
+<!-- Phase 2 自动填充：从限流中间件配置提取。检测来源：
+- .NET: AddRateLimiter / FixedWindowLimiter
+- Spring: RequestRateLimiter / Resilience4j
+- Express: express-rate-limit
+- Nginx: limit_req_zone
+若未检测到，删除本子章节。-->
+
+<!-- INCLUDE-IF: 检测到 Webhook / 事件回调代码 -->
+
+### Webhook / 事件回调
+
+<!-- Phase 2 自动填充：从 Webhook 注册接口、事件发布代码提取。
+若未检测到，删除本子章节。-->
+
+<!-- INCLUDE-IF: 路由路径中包含 /v1/、/v2/ 等版本前缀，或存在版本协商中间件 -->
+
+### 版本策略
+
+<!-- Phase 2 自动填充：从路由前缀或版本协商配置提取。
+若未检测到版本策略，删除本子章节。-->

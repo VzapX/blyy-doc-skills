@@ -1,62 +1,78 @@
 ---
 last_updated: {{DATE}}
+last_synced_commit: init
+audience: ai-and-human
+read_priority: 3
+max_lines: 400
+parent_doc: ARCHITECTURE.md
+code_anchors:
+applicable_project_types:
+  - backend-service
+  - microservice
+  - fullstack
+  - frontend-spa
+  - cli-tool
+  - library
+  - data-pipeline
+  - infrastructure
 change_triggers:
-  - 架构决策变更
+  - 新增架构决策
+  - 决策状态变更（采纳 → 替代/废弃）
 ---
 
 # 架构决策记录（ADR）
 
+<!-- AI-READ-HINT
+PURPOSE: 记录项目重要的架构/技术选型决策，包括"为什么这样选"。AI 修改架构相关代码前应先查此文档。
+READ-WHEN: 用户问「为什么用 X / 为什么不用 Y / 这个选型背景」或新增架构决策。
+SKIP-WHEN: 写业务代码、修业务 bug。
+PAIRED-WITH: ARCHITECTURE.md（系统架构）, modules.md（模块边界依据）
+-->
+
 > 返回 [架构文档](ARCHITECTURE.md)
+
+> **AI-RULE：架构决策的"为什么"**无法**从代码反推。本文档**严禁编造**任何 ADR — 只能基于：
+> ① 从 commit message / PR description 中提取的真实决策
+> ② 用户在 Phase 2 审查关卡明确确认的内容
+> ③ 由 doc-sync 在新增决策事件时持续追加
 
 ## 决策索引
 
-| ADR | 决策 | 状态 | 日期 |
-|-----|------|------|------|
-| ADR-001 | <!-- Phase 2 自动填充 --> | ✅ 已采纳 | {{DATE}} |
+> **初始化时若无可追溯的决策记录，本表为空。禁止预填示例 ADR。**
+
+| ADR | 决策 | 状态 | 日期 | 影响范围 |
+|-----|------|------|------|---------|
+| <!-- Phase 2 自动填充：仅从已确认事实中提取，无则留空 --> | | | | |
 
 ## 待决事项
 
-- <!-- TODO: 请补充待决事项 -->
+<!-- TODO[p3,design-rationale,dev-team]: 团队当前在讨论但尚未做出的决策。无则保留此 TODO。 -->
 
 ---
 
-## ADR-001: <!-- 决策标题 -->
+<!-- ADR 写作模板（新增决策时复制使用）：
 
-- **状态**：✅ 已采纳
-- **日期**：{{DATE}}
-- **决策者**：<!-- TODO -->
+## ADR-NNN: <决策标题>
 
-### 背景
-
-<!-- TODO: 请补充决策背景 -->
-
-### 决策
-
-<!-- TODO: 请补充具体决策 -->
-
-### 替代方案
-
-| 方案 | 优点 | 缺点 |
-|------|------|------|
-| <!-- TODO --> | | |
-
-### 后果
-
-<!-- TODO: 请补充决策影响 -->
-
----
-
-<!-- 
-ADR 模板：
-
-## ADR-NNN: [标题]
-
-- **状态**：🔄 讨论中 | ✅ 已采纳 | ❌ 已否决 | 🔀 已替代
+- **状态**：🔄 讨论中 | ✅ 已采纳 | ❌ 已否决 | 🔀 已替代（替代方为 ADR-MMM）
 - **日期**：YYYY-MM-DD
-- **决策者**：
+- **决策者**：<姓名 / 团队 / GitHub handle>
+- **相关 commit/PR**：<链接>
 
 ### 背景
+{决策面对的问题、约束、动机}
+
 ### 决策
+{具体选择，附简要理由}
+
 ### 替代方案
+
+| 方案 | 优点 | 缺点 | 否决原因 |
+|------|------|------|---------|
+| | | | |
+
 ### 后果
+- 正向：
+- 负向：
+- 待观察：
 -->

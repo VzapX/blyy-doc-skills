@@ -1,32 +1,71 @@
 ---
 last_updated: {{DATE}}
+last_synced_commit: init
+audience: ai-and-human
+read_priority: 1
+max_lines: 200
+parent_doc: ARCHITECTURE.md
+code_anchors:
+  - <!-- Phase 2 自动填充：源代码根目录 -->
+applicable_project_types:
+  - backend-service
+  - microservice
+  - fullstack
+  - frontend-spa
+  - cli-tool
+  - library
+  - data-pipeline
+  - infrastructure
 change_triggers:
   - 新增/删除模块
   - 全局性公共文件变动
+  - 顶层目录结构调整
 ---
 
 # 代码地图
 
-> 返回 [架构文档](ARCHITECTURE.md)
+<!-- AI-READ-HINT
+PURPOSE: 项目顶层目录与公共文件的快速索引。模块内部的文件→职责映射在各模块的 code-map.md。
+READ-WHEN: 用户问「代码在哪 / 项目结构 / 公共/全局文件」。
+SKIP-WHEN: 已经明确要修改某个模块时（直接读模块级 code-map.md 更高效）。
+PAIRED-WITH: modules.md（模块清单）, glossary.md（业务术语→代码）
+-->
 
-本文档提供项目代码结构的全局总览。各模块内部的文件→职责映射请查阅对应的模块代码地图。
+> 返回 [架构文档](ARCHITECTURE.md)
 
 ## 项目目录总览
 
-<!-- Phase 2 自动填充：生成顶层目录树（深度 2-3 层） -->
+<!-- Phase 2 自动填充：生成顶层目录树（深度 2-3 层），仅展示业务相关目录，排除构建产物 -->
 
 ```
 {{PROJECT_STRUCTURE}}
 ```
 
+## 按职责类型快速导航
+
+> AI 工具按"我想找什么类型的代码"快速跳转。详细映射在各模块 `code-map.md`。
+
+| 想找... | 去 |
+|--------|-----|
+| 所有 HTTP/RPC 端点 | 各模块 `code-map.md` 控制器章节 + [api-reference.md](api-reference.md) |
+| 所有数据库实体 | [data-model.md](data-model.md) + 各模块 `data-model.md` |
+| 所有定时任务 / 后台 Worker | <!-- Phase 2 自动填充：列出 Cron / BackgroundService / Job 文件 --> |
+| 所有配置项 | [config.md](config.md) |
+| 入口点 / 启动代码 | <!-- Phase 2 自动填充：Program.cs / main.go / index.ts ... --> |
+| 公共/共享代码 | 见下方「公共/全局文件」 |
+
 ## 模块代码地图索引
+
+<!-- Phase 2 自动填充：列出所有识别到的模块 -->
 
 | 模块 | 代码地图 | 简述 |
 |------|---------|------|
-| <!-- Phase 2 自动填充 --> | [→ 详情](modules/<name>/code-map.md) | |
+| <!-- Phase 2 --> | [→ 详情](modules/<name>/code-map.md) | |
 
 ## 公共/全局文件
 
-| 文件 | 职责 |
-|------|------|
-| <!-- Phase 2 自动填充：列出不属于任何模块的公共文件 --> | |
+<!-- Phase 2 自动填充：列出不属于任何模块的公共文件（基础设施、共享工具、入口） -->
+
+| 文件 | 职责 | 代码位置 |
+|------|------|---------|
+| <!-- Phase 2 --> | | `<!-- file:line -->` |

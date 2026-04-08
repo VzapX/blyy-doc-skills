@@ -1,61 +1,107 @@
 ---
 last_updated: {{DATE}}
+last_synced_commit: init
+audience: ai-only
+read_priority: 4
+max_lines: 250
+parent_doc: ARCHITECTURE.md
+code_anchors:
+applicable_project_types:
+  - backend-service
+  - microservice
+  - fullstack
+  - frontend-spa
+  - cli-tool
+  - library
+  - data-pipeline
+  - infrastructure
 change_triggers:
   - 文档维护规则变更
+  - 新增项目特定的同步规则
+  - 基线快照更新
 ---
 
 # 文档维护规则
 
-> 本文档面向 AI 工具。人类开发者可跳过此文件。
->
+<!-- AI-READ-HINT
+PURPOSE: AI 工具修改代码后的文档同步规则与基线数据。本文档供 blyy-doc-sync 防线 1/2/3 使用。
+READ-WHEN: 每次代码修改完成后（由 doc-sync 自动触发）。
+SKIP-WHEN: 人类阅读时（除非维护本文档自身）。
+PAIRED-WITH: blyy-doc-sync/resources/sync-matrix.md（通用同步矩阵）
+-->
+
 > 返回 [架构文档](ARCHITECTURE.md)
+>
+> **本文档面向 AI 工具与 doc-sync skill。人类开发者通常无需阅读。**
 
-AI 工具在修改代码时必须遵循以下规则同步维护文档。
+## 同步矩阵
 
-## Rule 1: 触发式文档同步
+> **通用同步矩阵在 `blyy-doc-sync/resources/sync-matrix.md`**，本文件**不重复**通用规则。
+> 仅在本节记录**项目特定的差量规则**。
 
-| 代码变更 | 需更新的文档 |
-|---------|------------|
-| 新增/重命名/删除源文件 | `docs/code-map.md` |
-| 新增/修改配置项 | `docs/config.md` |
-| 组件关系或数据流变化 | `docs/ARCHITECTURE.md` |
-| 服务/模块职责变更 | `docs/modules.md`（或模块级 `README.md`） |
-| 业务流程变化 | `docs/core-flow.md`（或模块级 `flow.md`） |
-| 数据库表结构变更 | `docs/data-model.md`（或模块级 `data-model.md`） |
-| 新增/移除功能 | `docs/features.md` |
-| 构建/运行/测试命令变化 | `AGENTS.md` + `README.md` |
-| 新增架构决策 | `docs/DECISIONS.md` |
-| 发现新的运维故障模式 | `docs/runbook.md` |
-| 发布新版本 | `CHANGELOG.md` |
-| 部署流程变化 | `docs/deployment.md` |
-| 测试策略/覆盖率要求变更 | `docs/testing.md` |
-| 监控指标/告警规则变更 | `docs/monitoring.md`（若存在） |
-| 数据库表结构变更（公共） | `docs/data-model.md` + `docs/database/` 下对应 schema |
-| 数据库表结构变更（模块内） | 模块级 `data-model.md` + 模块级 `database/` 下对应 schema |
-| 缓存 key/结构变更 | `docs/data-model.md`（非关系型数据模型章节） |
-| 消息/事件 schema 变更 | `docs/data-model.md`（消息/事件 Schema 章节） |
-| API 认证方式变更 | `docs/api-reference.md`（若存在） |
+### 项目特定规则
 
-## Rule 2: 代码地图准确性
+<!-- TODO[p3,design-rationale,dev-team]: 若本项目有特殊的代码-文档映射规则（如某个目录的变更触发非常规文档更新），在此补充。无则保留此 TODO。 -->
 
-- 新增 service/class → 在 `docs/code-map.md` 对应表格加一行
-- 重命名/移动文件 → 更新 `docs/code-map.md` 所有引用
-- 删除文件 → 从 `docs/code-map.md` 移除
-- 结构变更后扫描代码地图中是否有死引用
+| 项目特定的代码变更 | 需更新的文档 | 备注 |
+|-------------------|-------------|------|
+| <!-- 例：修改 `src/Plugins/` 下任何文件 --> | <!-- 例：`docs/plugins/<name>/README.md` --> | |
 
-## Rule 3: 提交前验证
+### 通用规则覆盖
 
-- [ ] `docs/code-map.md` 中所有文件路径存在
-- [ ] `docs/config.md` 中所有配置项与代码一致
-- [ ] 修改过的文档 `last_updated` 已更新
-- [ ] 无断链引用
-- [ ] 新增模块已在 `docs/modules.md` 注册
-- [ ] 模块级文档已更新（如适用）
-- [ ] 数据库 schema 变更已同步到 `docs/database/` 或模块级 `database/`
-- [ ] 新增/修改的 API 已在 `docs/api-reference.md` 中更新（若存在）
+> 若本项目需要覆盖通用矩阵中的某条规则（如：本项目不维护 CHANGELOG.md），在此声明。
 
-## Rule 4: 文档比例约束
+<!-- TODO[p3,design-rationale,dev-team]: 列出需要禁用或覆盖的通用规则。 -->
+
+## 提交前验证清单（项目特定）
+
+> 通用验证清单见 `blyy-doc-sync` 防线 2。本节仅追加项目特定项。
+
+```
+□ <!-- 例：所有 Plugin 类必须在 docs/plugins/ 下有对应文档 -->
+```
+
+## 文档比例约束
 
 - 不主动创建独立于现有架构的新文档文件
 - 拆分现有文档以改善可读性属于正常维护
 - 优先在现有文件中增加章节，而非新建文件
+- 每个文档的 `max_lines`（front matter）超标时必须考虑拆分
+
+---
+
+## 基线快照（doc-sync 防线 3 比对基准）
+
+> 此章节由 `blyy-init-docs` 在 Phase 3 自动写入，由 `blyy-doc-sync` 防线 3 在每次审计时更新。
+> AI 工具可读，但**不应手动编辑此章节** — 必须由确定性扫描命令的实际输出覆盖。
+
+```yaml
+# Phase 2 自动填充：由 init-docs Phase 3 写入
+baseline:
+  generated_at: {{DATE}}
+  git_commit: <!-- Phase 3 自动填充：当前 HEAD 短 SHA -->
+  counts:
+    modules: <!-- Phase 3 -->
+    entities_models: <!-- Phase 3 -->
+    controllers_routes: <!-- Phase 3 -->
+    services: <!-- Phase 3 -->
+    config_files: <!-- Phase 3 -->
+    test_files: <!-- Phase 3 -->
+    docs_total: <!-- Phase 3 -->
+  markers:
+    todo_total: <!-- Phase 3 -->
+    unverified_total: <!-- Phase 3 -->
+  layer_distribution:
+    layer_1: <!-- Phase 3 -->
+    layer_2: <!-- Phase 3 -->
+    layer_3: <!-- Phase 3 -->
+    layer_4: <!-- Phase 3 -->
+```
+
+### 历史快照（趋势数据）
+
+> doc-sync 防线 3 每次审计后追加一行，用于发现文档质量退化。
+
+| 日期 | git commit | 模块 | 实体 | TODO | UNVERIFIED | 备注 |
+|------|-----------|------|------|------|-----------|------|
+| <!-- Phase 3 --> | | | | | | 初始化基线 |

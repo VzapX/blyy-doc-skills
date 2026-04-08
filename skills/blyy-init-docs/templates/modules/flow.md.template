@@ -1,10 +1,32 @@
 ---
 last_updated: {{DATE}}
+last_synced_commit: init
+audience: ai-and-human
+read_priority: 2
+max_lines: 300
+parent_doc: README.md
+code_anchors:
+  - <!-- Phase 2 自动填充：本模块入口类与主要 Service -->
+applicable_project_types:
+  - backend-service
+  - microservice
+  - fullstack
+  - frontend-spa
+  - cli-tool
+  - data-pipeline
 change_triggers:
   - 模块内业务流程变化
+  - 主要方法调用链调整
 ---
 
 # {{MODULE_NAME}} — 业务流程
+
+<!-- AI-READ-HINT
+PURPOSE: 本模块内部的业务流程。AI 修改本模块业务逻辑前必读。
+READ-WHEN: 修改本模块的业务逻辑、修本模块的业务 bug、理解本模块如何工作。
+SKIP-WHEN: 仅修改本模块的配置/数据模型/外部接口签名（不涉及业务逻辑）。
+PAIRED-WITH: README.md（模块概览）, code-map.md（文件位置）
+-->
 
 > 返回 [模块概述](README.md) | [全局核心流程](../../core-flow.md)
 
@@ -12,31 +34,38 @@ change_triggers:
 
 ```mermaid
 flowchart TD
-    %% Phase 2 自动填充：基于模块内公共方法调用链
-    START[开始] --> STEP1[步骤1]
-    STEP1 --> END_[结束]
+    %% AI-RULE: 此图基于本模块的方法调用链生成。
+    %% 仅展示模块内步骤。跨模块调用在 ../../core-flow.md。
+    %% 若无法生成 ≥3 个真实节点，删除整个代码块。
 ```
 
 ## 流程详解
 
-### 流程 1: <!-- Phase 2 自动填充 -->
+> **AI-RULE：每个流程必须基于代码事实生成。每个步骤必须有「代码位置」列。
+> 步骤顺序不确定时标 `<!-- UNVERIFIED -->` 并加入 T3 待澄清批次。**
 
-**触发条件：** <!-- TODO -->
+### 流程：<!-- Phase 2 自动填充：流程名 -->
 
-**输入：** <!-- Phase 2 -->
+- **触发**：<!-- Phase 2 自动填充：HTTP / 事件 / 定时 / 内部调用 -->
+- **入口代码**：`<!-- file:line -->`
+- **输入**：<!-- Phase 2 -->
+- **输出**：<!-- Phase 2 -->
 
 **执行步骤：**
 
-1. <!-- Phase 2 自动填充 -->
+| # | 步骤 | 代码位置 |
+|---|------|---------|
+| 1 | <!-- Phase 2 --> | `<!-- file:line -->` |
+| 2 | | |
 
-**输出：** <!-- Phase 2 -->
+**异常分支：**
 
-**异常处理：**
+<!-- Phase 2 自动填充：从 try/catch + 自定义异常类扫描 -->
 
-| 异常场景 | 处理方式 |
-|---------|---------|
-| <!-- TODO --> | |
+| 异常场景 | 异常类型 | 代码位置 | 处理方式 |
+|---------|---------|---------|---------|
+| <!-- Phase 2 --> | | `<!-- file:line -->` | |
 
 ---
 
-### 流程 2: <!-- 按需添加 -->
+<!-- 复制上方模板生成更多流程。子代理需穷举本模块所有公共方法对应的业务流程。 -->

@@ -1,39 +1,70 @@
 ---
 last_updated: {{DATE}}
+last_synced_commit: init
+audience: ai-and-human
+read_priority: 3
+max_lines: 300
+parent_doc: ARCHITECTURE.md
+code_anchors:
+  - <!-- Phase 2 自动填充：跨模块编排代码（如 Saga / Orchestrator / 事件总线） -->
+applicable_project_types:
+  - backend-service
+  - microservice
+  - fullstack
+  - data-pipeline
 change_triggers:
-  - 业务流程变化
+  - 跨模块业务流程变化
+  - 主流程入口变更
 ---
 
 # 核心流程
 
+<!-- AI-READ-HINT
+PURPOSE: 描述跨模块的核心业务流程（仅跨模块的，模块内部流程在各模块的 flow.md）。
+READ-WHEN: 用户问「整个流程怎么走 / 业务从哪里开始 / 跨模块的链路」。
+SKIP-WHEN: 修改单个模块的内部逻辑（直接读模块的 flow.md）。
+PAIRED-WITH: modules.md（模块清单）, modules/<m>/flow.md（模块内流程）
+-->
+
 > 返回 [架构文档](ARCHITECTURE.md)
 
-本文档描述**跨模块的核心业务流程**。模块内部流程请查阅各模块的 `flow.md`。
+> 本文档仅描述**跨模块的核心业务流程**。模块内部流程请查阅 `modules/<m>/flow.md`。
 
 ## 主流程概览
 
 ```mermaid
 flowchart TD
-    %% Phase 2 自动填充：基于入口点分析生成
-    START[开始] --> STEP1[步骤1]
-    STEP1 --> STEP2[步骤2]
-    STEP2 --> END_[结束]
+    %% AI-RULE: 此图基于实际入口点 → 跨模块调用链生成。
+    %% 仅展示跨模块的步骤；模块内步骤放在模块级 flow.md。
+    %% 若无法生成 ≥3 个真实节点，删除整个代码块。
 ```
 
 ## 流程详解
 
-### 流程 1: <!-- Phase 2 自动填充 -->
+> **AI-RULE：每个流程必须基于代码事实生成。每个步骤必须有「代码位置」列。
+> 严禁编造步骤顺序 — 不确定的步骤必须标 `<!-- UNVERIFIED: ... -->` 并加入 T3 待澄清批次。**
 
-**触发条件：** <!-- TODO -->
+### 流程：<!-- Phase 2 自动填充：流程名 -->
+
+- **触发**：<!-- Phase 2 自动填充：HTTP 请求 / 事件 / 定时 / CLI / Webhook -->
+- **入口代码位置**：`<!-- file:line -->`
+- **涉及模块**：<!-- Phase 2 自动填充：模块名清单 -->
 
 **执行步骤：**
 
-1. <!-- Phase 2 自动填充 -->
+| # | 步骤 | 所属模块 | 代码位置 |
+|---|------|---------|---------|
+| 1 | <!-- Phase 2 --> | | `<!-- file:line -->` |
+| 2 | | | |
 
-**异常处理：**
+**异常分支：**
 
-- <!-- TODO: 请补充异常分支 -->
+<!-- Phase 2 自动填充：从 try/catch + 异常处理代码扫描，仅列出代码中实际存在的异常分支 -->
+
+| 异常场景 | 代码位置 | 处理方式 |
+|---------|---------|---------|
+| <!-- Phase 2 --> | `<!-- file:line -->` | |
 
 ---
 
-### 流程 2: <!-- 按需添加更多流程 -->
+<!-- 复制上方模板生成更多流程，每个流程一段。Phase 2 子代理需穷举所有跨模块流程。 -->

@@ -1,6 +1,6 @@
 # {{PROJECT_NAME}}
 
-<!-- TODO: 请补充项目一句话简介 -->
+<!-- TODO[p1,business-context,user]: 请补充项目一句话简介 -->
 
 ## 功能特性
 
@@ -44,4 +44,4 @@
 
 ## 许可证
 
-<!-- TODO: 请补充许可证类型 -->
+<!-- TODO[p2,business-context,user]: 请补充许可证类型（MIT / Apache-2.0 / GPL / 私有 等） -->

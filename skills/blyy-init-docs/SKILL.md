@@ -93,29 +93,36 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 ├── CONTRIBUTING.md          ← 可选，用户确认后生成
 ├── SECURITY.md              ← 按需，用户确认后生成
 └── docs/
-    ├── ARCHITECTURE.md
+    ├── ARCHITECTURE.md      ← 文档导航根节点（含 AI 任务路由表，≤150 行）
     ├── code-map.md          ← 总览简述 + 各模块链接
     ├── modules.md
+    ├── glossary.md          ← 业务术语 ↔ 代码符号映射
     ├── core-flow.md
     ├── config.md            ← 含配置优先级、密钥管理、环境差异
     ├── features.md
     ├── DECISIONS.md
-    ├── doc-maintenance.md
-    ├── data-model.md        ← 关系型 + 非关系型（缓存/消息/文档数据库）
+    ├── doc-maintenance.md   ← 含基线快照（供 doc-sync 防线 3 使用）
+    ├── data-model.md        ← 关系型 + 非关系型（缓存/消息/文档数据库，按需展开）
     ├── testing.md           ← 测试策略、覆盖率、E2E 场景、安全扫描
-    ├── runbook.md           ← 含告警升级、备份恢复、安全事件响应
-    ├── deployment.md        ← 含环境一致性、密钥管理、冒烟测试
-    ├── monitoring.md        ← 按需：核心指标、告警规则、日志规范
-    ├── api-reference.md     ← 按需：含认证鉴权、限流、版本策略、Webhook
+    ├── runbook.md           ← 健康检查 + 故障剧本（基础版）
+    ├── deployment.md        ← 含环境清单、回滚方案、密钥管理
+    ├── monitoring.md        ← 按需：核心指标、告警规则、仪表盘（告警的单一来源）
+    ├── api-reference.md     ← 按需：基础信息 + 接口列表 + 错误码（认证按需展开）
     ├── database/            ← 公共/跨模块表 + 各模块链接
     └── modules/
         └── <module-name>/
-            ├── README.md
-            ├── flow.md
+            ├── README.md       ← 含入向/出向依赖
+            ├── flow.md         ← 步骤含代码位置列
             ├── data-model.md
-            ├── code-map.md      ← 该模块的文件→职责映射
-            └── database/        ← 该模块的表 schema
+            ├── code-map.md     ← 该模块的文件→职责映射
+            └── database/       ← 该模块的表 schema
 ```
+
+> **模板架构变更要点（v0.2.0）**：
+> - 所有 `docs/*.template` 与 `modules/*.template` 的 YAML front matter 扩展了新字段：`audience` / `read_priority` / `max_lines` / `parent_doc` / `code_anchors` / `applicable_project_types` / `last_synced_commit`，详见 `resources/doc-guide.md` 七、YAML Front Matter 字段标准
+> - **Phase 1 骨架按 `applicable_project_types` 字段自动过滤**：识别项目类型后，仅生成 front matter 中包含该类型的模板，无需依赖 AI 阅读项目类型适配指南
+> - 所有列表型字段必须包含「代码位置」列（`file:line` 格式）
+> - 所有 `<!-- TODO -->` 必须使用结构化格式 `<!-- TODO[priority,type,owner]: ... -->`
 
 > **项目类型适配**：不同类型的项目对文档的侧重点不同，详见 `resources/doc-guide.md` 项目类型适配指南。部分文档可根据项目类型跳过。
 
@@ -128,15 +135,30 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
      - 移动完成后，向用户汇报迁移结果（迁移了多少个文件）
      - **递归列出** `docs-old/` 下所有 `.md` 文件清单，以便 Phase 2 填充阶段参考
    - **若 `docs/` 不存在** → **跳过迁移，不创建 `docs-old/`**，直接进入步骤 2
-2. 阅读 `templates/root/`、`templates/docs/`、`templates/modules/` 下的所有模板
-3. 在全新的 `docs/` 目录下按模板创建完整文档结构
-4. **根目录已有文档整合**：对于项目中已存在的根目录文档（`README.md`、`AGENTS.md`/`CLAUDE.md` 等、`CHANGELOG.md`）
+2. **项目类型识别**（Phase 1 骨架过滤的前置步骤）：
+   - 根据 Phase 0.3 的项目清点结果，结合 `resources/doc-guide.md` 五.适配矩阵 + 「条件判断方法」表，自动判定项目类型（取一个或多个枚举值：`backend-service` / `microservice` / `fullstack` / `frontend-spa` / `cli-tool` / `library` / `data-pipeline` / `infrastructure`）
+   - 向用户确认识别结果：`"识别到的项目类型: {types}。是否正确？(Y/纠正)"` — 用户纠正后才进入步骤 3
+   - 将识别结果记录到 `.init-docs/project-type.md`（大型模式）或在主 agent 上下文中保留（标准模式）
+3. 阅读 `templates/root/`、`templates/docs/`、`templates/modules/` 下的所有模板
+4. **按 `applicable_project_types` 过滤模板**：
+   - 对每个模板文件，读取其 YAML front matter 的 `applicable_project_types` 字段
+   - 若该字段**包含**步骤 2 识别的项目类型之一 → 创建该文档骨架
+   - 若该字段**不包含**任何识别的类型 → **跳过创建**，并在「跳过清单」中记录
+   - 若 front matter 中无 `applicable_project_types` 字段 → 视为「全类型适用」，创建
+   - 此过滤完全基于 front matter，**禁止 AI 自由判断**「这个项目应不应该有 monitoring」
+5. 在全新的 `docs/` 目录下按过滤结果创建文档骨架
+6. **根目录已有文档整合**：对于项目中已存在的根目录文档（`README.md`、`AGENTS.md`/`CLAUDE.md` 等、`CHANGELOG.md`）
    - 阅读已有文件，提取其中有价值的内容（项目描述、构建命令、配置说明、变更记录等）
    - 按模板结构重新组织这些内容，生成符合规范的新版本
    - 将新旧内容的差异摘要呈现给用户，说明哪些内容被保留、哪些被重组、哪些是新增
    - 用户确认后，覆盖原文件
    - 若 Phase 0.1 中工具 `/init` 生成了上下文文件，将其内容整合进对应文档
-5. 对于可选文档（`CONTRIBUTING.md`、`SECURITY.md`、`api-reference.md`、`monitoring.md`），询问用户是否需要（参考 `resources/doc-guide.md` 项目类型适配指南给出建议）
+7. **跳过清单确认**：将步骤 4 中所有被跳过的文档列出（含跳过原因），询问用户是否需要追加生成（「可跳过」不等于「禁止生成」）：
+   ```
+   📋 根据项目类型 [backend-service]，以下文档被跳过：
+   - frontend-routing.md（仅适用 frontend-spa）
+   - 是否需要追加生成？(选择需要的 / N=全部跳过)
+   ```
 
 ---
 
@@ -422,14 +444,18 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 - 用户暂停后，可在新会话中通过 `docs/.init-temp/` 恢复进度（标准模式也保留临时文件直到 Phase 3）
 - 已有文档优先：填充每个文档时先检查 Phase 1.5 提取产物中的对应信息
 
-**填充原则：**（详见 `resources/doc-guide.md` 四、Phase 2 填充规则）
+**填充原则：**（详见 `resources/doc-guide.md` 四、Phase 2 填充规则 + 七、YAML Front Matter 字段标准）
 
 - 穷举式枚举 + 确定性清单保障
 - 三级事实分类（T1/T2/T3）+ 填充前审查关卡
 - 基于代码事实，不臆测不编造
 - 已有文档优先
 - T3 推测性内容经审查关卡统一处理
-- 未确认内容保留 `<!-- TODO -->` 或 `<!-- UNVERIFIED -->` 占位符
+- **代码位置列必填**：所有列表型字段（实体表、文件清单、流程步骤、API 端点、配置项等）必须填充「源文件」或「定义位置」列，使用 `path/to/file.ext:行号` 格式（无确切行号时退化为 `path/to/file.ext`）。无代码位置的条目视为不可信，应标注 `<!-- UNVERIFIED -->`
+- **结构化 TODO 格式**：未确认内容必须使用 `<!-- TODO[priority,type,owner]: 简述 -->` 位置参数格式，详见 `resources/doc-guide.md` 七.4 — `priority` ∈ {p0,p1,p2,p3}，`type` ∈ {business-context,design-rationale,ops-info,security-info,external-link,metric-baseline}，`owner` ∈ {user,dev-team,ops-team,security-team,具体负责人名}
+- **front matter 完整性**：每个文档必须填充 `last_updated`（当前日期）、`last_synced_commit`（初始化时填 `init`，由 doc-sync 后续维护）、`audience`、`read_priority`、`code_anchors`（实际代码目录/文件路径）字段，禁止保留模板占位符
+- **AI-READ-HINT 块完整性**：保留模板中的 `AI-READ-HINT` 块，根据当前文档实际内容调整 `READ-WHEN`/`SKIP-WHEN`/`PAIRED-WITH` 描述，禁止整块删除
+- **INCLUDE-IF 条件段处理**：模板中标注 `<!-- INCLUDE-IF: 条件 -->` 的段落，若项目不满足条件直接整段删除；满足条件时移除标记并填充内容
 
 ---
 
@@ -535,17 +561,62 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
     - T1 确定性事实：N 个 (X%)
     - T2 高置信推断：M 个 (Y%)
     - T3 未验证推测：K 个 (Z%) — 逐一列出所在文档和位置
-12. **基线数据保留（供 doc-sync 使用）**：将确定性清单的精简版写入 `docs/doc-maintenance.md` 的「基线」章节，格式：
-    ```markdown
-    ## 基线清点（blyy-init-docs 自动生成）
-    - 生成日期：YYYY-MM-DD
-    - 实体/模型: N 个
-    - 控制器/路由: M 个
-    - 服务: K 个
-    - 配置文件: L 个
-    - 模块: P 个
+12. **基线数据保留（供 doc-sync 使用）**：将确定性清单的精简版写入 `docs/doc-maintenance.md` 的「基线快照」章节。基线**必须**采用 YAML 格式（便于 doc-sync 防线 3 程序化解析），包含同步状态、清单计数、TODO/UNVERIFIED 标记统计、文档分层分布四类数据：
+
+    ````markdown
+    ## 基线快照（blyy-init-docs 自动生成）
+
+    ```yaml
+    snapshot_date: YYYY-MM-DD
+    snapshot_commit: <git rev-parse HEAD 当前 commit>
+    last_synced_commit: <同上，doc-sync 后续会更新此字段>
+    skill_version: blyy-init-docs v0.2.0
+
+    inventory:
+      modules: P
+      entities: N
+      controllers: M
+      services: K
+      config_files: L
+      api_endpoints: Q
+      tests: T
+
+    markers:
+      todo_total: X
+      todo_by_priority:
+        p0: 0
+        p1: 0
+        p2: 0
+        p3: 0
+      todo_by_type:
+        fact: 0
+        decision: 0
+        owner: 0
+        review: 0
+      unverified_total: Y
+
+    layer_distribution:
+      layer1_core: 5         # ARCHITECTURE/README/AGENTS/modules/code-map
+      layer2_modules: P
+      layer3_aggregate: 7
+      layer4_ops: 6
+
+    fact_levels:
+      t1_count: N1
+      t2_count: N2
+      t3_count: N3
     ```
-    此数据供 `blyy-doc-sync` 防线 3 定期审计时作为历史对比基准。
+
+    ## 历史快照趋势
+
+    > doc-sync 防线 3 每次执行后追加一行，便于发现腐烂趋势。
+
+    | 日期 | commit | 实体 | 服务 | TODO 总数 | UNVERIFIED | 备注 |
+    |------|--------|------|------|-----------|------------|------|
+    | YYYY-MM-DD | abc1234 | N | K | X | Y | init |
+    ````
+
+    此数据供 `blyy-doc-sync` 防线 3 定期审计时作为历史对比基准（对比 inventory 偏差、markers 增长趋势、layer_distribution 失衡情况）。
 13. 大型项目模式下，清理 `.init-docs/` 目录（或保留供后续参考，由用户决定）
 14. 标准模式下，清理 `docs/.init-temp/` 临时目录（但若用户在 Layer 交付时选择暂停，保留临时文件供后续恢复）
 

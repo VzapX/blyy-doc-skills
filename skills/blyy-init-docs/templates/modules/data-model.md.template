@@ -1,27 +1,52 @@
 ---
 last_updated: {{DATE}}
+last_synced_commit: init
+audience: ai-and-human
+read_priority: 2
+max_lines: 300
+parent_doc: README.md
+code_anchors:
+  - <!-- Phase 2 自动填充：本模块实体类目录 -->
+applicable_project_types:
+  - backend-service
+  - microservice
+  - fullstack
+  - data-pipeline
 change_triggers:
-  - 模块内数据库表结构变更
-  - 新增/删除实体类
+  - 本模块表结构变更
+  - 新增/删除本模块实体类
+  - 本模块字段命名变更
 ---
 
 # {{MODULE_NAME}} — 数据模型
+
+<!-- AI-READ-HINT
+PURPOSE: 本模块独有的数据模型与表结构。跨模块共享的模型在 ../../data-model.md。
+READ-WHEN: 修改本模块的实体类、表字段、查询逻辑。
+SKIP-WHEN: 仅修改本模块业务逻辑而不涉及数据结构。
+PAIRED-WITH: database/（schema 文件）, code-map.md（实体类位置）
+-->
 
 > 返回 [模块概述](README.md) | [全局数据模型](../../data-model.md)
 
 ## 实体列表
 
-<!-- Phase 2 自动填充：扫描模块内实体类 -->
+> **AI-RULE：必须穷举本模块所有实体类。每条必须有「源文件」列。**
 
-| 实体/表名 | 用途 | 关联实体 |
-|----------|------|---------|
-| <!-- Phase 2 --> | | |
+<!-- Phase 2 自动填充：扫描本模块实体类 -->
 
-## 表结构
+| 实体/表名 | 用途 | 实体类源文件 | 迁移文件 |
+|----------|------|------------|---------|
+| <!-- Phase 2 --> | | `<!-- file:line -->` | `<!-- file -->` |
 
-### {{TABLE_NAME}}
+## 表结构详情
 
-<!-- Phase 2 自动填充 -->
+> 每张表一段。字段必须穷举（不要省略）。
+
+### <!-- Phase 2: 表名 -->
+
+- **实体类**：`<!-- file:line -->`
+- **迁移文件**：`<!-- file -->`
 
 | 字段 | 类型 | 约束 | 说明 |
 |------|------|------|------|
@@ -31,10 +56,6 @@ change_triggers:
 
 ```mermaid
 erDiagram
-    %% Phase 2 自动填充：模块内实体关系
+    %% AI-RULE: 仅展示本模块内部的实体关系。跨模块关系在 ../../data-model.md。
+    %% 若本模块只有 1 个实体或无关系，删除整个代码块。
 ```
-
-## Schema 文件
-
-<!-- Phase 2 自动填充：如有 SQL/迁移文件 -->
-- DDL: `docs/database/{{MODULE_NAME}}.sql`（如适用）

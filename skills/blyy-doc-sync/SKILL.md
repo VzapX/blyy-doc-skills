@@ -36,8 +36,12 @@ AI 工具在执行**任何代码修改任务**后，应自动触发 blyy-doc-syn
 #### Step 1 — 变更识别
 
 1. 确认本次代码变更的类型（新增/修改/删除了哪些文件）
-2. 查阅同步矩阵（优先读 `docs/doc-maintenance.md`，fallback 到 `resources/sync-matrix.md`）
-3. 根据矩阵确定需更新的文档列表
+2. **基于 `last_synced_commit` 增量识别**（若文档 front matter 中存在该字段）：
+   - 读取受影响文档的 `last_synced_commit`
+   - 执行 `git diff --name-only <last_synced_commit>..HEAD` 获取自上次同步以来的所有变更
+   - 若文档的 `code_anchors` 字段列出了关注路径，仅过滤这些路径下的变更
+3. 查阅同步矩阵（优先读 `docs/doc-maintenance.md`，fallback 到 `resources/sync-matrix.md`）
+4. 根据矩阵确定需更新的文档列表
 
 #### Step 2 — 影响区域确定性扫描
 
@@ -63,20 +67,32 @@ AI 工具在执行**任何代码修改任务**后，应自动触发 blyy-doc-syn
 
 1. 逐一更新受影响的文档
 2. **确定性差异优先**：先处理 Step 2 发现的数量差异（补充遗漏 / 清理过时），再处理内容变更
-3. 更新文档的 YAML `last_updated` 为当天日期
-4. 新增模块 → 在 `modules.md` 注册 + 创建模块级文档骨架
-5. 删除模块 → 从 `modules.md` 移除 + 归档模块级文档
+3. **代码位置同步**：若变更涉及文件重命名/移动，必须更新文档列表型字段中的「源文件」/「定义位置」列（`file:line` 格式），以及 front matter 的 `code_anchors`
+4. 更新文档的 YAML `last_updated` 为当天日期，**同时更新 `last_synced_commit` 为当前 commit hash**（`git rev-parse HEAD`）
+5. 新增模块 → 在 `modules.md` 注册 + 创建模块级文档骨架
+6. 删除模块 → 从 `modules.md` 移除 + 归档模块级文档
 
 #### Step 4 — TODO/UNVERIFIED 递减检查
 
-> `blyy-init-docs` 可能在文档中留下 `<!-- TODO: xxx -->` 和 `<!-- UNVERIFIED: xxx -->` 标记。每次代码变更都是填充这些标记的机会。
+> `blyy-init-docs` 可能在文档中留下 `<!-- TODO[priority,type,owner]: xxx -->` 和 `<!-- UNVERIFIED: xxx -->` 标记。每次代码变更都是填充这些标记的机会。结构化 TODO 的 priority/type/owner 含义详见 `blyy-init-docs/resources/doc-guide.md` 七.4。
 
-1. 在本次变更涉及的文档中搜索 `<!-- TODO` 和 `<!-- UNVERIFIED` 标记
-2. 判断当前变更是否提供了足够的代码事实来填充这些标记：
-   - 例如：`<!-- TODO: 请补充订单创建流程 -->`，而用户刚好完成了 `OrderService.CreateOrder()` 的实现
+1. 在本次变更涉及的文档中搜索结构化标记：
+   - `<!-- TODO\[(p[0-3]),([\w-]+),([\w-]+)\]:` (正则)
+   - `<!-- UNVERIFIED:`
+2. **按 priority 顺序处理**：p0 → p1 → p2 → p3
+3. 按 `type` 字段路由处理策略：
+   - `business-context` — 检查代码注释、命名、调用链是否提供了足够的业务事实，能则填充
+   - `design-rationale` — 检查是否有新的 ADR 或代码注释支撑决策，有则填充
+   - `ops-info` — 检查 IaC/CI/运维脚本是否新增了相关配置，有则填充
+   - `security-info` — 不自动填充，仅向用户提示
+   - `external-link` — 不自动填充，由用户提供 URL
+   - `metric-baseline` — 不自动填充，等待实测或配置补充
+4. **按 owner 分组提问**：当一次变更涉及多个同 owner 的 TODO 时，合并为一次提问，避免逐条打断用户
+5. 判断当前变更是否提供了足够的代码事实来填充这些标记：
+   - 例如：`<!-- TODO[p1,business-context,user]: 订单创建流程步骤 -->`，而用户刚好完成了 `OrderService.CreateOrder()` 的实现
    - 例如：`<!-- UNVERIFIED: 订单创建后是否通知仓库 -->`，而用户刚写了 `NotificationService.NotifyWarehouse()` 调用
-3. 若能填充 → 从代码中提取事实，替换标记，向用户汇报：`"✅ 已根据本次代码变更填充 1 个 TODO 标记（core-flow.md: 订单创建流程）"`
-4. 若不确定 → 保留标记不动
+6. 若能填充 → 从代码中提取事实，替换标记，向用户汇报：`"✅ 已填充 TODO[p1,business-context]（core-flow.md: 订单创建流程）"`
+7. 若不确定 → 保留标记不动
 
 #### 执行清单
 
@@ -140,7 +156,17 @@ rg "last_updated:" docs/ --type md -l | \
 
 **建议每月/每季度执行一次。**
 
-> 防线 3 本质上是 `blyy-init-docs` Phase 3 的独立运行版本。它重新执行确定性清点，与文档全面比对，发现日常同步遗漏的差异。
+> 防线 3 本质上是 `blyy-init-docs` Phase 3 的独立运行版本。它重新执行确定性清点，与 `docs/doc-maintenance.md` 中的**基线快照**进行**趋势对比**，发现日常同步遗漏的差异和文档腐烂趋势。
+
+#### Step 0 — 加载基线快照
+
+读取 `docs/doc-maintenance.md` 的「基线快照」YAML 块和「历史快照趋势」表格，提取：
+- `inventory.*` — 上次记录的代码清点基线
+- `markers.todo_total` / `unverified_total` — 上次记录的标记总数
+- `last_synced_commit` — 上次同步的 commit hash
+- `layer_distribution` — 上次记录的文档分层数量
+
+若 `doc-maintenance.md` 中无基线快照（项目未通过 init-docs 初始化），跳到 Step 1 直接执行全量扫描，扫描后**首次写入基线快照**。
 
 #### Step 1 — 全量确定性重扫
 
@@ -181,28 +207,69 @@ rg "last_updated:" docs/ --type md -l | \
 10. 检查 `monitoring.md`（若存在）监控指标和告警规则是否与实际配置一致
 11. 检查 `api-reference.md`（若存在）是否覆盖所有当前 API 端点
 
-#### Step 4 — TODO/UNVERIFIED 健康度报告
+#### Step 4 — TODO/UNVERIFIED 健康度报告（按优先级）
 
-统计所有文档中残留的标记：
+按结构化 TODO 的 `priority` 分组统计所有文档中残留的标记：
 
 ```
-📋 文档健康度:
-- <!-- TODO --> 标记: {N} 个（其中 {M} 个对应代码已实现，建议填充）
-- <!-- UNVERIFIED --> 标记: {K} 个（其中 {J} 个现在可从代码确认）
-- 文档总覆盖率: {X}%（清点基线 vs 文档条目）
+📋 文档健康度（按优先级）:
+- TODO[p0]: {N0} 个 — 必须立即处理
+- TODO[p1]: {N1} 个 — 阻塞文档可用性
+- TODO[p2]: {N2} 个
+- TODO[p3]: {N3} 个 — 可延期
+- UNVERIFIED: {K} 个（其中 {J} 个现在可从代码确认）
+
+按类型分组:
+- business-context: {N1} 个 — 等待业务上下文补充
+- design-rationale: {N2} 个 — 等待 ADR/设计决策
+- ops-info: {N3} 个 — 等待运维信息
+- security-info: {N4} 个 — 等待安全团队
+- external-link: {N5} 个 — 等待外部 URL
+- metric-baseline: {N6} 个 — 等待指标基线
+
+按 owner 聚合:
+- user: {N} 个
+- dev-team: {M} 个
+- ops-team: {K} 个
+- security-team: {L} 个
+
+文档总覆盖率: {X}%（清点基线 vs 文档条目）
 ```
 
-#### Step 5 — 文档维护优先级建议
+#### Step 5 — 趋势对比与维护建议
 
-基于审计结果，输出维护建议：
+将本次扫描与基线快照对比，识别**腐烂趋势**：
+
+```
+📊 趋势对比（vs 上次基线 {snapshot_date}, commit {short_hash}）:
+- 实体: {N1} → {N2} ({diff})
+- 服务: {K1} → {K2} ({diff})
+- TODO 总数: {X1} → {X2} ({diff})  ← 持续上升 = 文档腐烂
+- UNVERIFIED 总数: {Y1} → {Y2} ({diff})
+- 文档覆盖率: {C1}% → {C2}%
+
+🚨 腐烂信号:
+- {如果 TODO 持续上升 3 次以上 → 列出问题文档}
+- {如果某模块覆盖率连续下降 → 列出该模块}
+```
+
+输出维护建议：
 
 ```
 📊 维护优先级建议:
 - P1 紧急修复: {列出数量差异 > 20% 的文档}
-- P2 建议更新: {列出有残留 TODO 且代码已实现的文档}
+- P2 建议更新: {列出有残留 TODO[p0/p1] 且代码已实现的文档}
 - P3 可选清理: {列出 UNVERIFIED 标记可确认的文档}
 - 低活跃文档: {列出 last_updated 超过 90 天且无代码变更关联的文档}
 ```
+
+#### Step 6 — 写入新基线快照
+
+将本次扫描结果**追加**到 `docs/doc-maintenance.md`：
+
+1. 更新「基线快照」YAML 块为本次结果（覆盖旧值），同时更新 `last_synced_commit` 和 `snapshot_date`
+2. 在「历史快照趋势」表格末尾**追加一行**（不删除历史行），便于长期观察腐烂曲线
+3. 若历史行超过 12 条，归档最早的几行到 `doc-maintenance.md` 末尾的「归档」段落，保持表格简洁
 
 ---
 
@@ -214,25 +281,32 @@ rg "last_updated:" docs/ --type md -l | \
 
 | 数据源 | 位置 | 用途 |
 |--------|------|------|
-| 项目基线清点 | `docs/doc-maintenance.md` 基线章节 | 防线 3 审计时的历史对比基准 |
+| 项目基线快照（YAML） | `docs/doc-maintenance.md` 基线快照章节 | 防线 3 趋势对比的历史对比基准 |
+| 历史快照趋势表 | `docs/doc-maintenance.md` 历史快照趋势章节 | 防线 3 检测文档腐烂趋势 |
+| `last_synced_commit` | 各文档 front matter | 防线 1 增量识别变更范围 |
+| `code_anchors` | 各文档 front matter | 防线 1 过滤变更范围 |
 | 确定性清点命令 | `blyy-init-docs/resources/doc-guide.md` 清点命令矩阵 | 防线 1/2/3 的扫描命令参考 |
 | 技术栈锚点矩阵 | `blyy-init-docs/resources/doc-guide.md` 锚点矩阵 | 判断代码变更涉及的文件类别 |
-| TODO/UNVERIFIED 标记 | 各文档中 | 持续递减目标 |
+| 结构化 TODO/UNVERIFIED 标记 | 各文档中 | 按 priority/type/owner 持续递减 |
 
 ### TODO 递减闭环
 
 ```
-blyy-init-docs 生成文档 → 留下 TODO/UNVERIFIED 标记
+blyy-init-docs 生成文档 → 留下结构化 TODO[priority,type,owner] / UNVERIFIED 标记
     ↓
 用户持续开发，每次代码变更触发 blyy-doc-sync
     ↓
-防线 1 Step 4 检查：当前变更能否填充附近的标记？
+防线 1 Step 4 按 priority 顺序检查：当前变更能否填充附近的标记？
     ↓ 能
-自动填充并汇报 → 标记数量持续递减
+按 type 路由处理（business-context 检查代码事实 / design-rationale 检查 ADR /
+              ops-info 检查 IaC / security-info 提示安全团队 / external-link 等待 URL /
+              metric-baseline 等待实测）
     ↓
-防线 3 定期统计：剩余 TODO/UNVERIFIED 数量 + 可填充建议
+按 owner 分组合并提问 → 自动填充并汇报 → 标记数量持续递减
     ↓
-最终目标：所有标记归零
+防线 3 定期统计：按 priority/type/owner 聚合 + 趋势对比 + 写入新基线
+    ↓
+最终目标：p0/p1 归零，p2/p3 可控
 ```
 
 ---
@@ -264,9 +338,10 @@ blyy-init-docs 生成文档 → 留下 TODO/UNVERIFIED 标记
 | 防线 1 确定性扫描完成 | `📊 扫描结果: {变更区域} — 代码 {N} 个 vs 文档 {M} 个` |
 | 防线 1 每个文档更新 | `📝 已更新: {文档名}` |
 | 防线 1 TODO 填充 | `✅ 已填充 {N} 个 TODO/UNVERIFIED 标记` |
-| 防线 1 完成 | `✅ 文档同步完成: 更新 {N} 个文档, 修复 {M} 个差异, 填充 {K} 个标记` |
+| 防线 1 完成 | `✅ 文档同步完成: 更新 {N} 个文档, 修复 {M} 个差异, 填充 {K} 个标记 (last_synced_commit → {short_hash})` |
 | 防线 2 完成 | `✅ 提交前验证通过`（或 `⚠️ 发现 {N} 个问题: ...`） |
-| 防线 3 完成 | 输出完整审计报告（含覆盖率 + 健康度 + 维护优先级） |
+| 防线 3 加载基线 | `📂 已加载基线快照 ({snapshot_date}, commit {short_hash})` |
+| 防线 3 完成 | 输出完整审计报告（含覆盖率 + 按优先级的健康度 + 趋势对比 + 维护优先级） + 写入新基线 |
 
 ## 注意事项
 

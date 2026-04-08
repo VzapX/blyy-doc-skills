@@ -1,26 +1,47 @@
 ---
 last_updated: {{DATE}}
+last_synced_commit: init
+audience: ai-and-human
+read_priority: 3
+max_lines: 150
+parent_doc: ../data-model.md
+code_anchors:
+  - <!-- Phase 2 自动填充：本模块迁移目录 -->
+applicable_project_types:
+  - backend-service
+  - microservice
+  - fullstack
+  - data-pipeline
 change_triggers:
-  - 模块内数据库表结构变更
-  - 新增/删除表
+  - 本模块表结构变更
+  - 新增/删除本模块表
 ---
 
 # {{MODULE_NAME}} — 数据库定义
 
+<!-- AI-READ-HINT
+PURPOSE: 本模块独有的 SQL schema 与迁移文件。
+READ-WHEN: 修改本模块表的 DDL、查询迁移历史。
+SKIP-WHEN: 改业务逻辑而不动 schema。
+PAIRED-WITH: ../data-model.md（实体清单）
+-->
+
 > 返回 [模块概述](../README.md) | [模块数据模型](../data-model.md) | [全局数据库](../../../database/)
 
-本目录存放 {{MODULE_NAME}} 模块的数据库表结构定义。
+> 本目录存放 {{MODULE_NAME}} 模块**独有**的表 schema 与迁移。跨模块共享表在 `docs/database/`。
 
 ## 表清单
 
-| 表名 | 用途 | 对应实体类 |
-|------|------|-----------|
-| <!-- Phase 2 自动填充 --> | | |
+<!-- Phase 2 自动填充 -->
+
+| 表名 | 用途 | 实体类源文件 | SQL/迁移文件 |
+|------|------|------------|------------|
+| <!-- Phase 2 --> | | `<!-- file -->` | `<!-- file -->` |
 
 ## Schema 文件
 
-<!-- Phase 2 自动填充：列出本目录下的 .sql 文件 -->
+<!-- Phase 2 自动填充：列出本目录下所有 .sql / .json schema 文件 -->
 
-| 文件 | 内容 |
-|------|------|
-| <!-- Phase 2 自动填充 --> | |
+| 文件 | 内容 | 对应表 |
+|------|------|--------|
+| <!-- Phase 2 --> | | |

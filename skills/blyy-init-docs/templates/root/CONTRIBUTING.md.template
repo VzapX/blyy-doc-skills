@@ -18,7 +18,7 @@
 
 ## 分支策略
 
-<!-- TODO: 请补充分支策略 -->
+<!-- TODO[p2,design-rationale,dev-team]: 请补充分支策略（trunk-based / git-flow / 自定义） -->
 
 ## 代码规范
 
