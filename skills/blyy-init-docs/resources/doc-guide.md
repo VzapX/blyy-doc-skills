@@ -65,7 +65,7 @@
 | `data-model.md` | 公共数据模型 + **模块索引** | 数据结构变更 |
 | `runbook.md` | 运维手册 + 事故剧本 | 故障/运维变更 |
 | `deployment.md` | 部署流程 + 回滚方案 | 部署方式变更 |
-| `api-reference.md` | API 接口参考 | 接口变更 |
+| `api-reference.md` | API 公共信息 + **模块索引** | 全局认证/错误码变更 |
 
 ### 模块级文档
 
@@ -74,6 +74,7 @@
 | `README.md` | 模块概述、职责、边界、对外接口 |
 | `flow.md` | 模块内部业务流程 |
 | `data-model.md` | 模块内数据模型、表结构 |
+| `api-reference.md` | 模块内 API 接口详情 |
 | `code-map.md` | 模块内文件→职责映射 |
 | `database/` | 模块内表 schema |
 
@@ -87,6 +88,7 @@
 | **数据** | `data-model.md`：公共模型 + 索引 | `modules/<m>/data-model.md`：模块内模型 |
 | **模块** | `modules.md`：注册表（一行摘要） | `modules/<m>/README.md`：详细说明 |
 | **代码地图** | `code-map.md`：总览 + 模块链接 | `modules/<m>/code-map.md`：模块内映射 |
+| **API** | `api-reference.md`：公共信息 + 模块索引 | `modules/<m>/api-reference.md`：模块接口详情 |
 | **数据库** | `database/`：公共表 + 模块链接 | `modules/<m>/database/`：模块内表 schema |
 
 ---
@@ -120,14 +122,54 @@
    - 标准模式：`docs/.init-temp/inventory.md`
    - 大型项目模式：`.init-docs/inventory.md`
 
-2. **基于代码事实**：只填充能从代码中确认的信息，不臆测不编造
-3. **不确定必澄清（批量模式）**：对准确性/完整性存在不确定的内容（业务流程、模块边界、设计决策、数据流向等），**必须先向用户澄清确认后再写入**，不得自行推测。但澄清方式采用**批量模式**：
+2. **字段说明必填**：`data-model.md` 中所有表结构详情表的「说明」列**禁止留空**。按以下优先级提取字段语义描述：
+
+   **字段说明提取优先级**（1 最高）：
+   1. 代码文档注释（属性/字段上方或行尾的注释）
+   2. 数据注解/装饰器中的说明参数
+   3. 迁移文件中的列注释
+   4. 字段名语义推断（T2 级别）
+   5. 无法确定时标注 `<!-- TODO[p2,business-context,user]: 请补充字段说明 -->`
+
+   **各技术栈注释提取来源矩阵**：
+
+   | 技术栈 | 文档注释 | 数据注解/装饰器 | 迁移文件注释 |
+   |--------|---------|---------------|-------------|
+   | C# / .NET | `/// <summary>` XML 文档注释 | `[Comment("...")]`（EF Core）、`[Description("...")]` | `.HasComment("...")`（Fluent API） |
+   | Java / Spring | `/** */` JavaDoc | `@Comment("...")`（Hibernate 6+）、`@Column(columnDefinition="COMMENT '...'")`、`columnDefinition` | Flyway/Liquibase 迁移中的 `COMMENT ON COLUMN` |
+   | Python / Django | `#` 行注释、`"""` 文档字符串 | `help_text=`（Django Field）、`comment=`（SQLAlchemy Column）、`doc=`（Pydantic Field） | 迁移文件中的 `comment` 参数 |
+   | Go | `//` 行注释 | `gorm:"comment:..."` tag、`ent.Field().Comment("...")` | migrate SQL 中的 `COMMENT` |
+   | Node.js / TS | `/** */` JSDoc | `{ comment: "..." }`（TypeORM @Column）、`/// @description`（Prisma schema） | Knex `.comment("...")`、Prisma `/// 注释` |
+   | Ruby / Rails | `#` 行注释 | — | `t.column ... comment: "..."`（迁移文件） |
+   | PHP / Laravel | `/** */` PHPDoc | — | `$table->string('name')->comment("...")`（迁移文件） |
+   | Rust | `///` 文档注释 | `#[sea_orm(comment = "...")]`、diesel schema 注释 | `COMMENT ON COLUMN` SQL |
+
+   **字段名推断规则**（优先级 4，T2 级别）：
+
+   | 字段名模式 | 推断说明 |
+   |-----------|---------|
+   | `id` / `*_id` | 主键 / 外键关联 |
+   | `created_at` / `create_time` / `gmt_create` | 创建时间 |
+   | `updated_at` / `update_time` / `gmt_modified` | 更新时间 |
+   | `deleted_at` / `is_deleted` / `is_active` | 软删除标记 / 启用状态 |
+   | `name` / `title` / `label` | 名称 / 标题 |
+   | `status` / `state` | 状态 |
+   | `type` / `kind` / `category` | 类型 / 分类 |
+   | `sort` / `order` / `seq` / `position` | 排序号 |
+   | `remark` / `memo` / `note` / `description` | 备注 / 描述 |
+   | `version` / `revision` | 乐观锁版本号 |
+   | `tenant_id` / `org_id` | 租户/组织标识 |
+
+   > **三级事实分类对应**：优先级 1-3 的来源为 T1（直接提取），优先级 4 为 T2（高置信推断），优先级 5 为待确认标记。
+
+3. **基于代码事实**：只填充能从代码中确认的信息，不臆测不编造
+4. **不确定必澄清（批量模式）**：对准确性/完整性存在不确定的内容（业务流程、模块边界、设计决策、数据流向等），**必须先向用户澄清确认后再写入**，不得自行推测。但澄清方式采用**批量模式**：
    - 所有子代理完成后，主 agent 将不确定项按类别分组（模块边界类、业务流程类、数据模型类、配置类等），**一次性**呈现给用户
    - 每组以编号列表呈现，每个不确定项附带「最佳猜测」和置信度（高/中/低），用户可直接确认猜测或纠正
    - 大型项目模式下，不确定项集中在检查点 ③（Phase 2C 后）统一澄清
    - **禁止在填充过程中逐条打断用户** — 先收集，后批量
-4. **保留占位符**：无法推断且用户暂未确认的部分使用 `<!-- TODO: 请补充 xxx -->` 标记
-5. **更新元数据**：所有文档的 `last_updated` 设为生成当天
+5. **保留占位符**：无法推断且用户暂未确认的部分使用 `<!-- TODO: 请补充 xxx -->` 标记
+6. **更新元数据**：所有文档的 `last_updated` 设为生成当天
 
 ### 三级事实分类（Three-Tier Fact Classification）
 
@@ -524,6 +566,7 @@ Phase 1 骨架生成时，根据项目类型决定哪些模板实例化。以下
 | `modules.md` | 始终生成 | Layer 1 |
 | `code-map.md` | 始终生成 | Layer 1 |
 | `modules/<name>/*` | 每个识别到的模块 | Layer 2 |
+| `modules/<name>/api-reference.md` | 模块有 API 接口（控制器/路由） | Layer 2 |
 | `core-flow.md` | 始终生成 | Layer 3 |
 | `config.md` | 始终生成 | Layer 3 |
 | `data-model.md` | 项目有数据库或 ORM | Layer 3 |

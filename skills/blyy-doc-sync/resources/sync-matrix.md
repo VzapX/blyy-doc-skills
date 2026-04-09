@@ -27,8 +27,9 @@
 | 发现新的运维故障模式 | `docs/runbook.md` | 新增事故剧本 |
 | 发布新版本 | `CHANGELOG.md` | 新增版本条目 |
 | 部署流程变化 | `docs/deployment.md` | 更新部署步骤 |
-| API 接口变更 | `docs/api-reference.md` | 更新接口列表 |
-| API 认证/限流策略变更 | `docs/api-reference.md` | 更新认证与限流章节 |
+| API 接口变更（模块内） | `docs/modules/<name>/api-reference.md` + `docs/api-reference.md`（索引） | 更新模块接口列表 + 全局索引接口数 |
+| API 认证/限流策略变更（全局） | `docs/api-reference.md` | 更新认证与限流章节 |
+| API 限流策略变更（模块级） | `docs/modules/<name>/api-reference.md` | 更新模块限流规则 |
 | 公共数据库表新增/修改 | `docs/data-model.md` + `docs/database/` | 更新公共模型 + 同步 schema 文件 |
 | 模块数据库表新增/修改 | `docs/modules/<name>/data-model.md` + `docs/modules/<name>/database/` | 更新模块模型 + 同步 schema 文件 |
 | 缓存 key/结构变更 | `docs/data-model.md` | 更新非关系型数据模型章节 |

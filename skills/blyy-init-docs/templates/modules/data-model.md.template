@@ -42,6 +42,15 @@ PAIRED-WITH: database/（schema 文件）, code-map.md（实体类位置）
 ## 表结构详情
 
 > 每张表一段。字段必须穷举（不要省略）。
+>
+> **「说明」列填充规则**（按优先级依次尝试）：
+> 1. **代码注释**：属性/字段上方的文档注释（C# `/// <summary>`、Java `/** */`、Python `""" """`/`#`、Go `//`、TS `/** */`）
+> 2. **数据注解/装饰器**：`[Comment("...")]`（EF Core）、`@Comment`（Hibernate）、`comment=`（SQLAlchemy/TypeORM）、`help_text=`（Django）
+> 3. **迁移文件**：`.HasComment("...")`、`COMMENT '...'`、列注释 SQL
+> 4. **字段名推断**（T2 级别）：如 `created_at` → "创建时间"、`is_deleted` → "软删除标记"
+> 5. **无法确定**：填写 `<!-- TODO[p2,business-context,user]: 请补充字段说明 -->`
+>
+> **AI-RULE：禁止将「说明」列留空。必须按上述优先级逐一尝试，至少使用字段名推断。**
 
 ### <!-- Phase 2: 表名 -->
 
@@ -50,7 +59,7 @@ PAIRED-WITH: database/（schema 文件）, code-map.md（实体类位置）
 
 | 字段 | 类型 | 约束 | 说明 |
 |------|------|------|------|
-| <!-- Phase 2 --> | | | |
+| <!-- Phase 2 --> | | | <!-- 按上方优先级提取 --> |
 
 ## ER 关系图
 

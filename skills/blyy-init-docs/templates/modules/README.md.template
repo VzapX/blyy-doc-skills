@@ -95,5 +95,6 @@ PAIRED-WITH: flow.md（本模块流程）, code-map.md（文件映射）, data-m
 
 - [业务流程](flow.md)
 - [数据模型](data-model.md)
+- [API 参考](api-reference.md)
 - [代码地图](code-map.md)
 - [数据库定义](database/)

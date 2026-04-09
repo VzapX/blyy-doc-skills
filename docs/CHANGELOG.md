@@ -2,6 +2,24 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 格式。
 
+## [0.3.1] — 2026-04-09
+
+### 修复
+
+- **data-model.md「说明」列留空问题**：补充字段说明提取规则，子代理现在必须按优先级从代码注释、数据注解、迁移文件注释中提取字段语义。各技术栈注释来源矩阵（C# `/// <summary>`、Java `/** */`、Python `help_text=`、TypeORM `comment:`、EF Core `[Comment]` 等）已写入 `doc-guide.md` 和 `data-model.md.template`，禁止将说明列留空。
+
+### 新增
+
+- **api-reference.md 模块级拆分**：参照 data-model.md 的双层设计，新增 `templates/modules/api-reference.md.template`（模块接口详情）。全局 `api-reference.md` 重构为索引型（Base URL、认证方式、错误码格式 + 模块接口数汇总表），各模块接口详情迁移到 `modules/<m>/api-reference.md`。同步更新文档分工矩阵、条件化生成清单（Layer 2 按需生成）、sync-matrix.md。
+- **标准模式断点续跑**：在 Phase 0 前新增「断点续跑检测」步骤，检测 `docs/.init-temp/progress.md`（标准模式）或 `.init-docs/master-task.md`（大型模式），向用户展示上次进度并询问继续/重新开始。每个 Layer 交付点更新 `progress.md`，T3 澄清结果持久化到 `docs/.init-temp/clarifications.md`，避免跨会话重复提问。
+
+### 改进
+
+- 模块级 README.md 的「相关文档」增加 api-reference.md 链接
+- `large-project-mode.md` Phase 2C 子代理执行步骤补充字段说明提取
+
+---
+
 ## [0.3.0] — 2026-04-08
 
 ### 重构 — SKILL.md 渐进式加载架构
@@ -80,6 +98,7 @@
 - 多 AI 工具兼容（Gemini / Codex / Cursor / Claude Code）
 - Windows / Linux / macOS 安装脚本
 
+[0.3.1]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.3.1
 [0.3.0]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.3.0
 [0.2.0]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.2.0
 [0.1.1]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.1.1

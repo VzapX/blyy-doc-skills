@@ -1,0 +1,85 @@
+---
+last_updated: {{DATE}}
+last_synced_commit: init
+audience: ai-and-human
+read_priority: 3
+max_lines: 300
+parent_doc: README.md
+code_anchors:
+  - <!-- Phase 2 自动填充：本模块控制器/路由目录路径 -->
+applicable_project_types:
+  - backend-service
+  - microservice
+  - fullstack
+change_triggers:
+  - 本模块 API 接口变更
+  - 本模块认证/鉴权变更
+---
+
+# {{MODULE_NAME}} — API 参考
+
+<!-- AI-READ-HINT
+PURPOSE: 本模块对外暴露的 HTTP/RPC 接口详情。全局公共信息（Base URL、认证方式、错误码格式）在 ../../api-reference.md。
+READ-WHEN: 修改本模块的控制器/路由/Handler、调试本模块接口、新增本模块接口。
+SKIP-WHEN: 不涉及本模块的接口变更。
+PAIRED-WITH: ../../api-reference.md（全局信息）, README.md（模块概述）, code-map.md（实现位置）
+-->
+
+> 返回 [模块概述](README.md) | [全局 API 参考](../../api-reference.md)
+
+## 接口列表
+
+> **AI-RULE：必须穷举本模块所有 HTTP/RPC 接口。每行必须有「代码位置」列。禁止使用「代表性示例」+ 省略号。**
+
+<!-- Phase 2 自动填充：扫描本模块控制器/路由文件生成 -->
+
+| 方法 | 路径 | 说明 | 认证 | 代码位置 |
+|------|------|------|------|---------|
+| <!-- Phase 2 --> | | | | `<!-- file:line -->` |
+
+## 请求/响应示例
+
+> 仅列出本模块中非标准或复杂的接口示例。简单 CRUD 接口无需列出。
+> 若本模块所有接口均为标准 CRUD，删除本章节。
+
+<!-- Phase 2 自动填充：从控制器方法签名和 DTO 类提取 -->
+
+### <!-- Phase 2: 接口名 -->
+
+**请求：**
+
+```json
+// AI-RULE: 从 DTO/Request 类提取字段结构，不要编造示例数据
+```
+
+**响应：**
+
+```json
+// AI-RULE: 从 DTO/Response 类提取字段结构，不要编造示例数据
+```
+
+---
+
+## 高级章节（按检测到的特性条件包含）
+
+> **AI-RULE：以下子章节为可选模块，仅当本模块代码中检测到对应特性时才保留，否则整段删除。**
+
+<!-- INCLUDE-IF: 本模块存在独立的限流配置（非全局限流） -->
+
+### 本模块限流规则
+
+<!-- Phase 2 自动填充：从本模块的限流配置/装饰器提取 -->
+
+| 接口 | 限流策略 | 窗口 | 上限 | 配置位置 |
+|------|---------|------|------|---------|
+| <!-- Phase 2 --> | | | | `<!-- file:line -->` |
+
+<!-- INCLUDE-IF: 本模块存在 Webhook / 事件回调代码 -->
+
+### Webhook / 事件回调
+
+<!-- Phase 2 自动填充：从本模块的 Webhook 注册接口/事件发布代码提取 -->
+
+| 事件 | 触发条件 | Payload Schema | 代码位置 |
+|------|---------|---------------|---------|
+| <!-- Phase 2 --> | | `<!-- file:line -->` | `<!-- file:line -->` |
