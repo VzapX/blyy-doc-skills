@@ -2,6 +2,31 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 格式。
 
+## [0.3.2] — 2026-04-10
+
+### 新增
+
+- **模块复杂度分级体系**：Phase 2 模块识别后自动对每个模块评分，按得分决定文档形态，解决大型项目（40+ 模块）生成 280 个 md 文件过重的问题。
+  - **Core**（≥3 分）：完整目录 `modules/<m>/`，6 个子文件，适合核心复杂模块
+  - **Standard**（1-2 分）：单文件 `modules/<m>.md`，所有章节合并，适合中等复杂度模块
+  - **Lightweight**（0 分）：无独立文件，内联到 `modules.md`，适合工具/简单 CRUD 模块
+  - 评分维度：模块源文件数（>15: +2 / 5-15: +1）、有数据库实体（+1）、有 API 端点（+1）、被 ≥3 模块依赖（+1）
+  - 预计减少文档数约 70-80%（以 43 模块为例：278 → ~65）
+- **新增 `templates/modules-single.md.template`**：Standard 级别模块专用单文件模板，合并概述、职责边界、对外接口、依赖关系、代码地图、业务流程、数据模型、API 参考为一个文档
+- **doc-sync 防线 1 Step 2.5 — 模块级别升级信号检测**：每次代码变更涉及模块内文件增删时，对该模块快速重评分，若触达升级阈值则提示用户确认并执行文档形态转换（Lightweight→Standard→Core）
+- **doc-sync 防线 3 Step 2.5 — 模块分级全量复评**：定期审计时对所有模块重新评分，与基线对比，批量输出升级/降级建议（含降级方向，防止 Core 模块缩水后文档虚重）
+
+### 改进
+
+- **AGENTS.md 模板加入「Task Entry Protocol」章节**：明确要求 AI 工具做任何任务前必须先读 `docs/ARCHITECTURE.md`，禁止直接 Grep/Glob 搜索作为任务第一步，解决 AI 上手项目时绕过文档索引直接搜代码的问题
+- **`modules.md.template`**：模块注册表按 Core/Standard/Lightweight 三组展示，Lightweight 模块以展开段落内联（含职责、代码位置、关键类、依赖方）
+- **`doc-maintenance.md.template`**：基线快照增加 `module_tiers` 字段记录各模块级别；历史趋势表增加分级分布列（C/S/L）
+- **`ARCHITECTURE.md.template` 任务路由表**：增加模块路径约定说明，适配三种文档形态的不同路径
+- **`sync-matrix.md`**：新增模块级别升级/降级的同步映射规则
+- **`doc-guide.md`**：新增模块复杂度评分规则、三级文档形态说明、级别升降规则；更新全局与模块文档分工表
+
+---
+
 ## [0.3.1] — 2026-04-09
 
 ### 修复
@@ -98,6 +123,7 @@
 - 多 AI 工具兼容（Gemini / Codex / Cursor / Claude Code）
 - Windows / Linux / macOS 安装脚本
 
+[0.3.2]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.3.2
 [0.3.1]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.3.1
 [0.3.0]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.3.0
 [0.2.0]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.2.0

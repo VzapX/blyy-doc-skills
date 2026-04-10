@@ -39,12 +39,14 @@ PAIRED-WITH: modules.md（模块清单）, code-map.md（代码导航）, glossa
 
 > AI 工具按任务类型选读最少必要文档，避免上下文窗口被无用信息吃满。
 
+> **模块文档路径约定**：Core 模块 → `modules/<m>/README.md`（及子文件）；Standard 模块 → `modules/<m>.md`（单文件含全部章节）；Lightweight 模块 → 查 `modules.md` 中的内联段落。下表中「模块文档」泛指对应级别的入口。
+
 | 任务类型 | 必读 | 按需读 | 不要读 |
 |---------|------|--------|--------|
-| 修复某模块 bug | `modules/<m>/README.md` → `flow.md` → `code-map.md` | `modules/<m>/data-model.md` | 其他模块、`core-flow.md` |
-| 新增功能 / API | `modules/<m>/code-map.md` + `api-reference.md`(若存在) | `data-model.md`(全局) | `runbook.md`、`deployment.md` |
+| 修复某模块 bug | 该模块文档（Core: `README.md` → `flow.md` → `code-map.md`；Standard: 对应章节） | 模块 `data-model.md` 章节 | 其他模块、`core-flow.md` |
+| 新增功能 / API | 该模块文档中的代码地图 + API 参考章节 | `data-model.md`(全局) | `runbook.md`、`deployment.md` |
 | 修改配置项 | `config.md` | 调用方模块文档 | 模块内业务流程文档 |
-| 排查线上故障 | `runbook.md` → `monitoring.md` | 相关模块 `flow.md` | `features.md`、`DECISIONS.md` |
+| 排查线上故障 | `runbook.md` → `monitoring.md` | 相关模块流程章节 | `features.md`、`DECISIONS.md` |
 | 新增/修改数据库表 | `data-model.md`(模块或全局) → `database/` | `DECISIONS.md` | `runbook.md`、`monitoring.md` |
 | 理解整体架构 | 本文档 → `modules.md` | `core-flow.md`、`DECISIONS.md` | 模块内部文档 |
 | 用业务语言找代码 | `glossary.md` → 对应模块文档 | — | 全局参考型文档 |

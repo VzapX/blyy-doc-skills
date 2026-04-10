@@ -88,6 +88,10 @@ baseline:
     config_files: <!-- Phase 3 -->
     test_files: <!-- Phase 3 -->
     docs_total: <!-- Phase 3 -->
+  module_tiers:
+    core: <!-- Phase 3: [模块名列表] -->
+    standard: <!-- Phase 3: [模块名列表] -->
+    lightweight: <!-- Phase 3: [模块名列表] -->
   markers:
     todo_total: <!-- Phase 3 -->
     unverified_total: <!-- Phase 3 -->
@@ -102,6 +106,6 @@ baseline:
 
 > doc-sync 防线 3 每次审计后追加一行，用于发现文档质量退化。
 
-| 日期 | git commit | 模块 | 实体 | TODO | UNVERIFIED | 备注 |
-|------|-----------|------|------|------|-----------|------|
-| <!-- Phase 3 --> | | | | | | 初始化基线 |
+| 日期 | git commit | 模块 | 分级(C/S/L) | 实体 | TODO | UNVERIFIED | 备注 |
+|------|-----------|------|-------------|------|------|-----------|------|
+| <!-- Phase 3 --> | | | <!-- c/s/l --> | | | | 初始化基线 |

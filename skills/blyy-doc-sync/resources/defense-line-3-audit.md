@@ -45,6 +45,42 @@
 | 配置 (`config.md`) | N | M | ±X |
 | 服务 (`code-map.md`) | N | M | ±X |
 
+## Step 2.5 — 模块分级全量复评
+
+> 对所有模块重新执行复杂度评分，与 `doc-maintenance.md` 基线中记录的 `module_tiers` 对比，发现级别漂移。
+
+**执行步骤：**
+
+1. **读取当前分级基线**：从 `docs/doc-maintenance.md` 基线快照的 `module_tiers` 字段中提取每个模块的级别
+2. **全量重评分**：对每个模块执行复杂度评分（规则见 `blyy-init-docs/resources/doc-guide.md` 模块复杂度评分规则）：
+   - 统计模块源文件数
+   - 检查是否有 Entity/Model 文件
+   - 检查是否有 Controller/Handler 文件
+   - 统计反向依赖数
+3. **比对输出**：
+
+```
+📊 模块分级复评（共 {N} 个模块）：
+
+⬆️ 升级建议:
+  - Payments: Standard(2分) → Core(4分) — 文件数 8→22, 新增 5 张表, 新增 3 个 Controller
+  - Notifications: Lightweight(0分) → Standard(2分) — 文件数 2→7, 新增 1 个 Handler
+
+⬇️ 降级建议:
+  - LegacyImport: Standard(2分) → Lightweight(0分) — 文件数 12→3（大部分已删除）
+
+✅ 级别不变: {M} 个模块
+```
+
+4. **用户确认**：将升降级建议一次性呈现，用户可逐个确认或批量操作
+5. **执行变更**：
+   - 升级：按防线 1 Step 2.5 的升级执行步骤操作
+   - 降级：
+     - **Core → Standard**：将 `modules/<m>/` 目录下各子文件内容合并为 `modules/<m>.md` 单文件；删除原目录；更新 `modules.md` 注册表分组和链接
+     - **Standard → Lightweight**：将 `modules/<m>.md` 中的关键信息提取到 `modules.md` 对应的 Lightweight 内联段落；删除原单文件；更新 `modules.md`
+     - **Core → Lightweight**：先 Core → Standard，再 Standard → Lightweight
+6. **更新基线**：将新的分级结果写入 `doc-maintenance.md` 基线快照的 `module_tiers` 字段
+
 ## Step 3 — 详细检查
 
 1. 检查 `code-map.md` 路径是否全部有效
@@ -99,10 +135,12 @@
 - TODO 总数: {X1} → {X2} ({diff})  ← 持续上升 = 文档腐烂
 - UNVERIFIED 总数: {Y1} → {Y2} ({diff})
 - 文档覆盖率: {C1}% → {C2}%
+- 模块分级: Core {c1}→{c2}, Standard {s1}→{s2}, Lightweight {l1}→{l2}
 
 🚨 腐烂信号:
 - {如果 TODO 持续上升 3 次以上 → 列出问题文档}
 - {如果某模块覆盖率连续下降 → 列出该模块}
+- {如果模块分级变更未执行（Step 2.5 建议了升降级但用户未确认） → 列出滞后模块}
 ```
 
 输出维护建议：
@@ -119,6 +157,6 @@
 
 将本次扫描结果**追加**到 `docs/doc-maintenance.md`：
 
-1. 更新「基线快照」YAML 块为本次结果（覆盖旧值），同时更新 `last_synced_commit` 和 `snapshot_date`
-2. 在「历史快照趋势」表格末尾**追加一行**（不删除历史行），便于长期观察腐烂曲线
+1. 更新「基线快照」YAML 块为本次结果（覆盖旧值），同时更新 `last_synced_commit`、`snapshot_date` 和 `module_tiers`
+2. 在「历史快照趋势」表格末尾**追加一行**（不删除历史行），便于长期观察腐烂曲线（含分级分布列）
 3. 若历史行超过 12 条，归档最早的几行到 `doc-maintenance.md` 末尾的「归档」段落，保持表格简洁

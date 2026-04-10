@@ -13,8 +13,10 @@
 | 删除配置项 | `docs/config.md` | 移除对应行 |
 | 组件关系变化 | `docs/ARCHITECTURE.md` | 更新架构图 |
 | 数据流变化 | `docs/ARCHITECTURE.md` | 更新数据流图 |
-| 新增模块 | `docs/modules.md` + `docs/modules/<name>/` | 注册表加一行 + 创建模块级文档 |
-| 删除模块 | `docs/modules.md` + `docs/modules/<name>/` | 移除注册表行 + 归档模块级文档 |
+| 新增模块 | `docs/modules.md` + 按评分创建对应文档 | 评分→注册表加一行 + 按级别创建文档（Core=目录/Standard=单文件/Lightweight=内联） |
+| 删除模块 | `docs/modules.md` + 对应模块文档 | 移除注册表行 + 归档模块文档（无论何种级别） |
+| 模块级别升级 | `docs/modules.md` + 模块文档 + `docs/doc-maintenance.md` | 转换文档形态（单文件→目录/内联→单文件）+ 更新注册表分组 + 更新基线 |
+| 模块级别降级 | `docs/modules.md` + 模块文档 + `docs/doc-maintenance.md` | 合并文档形态（目录→单文件/单文件→内联）+ 更新注册表分组 + 更新基线 |
 | 模块职责变更 | `docs/modules.md`（或模块级 `README.md`） | 更新职责描述 |
 | 跨模块业务流程变化 | `docs/core-flow.md` | 更新流程图和说明 |
 | 模块内业务流程变化 | `docs/modules/<name>/flow.md` | 更新模块内流程 |

@@ -187,6 +187,7 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 6. **根目录已有文档整合**：对于项目中已存在的根目录文档（`README.md`、`AGENTS.md`/`CLAUDE.md` 等、`CHANGELOG.md`）
    - 阅读已有文件，提取其中有价值的内容（项目描述、构建命令、配置说明、变更记录等）
    - 按模板结构重新组织这些内容，生成符合规范的新版本
+   - **强制检查**：生成的 `AGENTS.md`（或对应 AI 上下文文件）必须包含「Task Entry Protocol」章节；若整合已有内容后该章节丢失，必须从模板补充
    - 将新旧内容的差异摘要呈现给用户，说明哪些内容被保留、哪些被重组、哪些是新增
    - 用户确认后，覆盖原文件
    - 若 Phase 0.1 中工具 `/init` 生成了上下文文件，将其内容整合进对应文档
@@ -262,7 +263,61 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 
 5. **按模块拆分清单** — 根据模块识别结果，将清单按模块分组，形成每个模块的子清单
 
-6. **初始化进度文件**（标准模式）— 在 `docs/.init-temp/progress.md` 创建进度追踪文件：
+6. **模块复杂度评分与分级** — 根据拆分后的子清单，对每个模块自动评分并确定文档形态：
+
+   **评分规则**（全部基于确定性清单的 shell 命令结果，不依赖 AI 判断）：
+
+   | 信号 | 检测方式 | 得分 |
+   |------|---------|------|
+   | 模块源文件数 > 15 | `fd --type f <module_dir> \| wc -l` | +2 |
+   | 模块源文件数 5-15 | 同上 | +1 |
+   | 模块源文件数 < 5 | 同上 | 0 |
+   | 有数据库实体/模型文件 | 清单中该模块含 Entity/Model 文件 | +1 |
+   | 有 API 端点（Controller/Handler） | 清单中该模块含 Controller/Handler 文件 | +1 |
+   | 被 ≥ 3 个其他模块依赖 | 反向引用扫描（`rg "import.*<module>" --type-add ...`） | +1 |
+
+   **分级结果**：
+
+   | 总分 | 级别 | 文档形态 | 说明 |
+   |------|------|---------|------|
+   | ≥ 3 | **Core** | 完整目录 `modules/<m>/`（6 个子文件） | 当前模板不变 |
+   | 1-2 | **Standard** | 单文件 `modules/<m>.md` | 使用 `modules-single.md.template` |
+   | 0 | **Lightweight** | 无独立文件，内联到 `modules.md` | 在模块注册表中展开为详细段落 |
+
+   **执行步骤**：
+
+   a. 对每个模块执行评分命令，计算总分
+   b. 向用户展示分级结果并确认：
+      ```
+      📊 模块复杂度分级（共 {N} 个模块）：
+      
+      Core（完整文档目录）— {n1} 个：
+        - Orders (5分): 22文件, 8表, 12端点, 被5个模块依赖
+        - Users (4分): 18文件, 5表, 8端点, 被7个模块依赖
+        ...
+      
+      Standard（单文件文档）— {n2} 个：
+        - Notifications (2分): 8文件, 2表
+        - Logging (1分): 6文件
+        ...
+      
+      Lightweight（内联到 modules.md）— {n3} 个：
+        - StringUtils (0分): 2文件
+        - Constants (0分): 1文件
+        ...
+      
+      预计文档数: {Core×6 + Standard×1 + 全局} 个（vs 无分级: {N×6 + 全局} 个）
+      
+      确认分级？(Y | 调整某模块级别)
+      ```
+   c. 用户确认后，将分级结果持久化：
+      - 标准模式：`docs/.init-temp/module-tiers.md`
+      - 大型项目模式：`.init-docs/module-tiers.md`
+   d. Phase 1 骨架生成时，按分级结果决定每个模块的文档结构
+
+   > **分级结果影响 Phase 1 骨架**：Core 模块创建完整 `modules/<m>/` 目录；Standard 模块创建单个 `modules/<m>.md` 文件；Lightweight 模块不创建独立文件。
+
+7. **初始化进度文件**（标准模式）— 在 `docs/.init-temp/progress.md` 创建进度追踪文件：
 
    ```yaml
    ---
@@ -273,6 +328,10 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
    current_phase: phase2-analysis
    current_layer: 0
    modules: [{{模块列表}}]
+   module_tiers:
+     core: [{{Core 模块列表}}]
+     standard: [{{Standard 模块列表}}]
+     lightweight: [{{Lightweight 模块列表}}]
    completed_modules: []
    t3_clarified: false
    ---
@@ -406,9 +465,9 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 | 文档 | 填充来源 | 说明 |
 |------|---------|------|
 | `README.md` | 项目名称、技术栈、构建命令 | 项目第一印象 |
-| `AGENTS.md` 等上下文文件 | 项目结构、构建/运行/测试命令、代码规范 | AI 工具上下文 |
+| `AGENTS.md` 等上下文文件 | 项目结构、构建/运行/测试命令、代码规范；**必须包含「Task Entry Protocol」章节**（指示 AI 先读 `docs/ARCHITECTURE.md`） | AI 工具上下文 |
 | `ARCHITECTURE.md` | 模块识别结果 → 系统总览 + 文档索引 | 文档入口 |
-| `modules.md` | 两级模块识别结果 → 模块注册表 | 模块概览 |
+| `modules.md` | 两级模块识别结果 → 模块注册表（含 Lightweight 模块的内联详情） | 模块概览 |
 | `code-map.md` | 项目总览目录树 + 各模块链接 | 代码导航 |
 
 > **Layer 1 交付点**：向用户呈现 5 个核心文档，确认无误。此时 AI 工具已有基本上下文记忆，用户可立即开始使用。
@@ -416,7 +475,11 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 >
 > **进度更新**：更新 `progress.md` — `current_layer: 1`，标记 `[x] Layer 1 核心文档`。
 
-**Layer 2 — 模块级文档（按模块逐个交付，用户可选顺序）：**
+**Layer 2 — 模块级文档（按模块分级交付）：**
+
+按模块复杂度分级（步骤 6 结果）采用不同的文档形态：
+
+**Core 模块**（完整目录）：
 
 | 文档 | 填充来源 |
 |------|---------|
@@ -427,12 +490,22 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 | 模块级 `api-reference.md` | 子代理产出 → 模块接口详情（仅有 API 的模块） |
 | 模块级 `database/` | 子代理产出 → 模块内表 schema |
 
-**交付策略：**
-- 若用户指定了优先模块 → 按指定顺序逐个生成
-- 若未指定 → 按模块代码量从大到小排序（大模块通常更重要）
-- 每个模块完成后向用户汇报，用户可随时暂停
+**Standard 模块**（单文件 `modules/<m>.md`）：
 
-> **Layer 2 交付点**：每完成一个模块的全套文档即交付。`"✅ [订单模块] 文档完成。继续下一个模块 [用户模块]？(Y | 跳到 Layer 3 | 暂停)"`
+使用 `templates/modules-single.md.template`，将上述所有内容合并为一个文档的不同章节。子代理产出与 Core 模块相同，但主 agent 整合时写入单文件而非目录。
+
+**Lightweight 模块**（内联到 `modules.md`）：
+
+不生成独立文件。子代理产出中提取关键信息（职责、代码位置、关键类），以展开段落形式写入 `modules.md` 的模块注册表中。
+
+**交付策略：**
+- Core 模块优先交付（通常是核心业务模块，最需要完整文档）
+- 若用户指定了优先模块 → 按指定顺序逐个生成
+- 若未指定 → 先 Core（按代码量从大到小），再 Standard（批量交付），最后 Lightweight（在 Layer 1 的 `modules.md` 中已完成）
+- 每个 Core 模块完成后单独向用户汇报；Standard 模块可批量汇报
+- 用户可随时暂停
+
+> **Layer 2 交付点**：Core 模块每完成一个即交付；Standard 模块可批量交付。`"✅ [订单模块](Core) 文档完成（6 个文件）。继续下一个？(Y | 跳到 Layer 3 | 暂停)"`
 >
 > **进度更新**：每完成一个模块，更新 `progress.md` — 将该模块加入 `completed_modules`，更新 `current_layer: 2`。
 
