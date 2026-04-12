@@ -1,0 +1,59 @@
+# MANIFEST.yaml — blyy-ai-docs 状态契约
+#
+# 由 Mode A 初始化，由 Mode B/C 更新。AI 工具可读，但禁止手动编辑——
+# 任何手编都会导致 sha 校验失败。
+#
+# 字段说明：
+# - last_synced_commit: 上次成功同步后的 git HEAD（短或长 sha 均可）
+# - last_audited:       上次跑 Mode C 全量审计的日期
+# - skill_version:      生成本 manifest 的 blyy-ai-docs 版本
+# - detected_stack:     Phase A0 探测到的技术栈枚举
+# - modules:            模块注册表（name + code_root），Mode B Phase B3 基于此判断新增/失效
+# - anchors:            所有文档引用的代码锚点的 sha 快照，自失效检测的真相源
+# - history:            事件追加日志，便于观察腐烂趋势
+
+ai_docs_version: 1
+skill_version: blyy-ai-docs v0.1.0
+last_synced_commit: {{INIT_COMMIT_SHA}}
+last_audited: {{DATE}}
+
+detected_stack:
+  primary: {{STACK_PRIMARY}}      # 例: csharp+aspnetcore / python+fastapi / typescript+nest
+  variants: []                    # 例: [efcore, dapper]
+  package_manager: {{PKG_MGR}}    # 例: nuget / pip / pnpm / cargo
+
+modules:
+  # 由 Phase A1 用户确认后写入
+  - name: {{MODULE_NAME}}
+    code_root: {{MODULE_PATH}}    # 例: src/Modules/Orders/
+    business_summary: {{ONE_LINE}}  # 1 句业务定位（与 modules.md 一致）
+
+anchors:
+  # 由 Phase A5 写入。每个被任何文档引用的文件都有一条记录。
+  # 注意：path 是相对项目根的路径；symbols 仅当文档用了 #SymbolName 语法时才填充。
+  - path: {{RELATIVE_FILE_PATH}}
+    sha256: {{GIT_HASH_OBJECT_OUTPUT}}     # git hash-object <file>
+    docs:                                  # 哪些 doc 引用了这个 anchor
+      - modules.md
+      - flows.md
+    symbols:                               # 可选：仅当 [file#Symbol] 锚点存在时
+      {{SymbolName}}:
+        line: {{LINE_START}}                 # 起始行号（仅供提示，sha 不依赖行号）
+        body_sha256: {{GIT_HASH_OBJECT_BODY}} # 符号体的 git hash-object 结果
+        signature: {{NORMALIZED_SIG}}         # 归一化签名（去除注释、空白）
+
+code_queries_registered:
+  # Phase A2 写入，列出 code-queries.md 中实际启用的 recipe id
+  - R-ENT-01-cs
+  - R-EP-01-cs
+  - R-MOD-01
+
+history:
+  # 追加日志。每个 event 一行，永不删除（用户可手动清理超长历史）。
+  # event 枚举: init / sync / audit
+  - date: {{DATE}}
+    event: init
+    commit: {{INIT_COMMIT_SHA}}
+    anchor_count: {{N}}
+    module_count: {{M}}
+    notes: 首次初始化

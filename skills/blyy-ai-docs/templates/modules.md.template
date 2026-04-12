@@ -1,0 +1,61 @@
+---
+ai_docs_version: 1
+last_synced_commit: init
+audience: ai-only
+max_lines: 300
+code_anchors: []
+---
+
+# Modules — 模块注册表
+
+> **本文件不是文件清单**。它只回答："这个项目分成哪几个业务模块？每个模块对外承诺什么？入口在哪里？"
+>
+> **禁止**在本文件里列出"该模块的所有实体 / Controller / Service"——那是 `code-queries.md` 的活儿。需要枚举时请运行对应 recipe。
+
+## 如何阅读
+
+- 每行代表一个**业务模块**（不是技术分层）。一个订单业务横跨 Controller / Service / Repository / Entity 也算一个模块
+- `code_root` 是该模块的代码根目录——递归扫描这个路径就能拿到模块所有文件
+- `business_summary` 是 1-2 句"对外承诺什么"，从入口符号反推
+- `entry_anchors` 是模块的入口符号锚点，AI 阅读模块时**先**读这些
+- `depends_on` 是该模块直接调用的其他模块（带 import / using 锚点证据）
+- 标 `[T2]` 的内容是强推断（已通过 Pre-Fill Review）；`[T3]` 已被禁止入正式文档（要么升 T2，要么 UNVERIFIED）
+
+---
+
+## Module Registry
+
+### {{MODULE_NAME}}
+
+- **code_root**: `{{MODULE_PATH}}`
+- **business_summary**: {{ONE_LINE_SUMMARY}} `[{{MODULE_ENTRY_ANCHOR}}]`
+- **entry_anchors**:
+  - `[{{MODULE_ENTRY_ANCHOR}}]` — {{ENTRY_PURPOSE}}
+- **depends_on**:
+  - `{{OTHER_MODULE}}` via `[{{IMPORT_ANCHOR}}]`
+- **owner_signals**: {{OWNER_HINT_OR_NA}}  <!-- 来自 CODEOWNERS / commit 高频作者；可空 -->
+
+> 重复以上 block 给每个模块。**条目数 = 模块数**，预期 ≤ 30。超过 30 个 → 提示用户疑似 monorepo，是否分批生成。
+
+---
+
+## Cross-Module Dependency Graph
+
+> 仅记录"模块 A → 模块 B"的有向边，每条边带至少一个 import / using 锚点。
+> **禁止**在此处列出函数级调用细节——那是流程图的活儿（见 flows.md）。
+
+| From | To | Evidence |
+|------|----|---------|
+| {{MODULE_A}} | {{MODULE_B}} | `[{{IMPORT_FILE_ANCHOR}}]` |
+
+---
+
+## What This File Does NOT Contain
+
+> 以下内容**不应**出现在本文件——若 AI 在维护时想写这些，**停下**：
+
+- 模块内的实体 / Controller / Service / DTO 清单 → 用 `code-queries.md` 的 `R-ENT-01-<stack>` / `R-EP-01-<stack>` / `R-SVC-01-<stack>`
+- 文件路径列表 → 用 `R-FILE-02 <module_root>`
+- 总数性陈述（"项目有 N 个模块"）→ 让 AI 数 Module Registry block 即可
+- 时间戳 / 维护人 → MANIFEST.history 已记录
+- 任何超过 20 行的表格 → 直接拒绝

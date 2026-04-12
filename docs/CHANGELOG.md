@@ -2,6 +2,56 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 格式。
 
+## [0.4.0] — 2026-04-12
+
+### 新增 — 第三个 Skill：`blyy-ai-docs`
+
+新增一个**纯 AI 用**的轻量索引技能，生成独立的 `ai-docs/` 目录，与 `blyy-init-docs` / `blyy-doc-sync` 维护的 `docs/` 并存且完全独立。
+
+**核心承诺**：
+
+1. **不重复代码事实**：实体清单 / 端点表 / 文件清单一律改写为 `code-queries.md` 中的查询配方（按栈持久化的 `fd` / `rg` 命令），由 AI 按需执行而非持久化结果
+2. **多年不腐烂**：基于 `MANIFEST.yaml` + 4-tier 自失效算法（文件存在性 → 文件 sha256 → 符号 body sha256 → 范围兜底）精确定位过期段落，只重写必要内容
+3. **不幻觉**：每条非 boilerplate 内容必须带 `[file#Symbol]` 锚点；无法锚定 → 强制 `<!-- UNVERIFIED -->` 包裹；禁止 > 20 行的列表型段落
+
+**三模式分派**（单 SKILL.md 根据 MANIFEST 状态自动选择）：
+
+- **Mode A — Init**：首次生成 `ai-docs/`（Phase A0 环境探测 → A1 模块识别 → A2 生成 code-queries.md → A3 子代理并行业务提取 → A4 Pre-Fill Review Gate → A5 写文档 + MANIFEST → A6 自检）
+- **Mode B — Sync**：`last_synced_commit ≠ HEAD` 时触发，跑 4-tier 失效检测，只对 STALE 段落整段重写、对 REVIEW 段落仅修正矛盾
+- **Mode C — Audit**：显式调用或距上次 audit > 90 天，执行全量锚点验证 + 抽样 query 比对 + 触发 Mode B 流程处理 STALE
+
+**产物文件结构**（7 个文件，扁平）：
+
+- `INDEX.md` — 任务路由表 + 新鲜度概览
+- `modules.md` — 模块注册表（name → code_root → 1-2 句业务定位 + 依赖图）
+- `glossary.md` — 业务术语 ↔ 代码符号映射
+- `flows.md` — 跨模块业务流程
+- `decisions.md` — 设计决策 + 不变式
+- `code-queries.md` — 按栈写入的 `fd` / `rg` 配方库（不含执行结果）
+- `MANIFEST.yaml` — 状态契约（`last_synced_commit` + anchors sha256 + symbols body_sha256 + history）
+
+**资源文件**（按需加载）：
+
+- `resources/tech-stack-matrix.md` — 8 大栈依赖文件探测 + 后端/前端锚点矩阵 + 模块根目录启发
+- `resources/query-recipes.md` — C# / Java / Python / Go / TS / Rust / Ruby / PHP 的 fd/rg 命令库（每条带 find/grep fallback）
+- `resources/anti-hallucination.md` — T1/T2/T3 分类 + 锚点强制规则 + 禁枚举铁律 + Pre-Fill Review Gate + 子代理通用指令
+- `resources/anchor-extraction.md` — 8 语言符号定位正则 + body 范围提取 + 归一化算法
+- `resources/self-invalidation.md` — 4-tier 完整算法伪代码 + 反向锚点索引 + 性能注解
+
+**默认行为**：
+
+- `ai-docs/` 自动追加到 `.gitignore`——视为本地 AI 索引缓存，每个开发者按需重生成
+- 与 `blyy-init-docs` / `blyy-doc-sync` **完全独立**，可单独安装；同时安装时互不依赖
+- 文件级 sha 统一使用 `git hash-object`（跨平台、零依赖），不使用 `sha256sum` / `Get-FileHash`
+
+### 改进
+
+- `install.sh` / `install.ps1` 默认安装三个 skill；支持 `--skills blyy-ai-docs` 单独安装
+- `README.md` 双语技能表加入第三行；「工作原理」章节补充 blyy-ai-docs 的反幻觉/自失效机制说明
+- `docs/architecture.md` 仓库结构图加入 `skills/blyy-ai-docs/` 层级；职责边界表由两列扩展为三列；新增 blyy-ai-docs 内部状态契约与渐进式加载映射
+
+---
+
 ## [0.3.2] — 2026-04-10
 
 ### 新增
@@ -123,6 +173,7 @@
 - 多 AI 工具兼容（Gemini / Codex / Cursor / Claude Code）
 - Windows / Linux / macOS 安装脚本
 
+[0.4.0]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.4.0
 [0.3.2]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.3.2
 [0.3.1]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.3.1
 [0.3.0]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.3.0

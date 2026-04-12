@@ -1,0 +1,206 @@
+---
+ai_docs_version: 1
+last_synced_commit: init
+audience: ai-only
+max_lines: 500
+code_anchors: []
+---
+
+# Code Queries — Deterministic Recipes
+
+> **本文件不存数据，存命令**。AI 需要"穷举某类代码对象"时，运行下面的
+> recipe 而非根据其他 ai-docs 文件推测。这是 ai-docs 反重复事实的核心机制。
+>
+> 由 `blyy-ai-docs` Phase A2 根据探测到的技术栈写入。
+
+## 使用约定
+
+1. 每个 recipe 都是**自包含**的 shell 命令，可直接复制到终端执行
+2. 输出格式与"预期输出形式"字段一致，AI 可放心解析
+3. **AI 不应在每次任务都执行所有 recipe** ——只在用户的当前任务确实需要某类清单时执行
+4. recipe 失效（命令报错、输出格式异常）→ 不要 fallback 到记忆，立即告知用户："code-queries.md 的 R-XXX recipe 失效，可能是 fd/rg 升级或目录结构变了"
+
+## 命令前置依赖
+
+| 工具 | 用途 | fallback |
+|------|------|---------|
+| `fd` | 文件名匹配 | `find . -type f -name '<pattern>'` |
+| `rg` | 内容/正则搜索 | `grep -rn '<pattern>'` |
+| `git` | 历史查询 | （无 fallback） |
+
+---
+
+## 全局 Recipes
+
+### R-MOD-LIST：列出所有模块代码根
+
+**用途**：用户问"项目有哪些模块"
+**触发**：modules.md 的 Quick Index 不够详细 / 对照 modules.md 是否有遗漏
+
+```bash
+# 由 Phase A2 根据 detected_stack 填充。常见形态：
+# 后端分层架构: ls src/Modules/
+# 前端组件库:   ls src/features/
+# Go 项目:      ls cmd/ pkg/ internal/
+```
+
+**预期输出**：目录名列表
+
+---
+
+### R-FILE-COUNT：模块文件数
+
+**用途**：评估某模块复杂度 / 检测模块是否需要拆分
+
+```bash
+fd --type f <module_root> | wc -l
+```
+
+**预期输出**：单个数字
+**失效信号**：数字与 MANIFEST.modules 中的初始值偏差 > 30% → 触发 Mode B 检查
+
+---
+
+## 实体 / 数据模型 Recipes
+
+### R-ENT-01：列出所有实体类
+（由 Phase A2 按 detected_stack 注入对应版本，例如 R-ENT-01-cs / R-ENT-01-java / ...）
+
+```bash
+{{ENT_LIST_COMMAND}}
+```
+
+**预期输出**：`<file:line>: <class declaration>` 一行一个
+
+---
+
+### R-ENT-02：某模块的实体
+
+```bash
+{{ENT_PER_MODULE_COMMAND}}
+```
+
+---
+
+## API / 端点 Recipes
+
+### R-EP-01：列出所有 HTTP 端点
+
+```bash
+{{EP_LIST_COMMAND}}
+```
+
+**预期输出**：`<file:line>: <route attribute or decorator>`
+
+---
+
+### R-EP-02：某端点的实现位置
+
+**参数化**：把 `<route>` 替换为具体路由
+
+```bash
+{{EP_FIND_COMMAND}}
+```
+
+---
+
+## 配置 Recipes
+
+### R-CFG-01：列出所有配置文件
+
+```bash
+{{CFG_LIST_COMMAND}}
+```
+
+---
+
+### R-CFG-02：某配置项被读取的位置
+
+**参数化**：把 `<key>` 替换为配置 key
+
+```bash
+{{CFG_USAGE_COMMAND}}
+```
+
+---
+
+## 服务 / 业务逻辑 Recipes
+
+### R-SVC-01：列出所有服务类
+
+```bash
+{{SVC_LIST_COMMAND}}
+```
+
+---
+
+## 数据库 Schema Recipes
+
+### R-DB-01：列出所有迁移文件
+
+```bash
+{{DB_MIGRATIONS_COMMAND}}
+```
+
+---
+
+### R-DB-02：某表的 schema 定义位置
+
+**参数化**：把 `<table>` 替换为表名
+
+```bash
+{{DB_TABLE_COMMAND}}
+```
+
+---
+
+## 流程追踪 Recipes
+
+### R-FLOW-01：某符号的所有调用方
+
+**参数化**：把 `<symbol>` 替换为方法/函数名
+
+```bash
+rg -n '\b<symbol>\s*\(' --type {{LANG_TYPE}}
+```
+
+---
+
+### R-FLOW-02：某符号的定义位置
+
+```bash
+rg -nP '(public|private|internal|protected)?\s*(static\s+)?(async\s+)?\w+\s+<symbol>\s*\(' --type {{LANG_TYPE}}
+```
+
+---
+
+## 测试 Recipes
+
+### R-TEST-01：列出所有测试文件
+
+```bash
+{{TEST_LIST_COMMAND}}
+```
+
+---
+
+### R-TEST-02：某符号的测试覆盖位置
+
+**参数化**：把 `<symbol>` 替换为被测函数名
+
+```bash
+{{TEST_OF_SYMBOL_COMMAND}}
+```
+
+---
+
+## Forbidden in This File
+
+> 以下内容**严禁**出现在本文件——它们会让本文件本身变成"代码事实的镜像"，违背设计意图：
+
+- 任何超过 3 行的命令输出样例
+- 实体 / 端点 / 服务的具体计数（例如 "项目有 23 个实体"）
+- 任何 "目前观察到 ..." 的总结性陈述
+- 时间戳或日期（除 last_synced_commit 之外）
+
+如果你（AI）在生成 / 修改本文件时想写以上任何一种内容 — **停下，问自己：这个内容应该在 modules.md 还是 glossary.md 还是 MANIFEST.history？**

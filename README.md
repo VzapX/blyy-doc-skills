@@ -16,6 +16,7 @@
 |-------|---------|-------------|
 | **blyy-init-docs** | Initialize complete project documentation from code analysis | Day 0 — One-time setup |
 | **blyy-doc-sync** | Keep documentation in sync with code changes | Day 1+ — Ongoing maintenance |
+| **blyy-ai-docs** | Generate/maintain an AI-only `ai-docs/` index (no duplicated code facts, self-invalidating, anchor-required) | Any time — auto-dispatches to init/sync/audit |
 
 ### Quick Install
 
@@ -54,6 +55,7 @@ cp -r skills/blyy-doc-sync .agents/skills/
 
 - **blyy-init-docs**: Scans your codebase, identifies modules, and generates a complete documentation set (architecture, code map, data model, deployment guide, etc.) with a baseline snapshot
 - **blyy-doc-sync**: After each code change, checks what documentation needs updating using a three-line-of-defense strategy (real-time sync / pre-commit gate / periodic audit)
+- **blyy-ai-docs**: Produces a lightweight `ai-docs/` folder consumed by AI tools only. Skips everything derivable from the code itself (entity lists, endpoint tables, file inventories) and persists only what code can't express: business glossary, cross-module flows, decisions, invariants. Stays fresh via a 4-tier self-invalidation algorithm (file existence → file sha256 → symbol body sha256 → range fallback). Every claim carries a `[file#Symbol]` anchor; unanchored speculation is refused at write time. A single skill auto-dispatches between **Init / Sync / Audit** modes based on `MANIFEST.yaml` state.
 
 ### Usage Scenarios
 
@@ -118,6 +120,7 @@ Use this when you're onboarding a project that already has months or years of co
 |------|------|---------|
 | **blyy-init-docs** | 基于代码分析初始化完整项目文档 | Day 0 — 一次性初始化 |
 | **blyy-doc-sync** | 保持文档与代码变更同步 | Day 1+ — 持续维护 |
+| **blyy-ai-docs** | 生成 / 维护纯 AI 用的 `ai-docs/` 索引（不重复代码事实、自失效、强制锚点） | 任何时间 — 自动分派 init/sync/audit |
 
 ### 快速安装
 
@@ -156,6 +159,7 @@ cp -r skills/blyy-doc-sync .agents/skills/
 
 - **blyy-init-docs**：扫描代码库，识别模块，生成完整文档集（架构总览、代码地图、数据模型、部署指南等），并写入基线快照
 - **blyy-doc-sync**：每次代码变更后，通过三道防线策略检查哪些文档需要更新（实时同步 / 提交前门禁 / 定期审计）
+- **blyy-ai-docs**：生成一份轻量的 `ai-docs/` 文件夹，**仅供 AI 工具阅读**。放弃所有可从代码推出的信息（实体清单、端点表、文件清单），只持久化代码无法表达的内容：业务术语表、跨模块流程、设计决策、不变式。通过 4-tier 自失效算法（文件存在性 → 文件 sha256 → 符号 body sha256 → 范围兜底）确保多年迭代仍不腐烂。每条断言必须带 `[file#Symbol]` 锚点，无锚点的推测在写入阶段即被拒绝。单个技能根据 `MANIFEST.yaml` 状态自动分派 **Init / Sync / Audit** 三种模式。
 
 ### 使用场景
 

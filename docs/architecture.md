@@ -16,7 +16,7 @@ blyy-doc-skills/
 │   ├── architecture.md            ← 架构说明（本文件）
 │   └── CHANGELOG.md               ← 变更日志
 └── skills/
-    ├── blyy-init-docs/            ← Skill 1：文档初始化
+    ├── blyy-init-docs/            ← Skill 1：文档初始化（人类 + AI 共用的 docs/）
     │   ├── SKILL.md               ← AI 入口（每次调用必加载）
     │   ├── resources/             ← 按需加载的详细流程
     │   │   ├── doc-guide.md
@@ -29,30 +29,58 @@ blyy-doc-skills/
     │       ├── docs/              ← docs/ 下文档
     │       ├── modules/           ← Core 模块完整目录模板（6 个子文件）
     │       └── modules-single.md.template  ← Standard 模块单文件模板
-    └── blyy-doc-sync/             ← Skill 2：持续同步
-        ├── SKILL.md               ← AI 入口
-        └── resources/
-            ├── sync-matrix.md
-            └── defense-line-3-audit.md
+    ├── blyy-doc-sync/             ← Skill 2：持续同步（维护 docs/）
+    │   ├── SKILL.md               ← AI 入口
+    │   └── resources/
+    │       ├── sync-matrix.md
+    │       └── defense-line-3-audit.md
+    └── blyy-ai-docs/              ← Skill 3：纯 AI 索引（维护 ai-docs/）
+        ├── SKILL.md               ← 单入口三模式分派（Init/Sync/Audit）
+        ├── resources/
+        │   ├── tech-stack-matrix.md      ← 技术栈探测 + 锚点矩阵
+        │   ├── query-recipes.md          ← 8 大栈 fd/rg 命令库
+        │   ├── anti-hallucination.md     ← T1/T2/T3 + 锚点强制 + 禁枚举
+        │   ├── anchor-extraction.md      ← 8 语言符号定位 + body 提取
+        │   └── self-invalidation.md      ← 4-tier 失效检测算法
+        └── templates/
+            ├── INDEX.md.template
+            ├── modules.md.template
+            ├── glossary.md.template
+            ├── flows.md.template
+            ├── decisions.md.template
+            ├── code-queries.md.template
+            └── MANIFEST.yaml.template
 ```
 
-## 两个 Skill 的职责边界
+## 三个 Skill 的职责边界
 
-| 维度 | blyy-init-docs | blyy-doc-sync |
-|------|---------------|---------------|
-| 触发时机 | Day 0，一次性 | Day 1+，每次代码变更 + 定期审计 |
-| 目标 | 从零建立可信文档集 | 维持文档与代码的一致性 |
-| 主要产出 | 完整文档骨架 + 填充内容 + 基线快照 | 增量更新 + 差异修复 + 趋势报告 |
-| 数据消费方 | 给 doc-sync 提供基线 | 持续读写基线快照 |
-| 是否含模板 | ✅ 含 templates/ | ❌ 不含 |
-| 是否调用子代理 | ✅ 大量并行 | ❌ 主 agent 主导 |
+| 维度 | blyy-init-docs | blyy-doc-sync | blyy-ai-docs |
+|------|---------------|---------------|-------------|
+| 输出目录 | `docs/` | `docs/` | `ai-docs/`（默认 gitignore） |
+| 目标读者 | 人类 + AI | 人类 + AI | **仅 AI** |
+| 触发时机 | Day 0，一次性 | Day 1+，每次代码变更 + 定期审计 | 任何时间，按 MANIFEST 状态自动分派 |
+| 主要目标 | 从零建立完整文档集 | 维持 docs/ 与代码的一致性 | 生成不重复代码事实、自失效的 AI 索引 |
+| 主要产出 | 完整文档骨架 + 填充内容 + 基线快照 | 增量更新 + 差异修复 + 趋势报告 | INDEX + modules + glossary + flows + decisions + code-queries + MANIFEST |
+| 反幻觉机制 | Pre-Fill Review Gate（T1/T2/T3） | 沿用 init 的 T 分级 | 强制 `[file#Symbol]` 锚点 + UNVERIFIED 包裹 + 禁枚举铁律 |
+| 自失效机制 | — | 三道防线（sync matrix / 门禁 / 审计） | 4-tier（file 存在性 / sha256 / body sha256 / 范围） |
+| 与其他 skill 依赖 | 无 | 依赖 init 写入的基线 | **完全独立**，可单独安装 |
+| 是否含模板 | ✅ | ❌ | ✅ |
+| 是否调用子代理 | ✅ 大量并行 | ❌ 主 agent 主导 | ✅ 每个模块一个子代理 |
 
-**两者之间的数据契约**（v0.2.0 起）：
+**init-docs ↔ doc-sync 数据契约**（v0.2.0 起）：
 
 - `docs/doc-maintenance.md` 中的**基线快照 YAML 块** — init-docs 写入 / doc-sync 防线 3 读取并追加
 - 各文档 front matter 的 **`last_synced_commit`** — init-docs 初始化为 `init`，doc-sync 防线 1 每次更新
 - 各文档 front matter 的 **`code_anchors`** — init-docs 填充实际代码路径，doc-sync 防线 1 用于过滤变更范围
 - **结构化 TODO 标记** — init-docs 留下未填充项，doc-sync 持续递减
+
+**blyy-ai-docs 内部状态契约**（v0.4.0 起）：
+
+- `ai-docs/MANIFEST.yaml.last_synced_commit` — 上次同步后的 HEAD，Mode B 据此做 `git diff` 增量
+- `ai-docs/MANIFEST.yaml.anchors[*].sha256` — 每个被文档引用的文件的 `git hash-object` 结果
+- `ai-docs/MANIFEST.yaml.anchors[*].symbols[*].body_sha256` — 符号体归一化后的 hash，符号级失效判定核心
+- `ai-docs/MANIFEST.yaml.anchors[*].docs` — 反向锚点索引（STALE → 段落定位）
+- `ai-docs/MANIFEST.yaml.history` — 事件追加日志（init / sync / audit）
 
 ## 渐进式加载架构（v0.3.0）
 
@@ -95,6 +123,23 @@ blyy-doc-sync/SKILL.md（~250 行，约 3.5K tokens，每次必加载）
     │
     └─ 触发防线 3 定期审计
           └─ Read resources/defense-line-3-audit.md（124 行）
+
+blyy-ai-docs/SKILL.md（~360 行，每次必加载；含三模式分派逻辑）
+    │
+    ├─ Mode A Phase A0/A1 技术栈与模块识别
+    │     └─ Read resources/tech-stack-matrix.md
+    │
+    ├─ Mode A Phase A2 生成 code-queries.md
+    │     └─ Read resources/query-recipes.md
+    │
+    ├─ Mode A Phase A3 子代理分发前
+    │     └─ Read resources/anti-hallucination.md
+    │
+    ├─ Mode A Phase A5 / Mode B Phase B1 / Mode C Phase C0
+    │     └─ Read resources/anchor-extraction.md
+    │
+    └─ Mode B Phase B1 / Mode C Phase C0 失效检测
+          └─ Read resources/self-invalidation.md
 ```
 
 ### 设计铁律
