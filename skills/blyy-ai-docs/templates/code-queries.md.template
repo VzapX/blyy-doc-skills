@@ -203,4 +203,4 @@ rg -nP '(public|private|internal|protected)?\s*(static\s+)?(async\s+)?\w+\s+<sym
 - 任何 "目前观察到 ..." 的总结性陈述
 - 时间戳或日期（除 last_synced_commit 之外）
 
-如果你（AI）在生成 / 修改本文件时想写以上任何一种内容 — **停下，问自己：这个内容应该在 modules.md 还是 glossary.md 还是 MANIFEST.history？**
+如果你（AI）在生成 / 修改本文件时想写以上任何一种内容 — **停下，问自己：这个内容应该在模块详情文件（`modules/{slug}.md`）还是 INDEX.md 还是 MANIFEST.history？**

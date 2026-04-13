@@ -30,14 +30,17 @@ When you modify anything in `skills/<name>/`, the install scripts' default `SKIL
 |-------|------------|----------|-------------------|
 | `blyy-ai-docs` | `ai-docs/` (gitignored) | **AI only** | 4-tier (file existence → sha256 → symbol body sha256 → range fallback) |
 
-`blyy-ai-docs` is a single skill with three auto-dispatched modes (Init / Sync / Audit). It carries its own tech-stack matrix, query recipes, anti-hallucination rules, and self-invalidation algorithm. It produces a flat `ai-docs/` directory (7 files + MANIFEST.yaml) that AI tools consume as a fast index layer.
+`blyy-ai-docs` is a single skill with three auto-dispatched modes (Init / Sync / Audit). It carries its own tech-stack matrix, query recipes, anti-hallucination rules, and self-invalidation algorithm. It produces a **Hub-and-Spoke** `ai-docs/` directory (INDEX.md hub + per-module detail files as spokes + code-queries.md + MANIFEST.yaml) that AI tools consume as a fast index layer.
 
-**Four core principles** (filter for all edits):
+**v2 architecture (Hub-and-Spoke)**: INDEX.md is the routing hub (always read first). Each Core/Standard module gets an independent detail file `modules/{slug}.md` containing terms, flows, decisions, and dependencies. Large modules auto-overflow into a directory `modules/{slug}/` with `_index.md` + topic files. This three-level progressive disclosure (project → module → topic) keeps per-task AI reading to ~350-500 lines regardless of project size.
+
+**Five core principles** (filter for all edits):
 
 1. **AI quick indexing** — help AI locate code entry points fast, not full-project scan
 2. **Record invisible facts** — business logic, flows, design intent that code can't express directly
 3. **Never repeat code facts** — entity lists, config tables, API inventories belong in `code-queries.md` as executable `fd`/`rg` recipes, not in prose docs
 4. **Long-term freshness** — self-invalidation mechanism ensures docs don't drift
+5. **Progressive disclosure** — three-level structure (project → module → topic), AI reads only what the current task needs
 
 ## Progressive loading is a hard constraint
 
@@ -60,13 +63,15 @@ Corollary rules you'll run into when editing templates or resources:
 
 ## Module complexity tiers
 
-`blyy-ai-docs` grades each identified module by a shell-computable score and controls **analysis depth** (not file structure — ai-docs is always flat):
+`blyy-ai-docs` grades each identified module by a shell-computable score and controls **analysis depth** and **file existence**:
 
-- **Core** (≥3 pts): sub-agent full business analysis (5 categories: business summary, terms, flows, decisions, dependencies)
-- **Standard** (1–2 pts): moderate analysis (3 categories: business summary, terms, dependencies)
-- **Lightweight** (0 pts): main agent writes 1-line business summary, skips sub-agent
+- **Core** (≥3 pts): sub-agent full business analysis (5 categories) → `modules/{slug}.md` or overflow directory
+- **Standard** (1–2 pts): moderate analysis (3 categories) → `modules/{slug}.md`
+- **Lightweight** (0 pts): main agent writes 1-line business summary → INDEX.md row only, no detail file
 
-Scoring signals (all deterministic): source file count, presence of entities, presence of controllers/handlers, inbound module dependency count. Mode B only upgrades tiers; Mode C re-evaluates bidirectionally. Details in `resources/module-tiering.md`.
+Scoring signals (all deterministic): source file count, presence of entities, presence of controllers/handlers, inbound module dependency count. Mode B Phase B3 detects tier upgrades → chain-triggers Phase B3.5 layout evolution. Mode C re-evaluates bidirectionally + suggests sub-module splitting. Details in `resources/module-tiering.md`.
+
+**Layout evolution** (Mode B Phase B3.5 / Mode C Phase C1.7): Module detail files auto-convert between single-file and directory modes. Upgrade threshold: >200 lines. Downgrade threshold: ≤160 lines (40-line hysteresis band prevents oscillation).
 
 ## Versioning & changelog discipline
 

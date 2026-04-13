@@ -90,15 +90,16 @@
    - ❌ "项目有 23 个实体" / "约 50 个端点"
    - ✅ "运行 `R-ENT-01` 获取实体清单"
 4. **文件路径清单**（除非每条都是模块入口锚点）：
-   - ❌ 在 modules.md 里列出 `OrderService.cs / OrderRepo.cs / OrderEntity.cs / OrderDto.cs / ...`
-   - ✅ 在 modules.md 里只写 `code_root: src/Modules/Orders/` + 入口 `[OrderService.cs#OrderService]`
+   - ❌ 在模块详情文件里列出 `OrderService.cs / OrderRepo.cs / OrderEntity.cs / OrderDto.cs / ...`
+   - ✅ 在模块详情文件里只写 `code_root: src/Modules/Orders/` + 入口 `[OrderService.cs#OrderService]`
 
 ### 允许的"看起来像清单"的内容
 
-- **模块注册表**：每行 1 个模块，固定字段（name / code_root / business_summary / 入口锚点）。**这是注册表，不是文件清单**——条目数 = 模块数（通常 ≤ 30），不会爆炸
-- **跨模块依赖图**：每行"模块 A 依赖模块 B"，依赖数有限
-- **不变式列表**：每条不变式都有明确的代码锚点，且表达"代码里看不到的规则"
-- **业务流程步骤**：每步带锚点，描述跨模块的业务事件顺序
+- **INDEX.md 的 Module Quick Index**：每行 1 个模块，固定字段（name / tier / code_root / summary / detail_file）。**这是注册表，不是文件清单**——条目数 = 模块数（通常 ≤ 30），不会爆炸
+- **INDEX.md 的 Cross-Module Dependency Graph**：每行"模块 A → 模块 B"，依赖数有限
+- **INDEX.md 的 Flow Catalog**：每行 1 个流程名 + trigger 模块 + 涉及模块 + 详情文件路径，仅做路由
+- **模块详情文件中的不变式列表**：每条有明确代码锚点，且表达"代码里看不到的规则"
+- **模块详情文件中的流程步骤**：每步带锚点，描述跨模块的业务事件顺序
 
 ---
 
@@ -199,17 +200,22 @@
 > Mode A Phase A6 / Mode B / Mode C 完成后，AI 必须自查以下所有项：
 
 ```
-□ 所有 doc 中的非 boilerplate 段落都有锚点 OR UNVERIFIED 包裹
+□ 所有模块详情文件和 INDEX.md 中的非 boilerplate 段落都有锚点 OR UNVERIFIED 包裹
 □ 没有任何超过 20 行的列表型段落
 □ 没有任何 "项目有 N 个 X" 形式的总数陈述
 □ 没有任何 "以下是所有 X" 句式
 □ 所有 [file#Symbol] 锚点都能通过 rg 验证存在
 □ MANIFEST.anchors 数量 ≥ 所有文档锚点的并集
+□ MANIFEST.anchors[].docs 反向索引精确指向模块文件（非笼统文件名）
 □ 所有 T3 都已经过 Pre-Fill Review（要么升级、要么 UNVERIFIED）
 □ code-queries.md 没有粘贴 > 3 行的输出样例
 □ INDEX.md 的 Freshness 表已更新
+□ INDEX.md 的 Module Quick Index 行数 = MANIFEST.modules 条目数
+□ INDEX.md 的 Flow Catalog 覆盖所有模块详情文件中的流程
 □ MANIFEST.history 已追加本次事件
-□ modules.md 每个模块的分级标签与 MANIFEST.modules 的 tier 字段一致
+□ MANIFEST.modules 的 detail_file 指向的文件全部存在
+□ MANIFEST.modules 中 layout=directory 的模块，overflow_files 列出的文件全部存在
+□ 每个模块详情文件的 tier 标签与 MANIFEST.modules 的 tier 字段一致
 □ 所有 TODO 标记使用结构化格式 <!-- TODO[pN, type]: desc -->
 □ .init-temp/ 或 .sync-temp/ 已清理（或大型项目模式下保留 master-task.yaml）
 ```

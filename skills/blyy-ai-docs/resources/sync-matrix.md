@@ -4,37 +4,39 @@
 >
 > **目的**：让 Mode B 在跑被动 sha 检测之前，先根据代码变更类型**主动判断**哪些 ai-docs 文件需要更新。两者互补——矩阵提供快速首轮定位，4-tier 捕获矩阵遗漏的细粒度变化。
 >
-> **与 docs/ 的区别**：ai-docs 只有 7 个文件且禁止重复代码事实，因此映射表远比 docs/ 的 48 条精简。
+> **与 docs/ 的区别**：ai-docs 采用 Hub-and-Spoke 结构（INDEX.md + 每模块独立详情文件），禁止重复代码事实，因此映射表远比 docs/ 精简。
 
 ---
 
 ## 一、变更类型→文档映射
 
+> v2 架构下，大部分变更类型指向具体的模块文件 `modules/{slug}.md`（或目录模式的 topic 文件），而非全局平面文件。
+
 | 代码变更类型 | 需检查的 ai-docs 文件 | 更新内容 |
 |-------------|---------------------|---------|
 | **模块级变更** | | |
-| 新增业务模块目录 | `modules.md` + `MANIFEST.yaml` | 评分分级→注册新模块→更新 MANIFEST.modules |
-| 删除业务模块目录 | `modules.md` + `glossary.md` + `flows.md` + `MANIFEST.yaml` | 移除模块条目 + 清理引用该模块的术语/流程 |
-| 模块职责变更（入口文件重构） | `modules.md` | 更新 business_summary + entry_anchors |
-| 模块间依赖变化（import/using 增删） | `modules.md` | 更新 depends_on + Cross-Module Dependency Graph |
+| 新增业务模块目录 | `INDEX.md` + `MANIFEST.yaml` | 评分分级→创建 `modules/{slug}.md`→更新 INDEX Module Quick Index + MANIFEST.modules |
+| 删除业务模块目录 | `INDEX.md` + `MANIFEST.yaml` | 删除 `modules/{slug}.md`（或 `modules/{slug}/` 目录）+ INDEX 移除行 + 清理其他模块文件中的跨引用 |
+| 模块职责变更（入口文件重构） | `modules/{slug}.md` 或 `modules/{slug}/_index.md` | 更新 Business Summary + Entry Anchors |
+| 模块间依赖变化（import/using 增删） | 涉及的模块详情文件 + `INDEX.md` | 更新 Dependencies 章节 + INDEX Dependency Graph |
 | **术语与数据模型变更** | | |
-| 新增/重命名核心实体类 | `glossary.md` | 新增/更新术语 ↔ 符号映射行 |
-| 废弃业务术语/实体 | `glossary.md` | 标注 deprecated 或移除 |
-| 引入新业务缩写 | `glossary.md` | 补充同义词/缩写 |
+| 新增/重命名核心实体类 | `modules/{slug}.md` Terms 章节（或 `modules/{slug}/terms.md`） | 新增/更新术语 ↔ 符号映射行 |
+| 废弃业务术语/实体 | 同上 | 标注 deprecated 或移除 |
+| 引入新业务缩写 | 同上 | 补充同义词/缩写 |
 | **业务流程变更** | | |
-| 跨模块业务流程变化 | `flows.md` | 更新流程步骤 + 锚点 |
-| 模块内流程重构（影响跨模块调用） | `flows.md` + `modules.md` | 更新流程步骤 + depends_on |
+| 跨模块业务流程变化 | trigger 模块的详情文件 Flows 章节（或 `modules/{slug}/flows.md`）+ `INDEX.md` Flow Catalog | 更新流程步骤 + 锚点 + INDEX 路由行 |
+| 模块内流程重构（影响跨模块调用） | trigger 模块 Flows 章节 + 涉及模块的 Dependencies | 更新流程步骤 + 依赖关系 |
 | **架构决策变更** | | |
-| 新增架构决策（ADR / 注释中 "why"） | `decisions.md` | 新增决策条目 |
-| 修改/废弃已有不变式 | `decisions.md` | 更新/标注废弃 |
+| 新增架构决策（ADR / 注释中 "why"） | 归属模块的详情文件 Decisions 章节；全局决策 → `INDEX.md` Global Decisions | 新增决策条目 |
+| 修改/废弃已有不变式 | 同上 | 更新/标注废弃 |
 | **技术栈变更** | | |
 | 切换框架/ORM/HTTP 库 | `code-queries.md` + `MANIFEST.yaml` | 更新 recipe 命令 + detected_stack.variants |
-| 新增语言栈（如加前端） | `code-queries.md` + `modules.md` | 补充该栈的 recipe + 注册新模块 |
+| 新增语言栈（如加前端） | `code-queries.md` + `INDEX.md` + 新模块详情文件 | 补充该栈的 recipe + 注册新模块 |
 | **基础设施变更** | | |
-| 文件重命名/移动 | 涉及锚点的所有文件 | 4-tier Tier 1 会捕获→STALE，但矩阵可加速定位 |
+| 文件重命名/移动 | `MANIFEST.anchors[].docs` 指向的具体模块文件 | 4-tier Tier 1 会捕获→STALE，矩阵加速定位到具体模块文件 |
 | 大规模重构（>30% 文件变更） | 建议降级到 Mode A | 提示用户 |
 
-> **未列出的变更类型**（纯内容修改、bug 修复等）：由 4-tier 失效检测的 Tier 2/3（sha 比对）自动捕获，无需矩阵映射。
+> **未列出的变更类型**（纯内容修改、bug 修复等）：由 4-tier 失效检测的 Tier 2/3（sha 比对）自动捕获，`MANIFEST.anchors[].docs` 反向索引精确指向受影响的模块文件，无需矩阵映射。
 
 ---
 

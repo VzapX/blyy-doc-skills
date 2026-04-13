@@ -1,6 +1,6 @@
 # 使用指南
 
-> 适用版本：v0.5.0+
+> 适用版本：v0.6.0+
 
 ## 概述
 
@@ -52,6 +52,7 @@ Phase A0 — 环境探测
 Phase A1 — 模块识别与分级
   ├── 架构布局检测（Layered vs Domain-driven）
   ├── 模块发现（Domain → 直接按目录；Layered → 跨层业务域提取）
+  ├── 子模块拆分检测（≥3 子目录各 ≥15 文件 → 建议拆分）
   ├── 模块复杂度评分（6 分制）
   ├── 分级：Core (≥3) / Standard (1-2) / Lightweight (0)
   └── 分级结果呈现给用户确认
@@ -70,13 +71,15 @@ Phase A4 — Pre-Fill Review Gate
   ├── 按类型分组，一次性呈现给用户
   └── 确认 → T2 / 纠正 → T1 / 跳过 → UNVERIFIED
 
-Phase A5 — 写文档 + MANIFEST
-  ├── 写入 7 个文档文件（INDEX / modules / glossary / flows / decisions / code-queries / MANIFEST）
-  ├── MANIFEST 含模块分级 + 锚点 sha + trend 初始行
-  └── modules.md 按分级分组显示
+Phase A5 — 写文档 + MANIFEST（Hub-and-Spoke 结构）
+  ├── code-queries.md（查询配方）
+  ├── modules/{slug}.md — 每个 Core/Standard 模块独立详情文件
+  │     └── 内容 > 200 行 → 自动溢出为 modules/{slug}/ 目录模式
+  ├── INDEX.md — Hub（模块注册 + 流程目录 + 依赖图 + 全局决策）
+  └── MANIFEST.yaml（含 detail_file / layout / overflow_files）
 
 Phase A6 — 自检
-  └── 7 项自检（锚点验证 / 禁枚举 / 分级一致性 / TODO 格式 / 临时目录清理等）
+  └── 11 项自检（锚点验证 / 禁枚举 / 分级一致性 / 布局一致性 / TODO 格式等）
 ```
 
 ### 三级事实分类（T1/T2/T3）
@@ -104,19 +107,26 @@ T3 条目在 Phase A4 **Pre-Fill Review Gate** 统一呈现给用户批量确认
 
 Mode B 同步时会顺手检查相关 TODO 是否可填充。
 
-### 产物文件结构
+### 产物文件结构（v2 Hub-and-Spoke）
 
 ```
 项目根目录/
-└── ai-docs/                     ← gitignored，纯 AI 消费
-    ├── INDEX.md                 ← 任务路由表 + 新鲜度概览
-    ├── modules.md               ← 模块注册表（按分级分组）
-    ├── glossary.md              ← 业务术语 ↔ 代码符号映射
-    ├── flows.md                 ← 跨模块业务流程
-    ├── decisions.md             ← 设计决策 + 不变式
-    ├── code-queries.md          ← 按栈写入的 fd/rg 配方库
-    └── MANIFEST.yaml            ← 状态契约
+└── ai-docs/                               ← gitignored，纯 AI 消费
+    ├── INDEX.md                           ← Hub：路由 + 模块注册 + 流程目录 + 全局决策
+    ├── code-queries.md                    ← 按栈写入的 fd/rg 配方库
+    ├── MANIFEST.yaml                      ← 状态契约
+    └── modules/                           ← Spoke：每模块独立详情文件
+        ├── orders.md                      ← 单文件模式（≤200 行）
+        ├── users.md
+        ├── trading/                       ← 目录溢出模式（>200 行自动拆分）
+        │   ├── _index.md                  ← 模块摘要 + 主题路由
+        │   ├── terms.md                   ← 完整术语
+        │   ├── flows.md                   ← 完整流程
+        │   └── decisions.md               ← 完整决策
+        └── ...
 ```
+
+**阅读路径**：AI 每次任务只需读 INDEX.md + 1-2 个模块详情文件（~350-500 行），而非全部内容。
 
 ---
 
@@ -134,17 +144,22 @@ Mode B 同步时会顺手检查相关 TODO 是否可填充。
    - 合并两种检测结果，去重后按优先级排序
 
 2. **Phase B2 — STALE/REVIEW 处理 + TODO 填充**
-   - STALE 段落：整段重写，读取当前代码生成新内容
+   - STALE 段落：整段重写，精确定位到具体模块文件（非全局扫描）
    - REVIEW 段落：仅修正与代码矛盾的部分
    - 顺手检查相关 TODO 是否可填充
 
 3. **Phase B3 — 模块变更 + 分级演化检测**
-   - 新增模块 → 计算分级，补充到 modules.md
-   - 已有模块 → 检测升级信号（仅升级方向）
+   - 新增模块 → 计算分级，创建 `modules/{slug}.md` + 更新 INDEX.md
+   - 已有模块 → 检测升级信号（仅升级方向）→ 链式触发 B3.5
 
-4. **Phase B4 — 更新 MANIFEST + 自检**
+4. **Phase B3.5 — 布局演化检测**（v0.6.0 新增）
+   - 自动检测模块文件是否需要在单文件/目录模式间转换
+   - 升级阈值：>200 行 → 溢出为目录；降级阈值：≤160 行 → 合并为单文件
+   - 滞回区间防震荡（40 行缓冲带）
+
+5. **Phase B4 — 更新 MANIFEST + 自检**
    - 更新 `last_synced_commit`
-   - 更新变更了的锚点 sha
+   - 更新变更了的锚点 sha + 模块布局信息
    - 追加 history 事件
 
 ---
@@ -169,10 +184,14 @@ Mode B 同步时会顺手检查相关 TODO 是否可填充。
    - 与 MANIFEST 中记录的分级对比
    - 输出升级/降级建议（双向）
 
-4. **Phase C2 — 触发 Mode B 处理 STALE**
+4. **Phase C1.7 — 布局演化 + 子模块拆分建议**（v0.6.0 新增）
+   - 布局演化：同 B3.5 逻辑（file↔directory 转换）
+   - 子模块拆分：检测内部子领域边界，向用户建议拆分（需确认）
+
+5. **Phase C2 — 触发 Mode B 处理 STALE**
    - 对发现的 STALE 段落执行 Mode B 的 B2 处理流程
 
-5. **Phase C3 — 趋势追踪 + 报告**
+6. **Phase C3 — 趋势追踪 + 报告**
    - 追加 `trend` 行到 MANIFEST
    - 腐烂信号检测：连续 3 次审计 TODO 上升 → 标记
    - 输出审计报告摘要

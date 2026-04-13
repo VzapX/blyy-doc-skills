@@ -1,9 +1,9 @@
 ---
-ai_docs_version: 1
+ai_docs_version: 2
 last_synced_commit: init
 last_audited: {{DATE}}
 audience: ai-only
-max_lines: 150
+max_lines: 200
 code_anchors: []
 ---
 
@@ -15,23 +15,25 @@ code_anchors: []
 
 ## How AI Should Read This Folder
 
-1. **每次任务开始**：先读本文件的 Task-Type Routing 表，按任务类型决定下一步读哪些文件
-2. **遇到列表型需求**（"列出所有 X"）：**不要**从其他 doc 推断，直接执行 `code-queries.md` 里对应的 recipe
-3. **每条断言都带锚点 `[file#Symbol]`**——任何无锚点的内容立即视为不可信
-4. **`<!-- UNVERIFIED -->` 段落**是已知不确定内容，不得作为决策依据
+1. **每次任务开始**：先读本文件 → 从 Module Quick Index 定位相关模块
+2. **按任务类型决定读取深度**（见下表）
+3. **遇到列表型需求**（"列出所有 X"）：**不要**从模块文档推断，直接执行 `code-queries.md` 里对应的 recipe
+4. **每条断言都带锚点 `[file#Symbol]`**——任何无锚点的内容立即视为不可信
+5. **`<!-- UNVERIFIED -->` 段落**是已知不确定内容，不得作为决策依据
+6. **模块目录结构**：`modules/` 下每个模块一个文件或一个子目录（大模块会拆分为 `_index.md` + 主题文件）
 
 ## Task-Type Routing
 
-| 任务类型 | 必读文件 | 推荐次读 | 不要读 |
-|---------|---------|---------|--------|
-| 理解项目业务（onboarding） | `modules.md`、`glossary.md` | `flows.md` | `code-queries.md` |
-| 用业务术语反向定位代码 | `glossary.md` | `modules.md` | — |
-| 实现跨模块新功能 | `flows.md`、`decisions.md` | `modules.md` | — |
-| 修 bug（已知模块） | `modules.md` 对应行 | `code-queries.md`（按需查文件清单） | `flows.md` |
-| 理解 WHY / 设计动机 | `decisions.md` | — | — |
-| 检查不变式 / 约束 | `decisions.md` 的 Invariants 章节 | — | — |
-| 穷举实体 / 端点 / 服务 | `code-queries.md`（仅这个） | — | 其他全部 |
-| 修改已有 API / 端点 | `code-queries.md`（先查清单）→ `modules.md`（找模块） | `flows.md`（看是否被流程引用） | — |
+| 任务类型 | 必读 | 按需深入 |
+|---------|------|---------|
+| Bug fix（已知模块） | 本文件 → `modules/{slug}.md` 或 `modules/{slug}/_index.md` | `code-queries.md` |
+| 理解项目业务（onboarding） | 本文件（Module Quick Index 即鸟瞰） | 逐个读感兴趣的模块详情文件 |
+| 用业务术语反向定位代码 | 本文件 → 从 Module Quick Index 定位模块 → 模块详情的 Terms 章节 | — |
+| 实现跨模块新功能 | 本文件（Flow Catalog + Dependency Graph）→ 涉及的模块详情文件 | — |
+| 理解 WHY / 设计动机 | 本文件 Global Decisions → 模块详情的 Decisions 章节 | — |
+| 检查不变式 / 约束 | 本文件 Global Invariants → 模块详情的 Invariants 章节 | — |
+| 穷举实体 / 端点 / 服务 | `code-queries.md`（仅这个） | — |
+| 修改已有 API / 端点 | `code-queries.md`（先查清单）→ 本文件（找模块）→ 模块详情 | — |
 
 ## Freshness
 
@@ -47,16 +49,52 @@ code_anchors: []
 
 ## Module Quick Index
 
-> 完整模块说明在 `modules.md`。这里只是快速跳转表。
+> 每个 Core/Standard 模块有独立详情文件。Lightweight 模块仅在此表中登记。
 
-| Module | Code Root | One-line Purpose |
-|--------|-----------|------------------|
-| {{MODULE_NAME}} | `{{CODE_ROOT}}` | {{BUSINESS_SUMMARY}} |
+| Module | Tier | Code Root | One-line Purpose | Detail |
+|--------|------|-----------|------------------|--------|
+| {{MODULE_NAME}} | {{TIER}} | `{{CODE_ROOT}}` | {{BUSINESS_SUMMARY}} `[{{ENTRY_ANCHOR}}]` | `{{DETAIL_FILE}}` |
+
+> Lightweight 模块的 Detail 列为 `—`，代表无独立详情文件。
+
+## Cross-Module Dependency Graph
+
+> 仅模块间有向边。每条边带至少一个 import/using 锚点。
+
+| From → To | Evidence |
+|-----------|---------|
+| {{MODULE_A}} → {{MODULE_B}} | `[{{IMPORT_FILE_ANCHOR}}]` |
+
+## Flow Catalog
+
+> 流程详情在 trigger 模块的详情文件中（单文件模式在 Flows 章节；目录模式在 `flows.md`）。本表仅做路由。
+
+| Flow | Trigger Module | Involved Modules | Detail In |
+|------|---------------|-----------------|-----------|
+| {{FLOW_NAME}} | {{TRIGGER_MODULE}} | {{MODULE_LIST}} | `{{DETAIL_FILE_PATH}}` |
+
+## Global Decisions & Invariants
+
+> 仅放影响 ≥2 模块且无明确归属的全局决策/不变式（≤10 条）。模块级决策在各自详情文件中。
+
+### GD-{{NN}}: {{TITLE}}
+
+- **决定**: {{ONE_LINE_DECISION}}
+- **影响**: {{AFFECTED_MODULES}}
+- **出处**: `[{{SOURCE_ANCHOR}}]`
+
+### GI-{{NN}}: {{INVARIANT_NAME}}
+
+- **规则**: {{ONE_SENTENCE_RULE}}
+- **违反后果**: {{WHAT_BREAKS}}
+- **证据**: `[{{CODE_ANCHOR}}]`
+
+> 全局决策/不变式总数 ≤ 10。超过说明应该归属到具体模块。
 
 ## Hard Rules for AI Readers
 
 1. **本目录的每条内容**都带 `[file:line]` 或 `[file#Symbol]` 锚点——读到任何无锚点的内容立即视为不可信，按 `code-queries.md` 重新验证
-2. **需要穷举某类代码对象**（实体/端点/服务）时，**必须**执行 `code-queries.md` 的 recipe，**禁止**根据 `modules.md` 的描述推断清单
+2. **需要穷举某类代码对象**（实体/端点/服务）时，**必须**执行 `code-queries.md` 的 recipe，**禁止**根据模块详情的描述推断清单
 3. **`<!-- UNVERIFIED -->` 段落**是已知不确定内容，不得作为决策依据；如果你的任务恰好需要确认这些内容，请先与人类用户核对
 4. **看到 stale 提示** → 不要继续使用本目录，先告诉用户跑 `blyy-ai-docs`（Mode B/C 会自动同步）
 5. **本文件的 Freshness 表过期**（last_synced_commit 与 git HEAD 不一致）→ 警告用户后再继续

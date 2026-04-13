@@ -4,7 +4,7 @@
 >
 > **目的**：根据模块的确定性指标评分，决定 Phase A3 子代理的**分析深度**。核心模块值得深挖业务逻辑和设计决策，简单模块一句话定位即可。
 >
-> **注意**：ai-docs 是扁平结构（7 个文件），分级**不控制文件结构**（不像 docs/ 的 Core=目录、Standard=单文件、Lightweight=内联），而是控制**业务分析的深度与子代理资源分配**。
+> **v2 架构**：ai-docs 采用 Hub-and-Spoke 结构，每个 Core/Standard 模块有独立详情文件 `modules/{slug}.md`。分级控制**业务分析的深度**（子代理资源分配）和**文件存在性**（Lightweight 无独立文件）。大模块内容超 200 行时自动溢出为目录结构。
 
 ---
 
@@ -27,11 +27,11 @@
 
 ## 二、分级定义与分析深度
 
-| 总分 | 级别 | Phase A3 分析深度 | modules.md 呈现 |
-|------|------|-----------------|----------------|
-| **≥ 3** | **Core** | 子代理全量提取 5 类：business_summary + terms + flows + decisions/invariants + dependencies | 完整块（含 entry_anchors + depends_on） |
-| **1–2** | **Standard** | 子代理适度提取 3 类：business_summary + terms + dependencies | 适度块（含 entry_anchors） |
-| **0** | **Lightweight** | 主 agent 直接写 1 行 business_summary，**跳过子代理** | 底部 Lightweight 表格单行 |
+| 总分 | 级别 | Phase A3 分析深度 | ai-docs 产物 |
+|------|------|-----------------|-------------|
+| **≥ 3** | **Core** | 子代理全量提取 5 类：business_summary + terms + flows + decisions/invariants + dependencies | `modules/{slug}.md`（或溢出为 `modules/{slug}/` 目录） |
+| **1–2** | **Standard** | 子代理适度提取 3 类：business_summary + terms + dependencies | `modules/{slug}.md`（通常单文件即够） |
+| **0** | **Lightweight** | 主 agent 直接写 1 行 business_summary，**跳过子代理** | 无独立文件，仅在 INDEX.md Module Quick Index 中登记一行 |
 
 ### Core 模块子代理产出要求
 
@@ -99,7 +99,7 @@ Lightweight: 1 个（主 agent 直接写）
    执行？(Y | 稍后)
 ```
 
-4. 用户确认 → 启动子代理补充缺失的分析类别，更新 modules.md 和 MANIFEST
+4. 用户确认 → 启动子代理补充缺失的分析类别，更新模块详情文件和 MANIFEST → **链式触发 Phase B3.5 布局演化检测**（升级后内容增加，可能触发 file→directory 溢出）
 5. 降级信号不在 Mode B 提示（避免频繁打扰），留给 Mode C 处理
 
 ### Mode C — 全量复评（双向）
@@ -121,5 +121,48 @@ Phase C1.5 对所有模块重新评分：
 确认执行？(全部 | 逐个确认 | 跳过)
 ```
 
-3. 升级 → 补充分析；降级 → 简化 modules.md 中该模块的条目
-4. 更新 MANIFEST.modules 中的 `tier` 和 `complexity_score`
+3. 升级 → 补充分析，写入模块详情文件；降级 → 简化模块详情文件（Core→Standard 移除 flows/decisions 章节；Standard→Lightweight 删除模块详情文件，仅保留 INDEX.md 单行）
+4. 更新 MANIFEST.modules 中的 `tier`、`complexity_score`、`detail_file`、`layout`
+5. **全量布局演化检测**：同 Phase B3.5 逻辑，对每个模块检查 file↔directory 转换需求
+
+---
+
+## 五、子模块拆分检测
+
+> 仅在 Mode A Phase A1 和 Mode C Phase C1.7 执行。Mode B 不做（避免频繁打扰）。
+
+### 触发条件
+
+对每个候选模块（或已注册模块），检查子领域边界：
+
+```
+目录内 ≥ 3 个子目录
+AND 每个子目录 ≥ 15 个源文件
+AND 子目录间有独立入口文件（Controller / Handler / Service 等）
+```
+
+检测命令：
+
+```bash
+# 统计子目录数及各子目录文件数
+for d in $(fd --type d --max-depth 1 {{module_dir}}); do
+  echo "$d $(fd --type f "$d" | wc -l)"
+done
+```
+
+### 处理方式
+
+1. **满足条件** → 向用户建议拆分（**非自动，需确认**）
+2. 每个子模块独立评分分级
+3. 用户确认拆分 → 删除旧模块文件 → 为每个子模块创建新详情文件 → 更新 INDEX.md + MANIFEST
+4. 用户拒绝 → 保持现状（大模块走溢出目录模式兜底）
+
+### 命名约定
+
+拆分后的子模块命名为 `{Parent}.{Child}` 格式，slug 为 `{parent}-{child}`：
+
+```
+Trading → Trading.Execution (slug: trading-execution)
+        → Trading.Risk (slug: trading-risk)
+        → Trading.MarketData (slug: trading-market-data)
+```

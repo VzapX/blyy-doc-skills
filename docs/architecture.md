@@ -28,11 +28,9 @@ blyy-doc-skills/
         │   ├── large-project-mode.md     ← 大型项目模式（>500 文件分阶段执行）
         │   └── sync-matrix.md            ← 同步矩阵（代码变更 → 文档更新映射）
         └── templates/
-            ├── INDEX.md.template
-            ├── modules.md.template
-            ├── glossary.md.template
-            ├── flows.md.template
-            ├── decisions.md.template
+            ├── INDEX.md.template              ← Hub：路由 + 模块注册 + 流程目录 + 全局决策
+            ├── module-detail.md.template      ← 单文件模式的模块详情
+            ├── module-index.md.template       ← 目录溢出模式的 _index.md
             ├── code-queries.md.template
             └── MANIFEST.yaml.template
 ```
@@ -45,20 +43,24 @@ blyy-doc-skills/
 | 目标读者 | **仅 AI** |
 | 触发时机 | 任何时间，按 MANIFEST 状态自动分派 |
 | 主要目标 | 生成不重复代码事实、自失效的 AI 索引 |
-| 主要产出 | INDEX + modules + glossary + flows + decisions + code-queries + MANIFEST |
+| 主要产出 | INDEX.md（Hub）+ modules/{slug}.md（Spoke）+ code-queries.md + MANIFEST.yaml |
+| 文件结构 | **Hub-and-Spoke**：INDEX.md 路由中心 + 每模块独立详情文件；大模块溢出为目录 |
 | 反幻觉机制 | 强制 `[file#Symbol]` 锚点 + UNVERIFIED 包裹 + 禁枚举铁律 + Pre-Fill Review Gate |
 | 自失效机制 | 4-tier（file 存在性 / sha256 / body sha256 / 范围） |
-| 模块分级 | Core/Standard/Lightweight 控制**分析深度**（不影响输出文件结构） |
+| 模块分级 | Core/Standard/Lightweight 控制**分析深度** + **文件存在性**（Lightweight 无独立文件） |
+| 布局演化 | Mode B Phase B3.5 / Mode C Phase C1.7 自动检测 file↔directory 转换（滞回区间防震荡） |
 
-**blyy-ai-docs 内部状态契约**（v0.5.0）：
+**blyy-ai-docs 内部状态契约**（v0.6.0）：
 
+- `ai-docs/MANIFEST.yaml.ai_docs_version` — 文档格式版本（v2 = Hub-and-Spoke）
 - `ai-docs/MANIFEST.yaml.last_synced_commit` — 上次同步后的 HEAD，Mode B 据此做 `git diff` 增量
 - `ai-docs/MANIFEST.yaml.anchors[*].sha256` — 每个被文档引用的文件的 `git hash-object` 结果
 - `ai-docs/MANIFEST.yaml.anchors[*].symbols[*].body_sha256` — 符号体归一化后的 hash，符号级失效判定核心
-- `ai-docs/MANIFEST.yaml.anchors[*].docs` — 反向锚点索引（STALE → 段落定位）
+- `ai-docs/MANIFEST.yaml.anchors[*].docs` — 反向锚点索引（精确到模块文件，如 `modules/orders.md`）
 - `ai-docs/MANIFEST.yaml.modules[*].tier` / `complexity_score` — 模块复杂度分级
+- `ai-docs/MANIFEST.yaml.modules[*].detail_file` / `layout` / `overflow_files` — 模块文件布局追踪
 - `ai-docs/MANIFEST.yaml.trend` — 审计趋势追踪（连续 3 次 TODO 上升 → 腐烂信号）
-- `ai-docs/MANIFEST.yaml.history` — 事件追加日志（init / sync / audit）
+- `ai-docs/MANIFEST.yaml.history` — 事件追加日志（init / sync / audit / layout-upgrade / layout-downgrade）
 
 ## 渐进式加载架构
 
@@ -117,19 +119,19 @@ blyy-ai-docs/SKILL.md（~470 行，每次必加载；含三模式分派逻辑）
 
 ## 模块复杂度分级体系
 
-模块按 6 分制评分，控制 **分析深度**（ai-docs 产物始终是扁平 7 文件结构，分级不影响文件数）：
+模块按 6 分制评分，控制**分析深度**和**文件存在性**：
 
-| 级别 | 条件（评分） | 分析深度 |
-|------|------------|---------|
-| **Core** | ≥ 3 分 | 子代理全量业务分析（5 类：业务定位 + 术语 + 流程 + 决策 + 依赖） |
-| **Standard** | 1-2 分 | 适度分析（3 类：业务定位 + 术语 + 依赖） |
-| **Lightweight** | 0 分 | 主 agent 直接写 1 行业务定位，跳过子代理 |
+| 级别 | 条件（评分） | 分析深度 | ai-docs 产物 |
+|------|------------|---------|-------------|
+| **Core** | ≥ 3 分 | 子代理全量业务分析（5 类） | `modules/{slug}.md` 或溢出为 `modules/{slug}/` 目录 |
+| **Standard** | 1-2 分 | 适度分析（3 类） | `modules/{slug}.md`（通常单文件） |
+| **Lightweight** | 0 分 | 主 agent 直接写 1 行业务定位 | 无独立文件，仅 INDEX.md 单行 |
 
 **评分信号**（全部基于 shell 命令，不依赖 AI 判断）：源文件数 >15（+2）/5-15（+1）、有 Entity/Model 文件（+1）、有 Controller/Handler 文件（+1）、被 ≥3 模块依赖（+1）。
 
 **动态复评闭环**：
-- **Mode B Phase B3**：新模块计算分级；已有模块检测升级信号（仅升级方向）
-- **Mode C Phase C1.5**：全量复评（升降双向）
+- **Mode B Phase B3**：新模块计算分级；已有模块检测升级信号（仅升级方向）→ 链式触发 **Phase B3.5 布局演化检测**
+- **Mode C Phase C1.5**：全量复评（升降双向）→ **Phase C1.7 布局演化 + 子模块拆分建议**
 
 ## 多 AI 工具兼容策略
 

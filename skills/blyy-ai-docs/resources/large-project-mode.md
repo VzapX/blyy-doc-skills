@@ -58,12 +58,13 @@
 按以下顺序写入，每个文件完成后立即落盘：
 
 1. `code-queries.md`（Phase A2 已完成）
-2. `modules.md`（含分级标注）
-3. `glossary.md`
-4. `flows.md`
-5. `decisions.md`
-6. `INDEX.md`
-7. `MANIFEST.yaml`
+2. `modules/` 目录创建
+3. 逐个写入每个 Core/Standard 模块的详情文件：
+   - 内容 ≤ 200 行 → `modules/{slug}.md`（单文件）
+   - 内容 > 200 行 → `modules/{slug}/_index.md` + 溢出 topic 文件（目录模式）
+   - 每个模块写完后立即更新 `master-task.yaml`
+4. `INDEX.md`（Hub：聚合 Module Quick Index + Dependency Graph + Flow Catalog + Global Decisions）
+5. `MANIFEST.yaml`（含每个模块的 detail_file / layout / overflow_files）
 
 每个文件写完后更新 `master-task.yaml` 进度。用户可在任意步骤后暂停（进度已持久化）。
 
@@ -94,15 +95,16 @@ modules_total: 12
 modules_analyzed: 8          # 已完成分析的模块数
 files_written:               # 已写入的正式文档
   - code-queries.md
-  - modules.md
+  - modules/orders.md
+  - modules/users.md
 checklist:
   - [x] Phase A0 环境探测
   - [x] Phase A1-L 项目轮廓
-  - [x] Phase A1-M 模块识别与分级
+  - [x] Phase A1-M 模块识别与分级（含子模块拆分检测）
   - [x] Phase A2 生成 code-queries.md
   - [/] Phase A3-L 模块聚焦分析 (8/12)
   - [ ] Phase A4 Pre-Fill Review
-  - [ ] Phase A5-L 写正式文档
+  - [ ] Phase A5-L 写正式文档（modules/ → INDEX.md → MANIFEST.yaml）
   - [ ] Phase A6 自检
 ```
 

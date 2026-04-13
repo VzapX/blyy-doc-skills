@@ -1,0 +1,101 @@
+---
+ai_docs_version: 2
+module: {{MODULE_SLUG}}
+tier: {{TIER}}
+code_root: {{CODE_ROOT}}
+layout: file
+max_lines: 200
+code_anchors: []
+---
+
+# {{MODULE_NAME}} — {{ONE_LINE_SUMMARY}}
+
+## Business Summary
+
+{{BUSINESS_SUMMARY_1_2_SENTENCES}} `[{{ENTRY_FILE}}#{{ENTRY_SYMBOL}}]`
+
+## Entry Anchors
+
+- `[{{ENTRY_FILE}}#{{SYMBOL}}]` — {{ENTRY_PURPOSE}}
+
+> 入口锚点是该模块的"大门"——AI 阅读模块时**先**读这些符号。
+
+---
+
+## Terms（业务术语 ↔ 代码符号）
+
+> 仅本模块独有的术语。跨模块共用术语见其"定义模块"的 Terms 章节。
+
+### {{TERM_NAME}} `[{{DOMAIN_TAG}}]`
+
+- **代码符号**: `[{{FILE_PATH}}#{{SYMBOL_NAME}}]`
+- **定义**: {{ONE_OR_TWO_SENTENCES}}
+- **also-see**: `[{{OTHER_FILE}}#{{OTHER_SYMBOL}}]`、术语 "{{RELATED_TERM}}"
+- **别名**: {{ALIAS_LIST_OR_NA}}
+
+> 每条 entry ≤ 6 行。超过说明细节该挪到 Flows 或 Decisions 章节。
+> 禁止枚举"本模块所有实体/DTO"——用 `code-queries.md` 的 recipe。
+
+---
+
+## Flows（本模块触发的跨模块流程）
+
+> 仅本模块作为触发方的流程。本模块被其他流程引用时，不在此重复——通过 INDEX.md Flow Catalog 反查。
+
+### {{FLOW_NAME}}
+
+- **触发**: {{TRIGGER_DESCRIPTION}} `[{{ENTRY_ANCHOR}}]`
+- **涉及模块**: {{MODULE_A}}、{{MODULE_B}}、{{MODULE_C}}
+- **业务承诺**: {{WHAT_SHOULD_HAPPEN_FROM_USERS_VIEW}}
+
+**步骤**：
+
+1. {{STEP_DESCRIPTION}}  `[{{FILE_PATH}}#{{SYMBOL_NAME}}]`
+2. {{STEP_DESCRIPTION}}  `[{{FILE_PATH}}#{{SYMBOL_NAME}}]`
+3. {{STEP_DESCRIPTION}}  `[{{FILE_PATH}}#{{SYMBOL_NAME}}]`
+   - 若 {{CONDITION}}，则 {{BRANCH_OUTCOME}} `[{{BRANCH_ANCHOR}}]`
+4. {{STEP_DESCRIPTION}}  `[{{FILE_PATH}}#{{SYMBOL_NAME}}]`
+
+**已知失败模式**:
+- {{FAILURE_MODE}} → 处理: {{HANDLING}} `[{{HANDLER_ANCHOR}}]`
+
+> 步骤数 3-15；超过 15 步 → 拆成多个流程。
+
+---
+
+## Decisions & Invariants
+
+> 本模块范围内的架构决策和不变式。全局性决策/不变式（影响 ≥2 模块且无明确归属）见 INDEX.md Global Decisions。
+
+### D-{{NN}}: {{TITLE}}
+
+- **决定**: {{ONE_LINE_DECISION}}
+- **背景**: {{WHY_NEEDED}}
+- **替代方案**: {{ALTERNATIVES_CONSIDERED}}
+- **出处**: `[{{COMMIT_OR_PR_OR_FILE_ANCHOR}}]`
+- **状态**: active / superseded by D-{{MM}} / deprecated
+
+### I-{{NN}}: {{INVARIANT_NAME}}
+
+- **规则**: {{ONE_SENTENCE_RULE}}
+- **代码证据**: `[{{FILE}}#{{SYMBOL}}]`
+- **违反后果**: {{WHAT_BREAKS}}
+- **如何验证**: {{HOW_TO_CHECK}}
+
+---
+
+## Dependencies
+
+> 有向依赖：`→` 本模块调用目标 / `←` 被其他模块调用。每条带 import/using 锚点。
+
+- → {{TARGET_MODULE}}：{{REASON}} `[{{IMPORT_ANCHOR}}]`
+- ← {{SOURCE_MODULE}}：{{REASON}} `[{{CALLER_ANCHOR}}]`
+
+---
+
+## What This File Does NOT Contain
+
+- 模块内的实体 / Controller / Service / DTO 清单 → `code-queries.md`
+- 单模块内的局部调用链 → AI 直接读源码或用 `R-FLOW-01`
+- 代码片段 / 配置值 → AI 直接读源码
+- 任何超过 20 行的列表 → 直接拒绝

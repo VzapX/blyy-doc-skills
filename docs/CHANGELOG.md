@@ -2,6 +2,61 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 格式。
 
+## [0.6.0] — 2026-04-13
+
+### 重构 — Hub-and-Spoke 架构（三级渐进式披露）
+
+将 ai-docs/ 产物从 v1 扁平结构（7 个全局文件）重构为 v2 Hub-and-Spoke 结构（INDEX.md Hub + 每模块独立详情文件 Spoke），大幅降低 AI 单次任务的上下文读取量。
+
+**核心改动**：
+
+- **Hub-and-Spoke 文件结构**：INDEX.md 作为唯一路由中心，每个 Core/Standard 模块有独立详情文件 `modules/{slug}.md`；Lightweight 模块仅在 INDEX.md 登记一行
+- **模块内溢出机制**：单个模块内容超 200 行时自动拆分为目录结构 `modules/{slug}/_index.md` + topic 子文件（terms/flows/decisions），实现模块内的三级渐进式披露
+- **子模块拆分检测**：Phase A1 和 Mode C Phase C1.7 检测大模块内部子领域边界（≥3 子目录各 ≥15 文件），建议用户拆分为独立模块
+- **布局自动演化**：Mode B 新增 Phase B3.5 / Mode C 新增 Phase C1.7，自动检测模块文件是否需要在单文件/目录模式间转换
+- **滞回区间防震荡**：升级阈值 >200 行 / 降级阈值 ≤160 行（40 行缓冲带），topic 溢出 >60 行 / 回收 ≤30 行
+- **v1 兼容检测**：Mode B 检测到 v1 平面结构时提示用户升级到 v2
+- **阅读路径优化**：Bug fix 场景从 ~950 行降至 ~350 行（缩减 63%）；Onboarding 从 ~850 行降至 ~200 行起步（缩减 76%）
+
+**删除的模板**（内容拆入 INDEX.md + 模块详情文件）：
+
+- `templates/modules.md.template`
+- `templates/glossary.md.template`
+- `templates/flows.md.template`
+- `templates/decisions.md.template`
+
+**新增的模板**：
+
+- `templates/module-detail.md.template` — 单文件模式的模块详情
+- `templates/module-index.md.template` — 目录溢出模式的 _index.md（摘要 + 路由）
+
+**SKILL.md 变更**：
+
+- 概述新增 v2 架构说明和渐进式披露原则
+- Phase A1 新增子模块拆分检测步骤
+- Phase A5 重写为 Hub-and-Spoke 写入流程（modules/ → INDEX.md → MANIFEST）
+- Phase A6 自检扩展至 11 项（新增布局一致性、Flow Catalog 覆盖等）
+- Mode B 新增 Phase B0 v1 兼容检测
+- Mode B 新增 Phase B3.5 布局演化检测
+- Mode C 新增 Phase C1.7 布局演化 + 子模块拆分建议
+- 核心铁律新增第 13 条（布局自动演化）和第 14 条（anchors.docs 精确到模块文件）
+
+**MANIFEST.yaml 变更**：
+
+- `ai_docs_version` 升为 2
+- `modules[]` 新增 `detail_file`、`layout`（file/directory/none）、`overflow_files` 字段
+- `anchors[].docs` 反向索引精确到模块文件路径
+- `history[].event` 新增 `layout-upgrade` / `layout-downgrade` 枚举
+
+**Resource 文件变更**：
+
+- `sync-matrix.md`：变更类型映射更新为模块文件级
+- `anti-hallucination.md`：自查清单扩展至 18 项，文件引用更新
+- `module-tiering.md`：新增子模块拆分检测规则（Section 五）；分级表更新产物列
+- `large-project-mode.md`：Phase A5-L 写入顺序更新为 Hub-and-Spoke
+
+---
+
 ## [0.5.0] — 2026-04-13
 
 ### 重构 — 合并为单一技能 `blyy-ai-docs`
@@ -235,6 +290,7 @@
 - 多 AI 工具兼容（Gemini / Codex / Cursor / Claude Code）
 - Windows / Linux / macOS 安装脚本
 
+[0.6.0]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.6.0
 [0.5.0]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.5.0
 [0.4.0]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.4.0
 [0.3.2]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.3.2

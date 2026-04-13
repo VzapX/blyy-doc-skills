@@ -1,0 +1,67 @@
+---
+ai_docs_version: 2
+module: {{MODULE_SLUG}}
+tier: {{TIER}}
+code_root: {{CODE_ROOT}}
+layout: directory
+max_lines: 100
+code_anchors: []
+---
+
+# {{MODULE_NAME}} — {{ONE_LINE_SUMMARY}}
+
+> 本模块内容已按主题拆分到子文件。本文件是摘要 + 路由——先读这里，再按需深入。
+
+## Business Summary
+
+{{BUSINESS_SUMMARY_1_2_SENTENCES}} `[{{ENTRY_FILE}}#{{ENTRY_SYMBOL}}]`
+
+## Entry Anchors
+
+- `[{{ENTRY_FILE}}#{{SYMBOL}}]` — {{ENTRY_PURPOSE}}
+
+---
+
+## Dependencies
+
+- → {{TARGET_MODULE}}：{{REASON}} `[{{IMPORT_ANCHOR}}]`
+- ← {{SOURCE_MODULE}}：{{REASON}} `[{{CALLER_ANCHOR}}]`
+
+---
+
+## Terms（{{TERM_COUNT}} 条 → 详见 terms.md）
+
+> 完整术语表在 `terms.md`。下表列出 Top 10 高频术语供快速定位。
+
+| 术语 | 代码符号 | 一句话定义 |
+|------|---------|-----------|
+| {{TERM_NAME}} | `[{{FILE}}#{{SYMBOL}}]` | {{SHORT_DEF}} |
+
+---
+
+## Flows（{{FLOW_COUNT}} 条 → 详见 flows.md）
+
+> 完整流程在 `flows.md`。下表列出所有流程的触发条件和涉及模块。
+
+| Flow | Trigger | Involved Modules |
+|------|---------|-----------------|
+| {{FLOW_NAME}} | {{TRIGGER_SHORT}} | {{MODULE_LIST}} |
+
+---
+
+## Decisions & Invariants（{{DECISION_COUNT}} 条 → 详见 decisions.md）
+
+> 完整决策/不变式在 `decisions.md`。下表列出关键不变式。
+
+| ID | 规则 | 违反后果 |
+|----|------|---------|
+| I-{{NN}} | {{RULE_ONE_LINE}} | {{CONSEQUENCE}} |
+
+---
+
+## What This File Does NOT Contain
+
+- 模块内的实体 / Controller / Service / DTO 清单 → `code-queries.md`
+- 完整术语定义 → 本目录 `terms.md`
+- 完整流程步骤 → 本目录 `flows.md`
+- 完整决策详情 → 本目录 `decisions.md`

@@ -1,4 +1,4 @@
-# MANIFEST.yaml — blyy-ai-docs 状态契约
+# MANIFEST.yaml — blyy-ai-docs 状态契约（v2 Hub-and-Spoke）
 #
 # 由 Mode A 初始化，由 Mode B/C 更新。AI 工具可读，但禁止手动编辑——
 # 任何手编都会导致 sha 校验失败。
@@ -8,12 +8,12 @@
 # - last_audited:       上次跑 Mode C 全量审计的日期
 # - skill_version:      生成本 manifest 的 blyy-ai-docs 版本
 # - detected_stack:     Phase A0 探测到的技术栈枚举
-# - modules:            模块注册表（name + code_root），Mode B Phase B3 基于此判断新增/失效
+# - modules:            模块注册表（含 detail_file 和 layout），Mode B/C 基于此追踪模块文件
 # - anchors:            所有文档引用的代码锚点的 sha 快照，自失效检测的真相源
 # - history:            事件追加日志，便于观察腐烂趋势
 
-ai_docs_version: 1
-skill_version: blyy-ai-docs v0.1.0
+ai_docs_version: 2
+skill_version: blyy-ai-docs v0.6.0
 last_synced_commit: {{INIT_COMMIT_SHA}}
 last_audited: {{DATE}}
 
@@ -24,20 +24,28 @@ detected_stack:
 
 modules:
   # 由 Phase A1 用户确认后写入，Phase A1 分级后补充 tier/complexity_score
+  # layout: file → 单文件 modules/{slug}.md
+  # layout: directory → 目录模式 modules/{slug}/_index.md + topic files
   - name: {{MODULE_NAME}}
-    code_root: {{MODULE_PATH}}    # 例: src/Modules/Orders/
-    business_summary: {{ONE_LINE}}  # 1 句业务定位（与 modules.md 一致）
-    tier: {{core|standard|lightweight}}     # 模块复杂度分级
-    complexity_score: {{0-5}}               # 6 分制评分
+    code_root: {{MODULE_PATH}}          # 例: src/Modules/Orders/
+    business_summary: {{ONE_LINE}}      # 1 句业务定位（与 INDEX.md Module Quick Index 一致）
+    tier: {{core|standard|lightweight}} # 模块复杂度分级
+    complexity_score: {{0-5}}           # 6 分制评分
+    detail_file: {{DETAIL_FILE_PATH}}   # 例: modules/orders.md 或 modules/orders/_index.md
+    layout: {{file|directory|none}}     # file=单文件 / directory=溢出目录 / none=Lightweight 无详情文件
+    overflow_files: []                  # 仅 layout=directory 时有值，例: [modules/orders/terms.md, modules/orders/flows.md]
 
 anchors:
   # 由 Phase A5 写入。每个被任何文档引用的文件都有一条记录。
   # 注意：path 是相对项目根的路径；symbols 仅当文档用了 #SymbolName 语法时才填充。
+  # docs 反向索引精确到模块文件（非平面文件名），用于自失效检测的精确定位。
   - path: {{RELATIVE_FILE_PATH}}
     sha256: {{GIT_HASH_OBJECT_OUTPUT}}     # git hash-object <file>
-    docs:                                  # 哪些 doc 引用了这个 anchor
-      - modules.md
-      - flows.md
+    docs:                                  # 哪些 doc 引用了这个 anchor（精确到模块文件）
+      - modules/orders.md                  # 单文件模式示例
+      - modules/trading/_index.md          # 目录模式 _index 示例
+      - modules/trading/flows.md           # 目录模式 topic 文件示例
+      - INDEX.md                           # 全局决策/不变式引用
     symbols:                               # 可选：仅当 [file#Symbol] 锚点存在时
       {{SymbolName}}:
         line: {{LINE_START}}                 # 起始行号（仅供提示，sha 不依赖行号）
@@ -64,7 +72,7 @@ trend:
 
 history:
   # 追加日志。每个 event 一行，永不删除（用户可手动清理超长历史）。
-  # event 枚举: init / sync / audit
+  # event 枚举: init / sync / audit / layout-upgrade / layout-downgrade
   - date: {{DATE}}
     event: init
     commit: {{INIT_COMMIT_SHA}}
