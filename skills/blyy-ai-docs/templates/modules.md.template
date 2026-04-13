@@ -25,17 +25,34 @@ code_anchors: []
 
 ## Module Registry
 
-### {{MODULE_NAME}}
+<!-- 模块按分级分组显示。分级由 module-tiering.md 的 6 分制评分决定。 -->
+<!-- Core (≥3分): 子代理全量分析 | Standard (1-2分): 适度分析 | Lightweight (0分): 主 agent 直接写 -->
 
+### {{MODULE_NAME}} `[Core]`
+
+- **tier**: Core (score: {{N}}/5)
 - **code_root**: `{{MODULE_PATH}}`
 - **business_summary**: {{ONE_LINE_SUMMARY}} `[{{MODULE_ENTRY_ANCHOR}}]`
 - **entry_anchors**:
   - `[{{MODULE_ENTRY_ANCHOR}}]` — {{ENTRY_PURPOSE}}
 - **depends_on**:
   - `{{OTHER_MODULE}}` via `[{{IMPORT_ANCHOR}}]`
-- **owner_signals**: {{OWNER_HINT_OR_NA}}  <!-- 来自 CODEOWNERS / commit 高频作者；可空 -->
 
-> 重复以上 block 给每个模块。**条目数 = 模块数**，预期 ≤ 30。超过 30 个 → 提示用户疑似 monorepo，是否分批生成。
+### {{MODULE_NAME}} `[Standard]`
+
+- **tier**: Standard (score: {{N}}/5)
+- **code_root**: `{{MODULE_PATH}}`
+- **business_summary**: {{ONE_LINE_SUMMARY}} `[{{MODULE_ENTRY_ANCHOR}}]`
+- **entry_anchors**:
+  - `[{{MODULE_ENTRY_ANCHOR}}]` — {{ENTRY_PURPOSE}}
+
+### Lightweight Modules
+
+| Module | Code Root | Business Summary |
+|--------|-----------|-----------------|
+| {{MODULE_NAME}} | `{{MODULE_PATH}}` | {{ONE_LINE}} `[{{ENTRY_ANCHOR}}]` |
+
+> **条目数 = 模块数**，预期 ≤ 30。超过 30 个 → 提示用户疑似 monorepo，是否分批生成。
 
 ---
 

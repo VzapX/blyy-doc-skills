@@ -54,6 +54,25 @@
 - AI 阅读时，UNVERIFIED 段落**不得作为决策依据**
 - Phase B/C 不会自动消除 UNVERIFIED——只有用户在 Pre-Fill Review 中确认才能升级
 
+### `<!-- TODO -->` 结构化标记
+
+```html
+<!-- TODO[p1, business-context]: 支付模块的对外承诺 -->
+```
+
+**格式**：`<!-- TODO[priority, type]: 简述 -->`
+
+- `priority` ∈ `{p0, p1, p2, p3}`（p0 最高）
+- `type` ∈ `{business-context, design-rationale, invariant-gap}`
+  - `business-context`：缺少业务上下文（模块定位、流程语义等）
+  - `design-rationale`：缺少设计决策的 "why"
+  - `invariant-gap`：缺少已知但未锚定的不变式/约束
+
+**处理规则**：
+- Mode A 生成时，无法锚定的业务断言优先用 `<!-- UNVERIFIED -->`；明确知道缺什么信息时用 TODO
+- Mode B 同步时，应**顺手检查**相关 TODO 是否可填充（详见 `sync-matrix.md` 三、渐进式 TODO 填充）
+- Mode C 审计时，统计 TODO 数量变化趋势，连续 3 次审计 TODO 上升 → 标记为腐烂信号
+
 ---
 
 ## 三、禁枚举铁律
@@ -190,6 +209,9 @@
 □ code-queries.md 没有粘贴 > 3 行的输出样例
 □ INDEX.md 的 Freshness 表已更新
 □ MANIFEST.history 已追加本次事件
+□ modules.md 每个模块的分级标签与 MANIFEST.modules 的 tier 字段一致
+□ 所有 TODO 标记使用结构化格式 <!-- TODO[pN, type]: desc -->
+□ .init-temp/ 或 .sync-temp/ 已清理（或大型项目模式下保留 master-task.yaml）
 ```
 
 任意一项不通过 → 必须修正后才能完成本次执行。

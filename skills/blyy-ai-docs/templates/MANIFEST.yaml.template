@@ -23,10 +23,12 @@ detected_stack:
   package_manager: {{PKG_MGR}}    # 例: nuget / pip / pnpm / cargo
 
 modules:
-  # 由 Phase A1 用户确认后写入
+  # 由 Phase A1 用户确认后写入，Phase A1 分级后补充 tier/complexity_score
   - name: {{MODULE_NAME}}
     code_root: {{MODULE_PATH}}    # 例: src/Modules/Orders/
     business_summary: {{ONE_LINE}}  # 1 句业务定位（与 modules.md 一致）
+    tier: {{core|standard|lightweight}}     # 模块复杂度分级
+    complexity_score: {{0-5}}               # 6 分制评分
 
 anchors:
   # 由 Phase A5 写入。每个被任何文档引用的文件都有一条记录。
@@ -47,6 +49,18 @@ code_queries_registered:
   - R-ENT-01-cs
   - R-EP-01-cs
   - R-MOD-01
+
+trend:
+  # Mode C 审计时追加一行，永不删除。用于检测文档腐烂趋势。
+  # 连续 3 次审计 TODO 上升 → 标记为腐烂信号。
+  - date: {{DATE}}
+    commit: {{SHA_SHORT}}
+    modules: {{N}}
+    anchors: {{M}}
+    stale: {{K}}
+    unverified: {{L}}
+    todo_count: {{T}}
+    event: {{init|audit}}
 
 history:
   # 追加日志。每个 event 一行，永不删除（用户可手动清理超长历史）。

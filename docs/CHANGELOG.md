@@ -2,6 +2,68 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 格式。
 
+## [0.5.0] — 2026-04-13
+
+### 重构 — 合并为单一技能 `blyy-ai-docs`
+
+将 `blyy-init-docs` 和 `blyy-doc-sync` 的精华融入 `blyy-ai-docs`，删除这两个技能，仓库从"三个技能"简化为"一个技能三种模式"。
+
+**迁移的核心概念**：
+
+- **模块复杂度分级**（来自 init-docs）：新建 `resources/module-tiering.md`，6 分制评分控制**分析深度**（Core=子代理全量分析 / Standard=适度分析 / Lightweight=跳过子代理），不控制文件结构
+- **架构布局检测**（来自 init-docs）：融入 `resources/tech-stack-matrix.md` Section VI-VII，支持 Layered vs Domain-driven 检测 + 跨层业务域提取
+- **大型项目模式**（来自 init-docs）：新建 `resources/large-project-mode.md`，>500 文件触发分阶段执行 + 跨会话持久化（`.init-temp/master-task.yaml`）
+- **同步矩阵**（来自 doc-sync）：新建 `resources/sync-matrix.md`，代码变更→文档更新映射（简化为 ~15 条映射 ai-docs 的 7 个文件）
+- **基线趋势追踪**（来自 doc-sync）：MANIFEST.yaml 新增 `trend` 节，连续 3 次审计 TODO 上升 → 标记腐烂信号
+- **结构化 TODO**（来自 doc-sync）：简化为 `<!-- TODO[p0-p3, type]: desc -->`（去掉 owner，AI-only 无人类负责人）
+- **渐进式 TODO 填充**（来自 doc-sync）：Mode B 同步时顺手填充相关 TODO
+- **断点续跑**（来自 init-docs）：新增 Phase 0 检测 `.init-temp/master-task.yaml`
+
+**明确不迁移（违反核心原则"不重复代码事实"）**：
+
+- 确定性清单预扫描 + 物化基线计数
+- 14 项完成度检查中的覆盖率验证
+- 人类运维文档（deployment/runbook/monitoring）
+- 28 个面向人类的文档模板
+- 旧文档结构化提取（legacy-extraction）
+- Per-document `last_synced_commit`
+- Pre-commit validation gate
+
+**SKILL.md 变更**：
+
+- 删除"与现有 skill 的关系"章节
+- 新增 Phase 0 断点续跑检测
+- Phase A0 新增文件数检测（>500 触发大型项目模式）
+- Phase A1 重写为"模块识别与分级"，含架构布局检测 + 跨层业务域提取 + 分级评分
+- Phase A3 按分级调整子代理任务深度
+- Mode B Phase B1 重写为"主动映射 + 被动失效检测"
+- Mode B 新增 Phase B2 渐进式 TODO 填充 + Phase B3 分级演化检测
+- Mode C 新增 Phase C1.5 模块分级全量复评 + Phase C3 趋势追踪
+- 资源文件表从 5 个扩展到 8 个
+- 核心铁律新增"结构化 TODO 格式"
+
+**模板变更**：
+
+- `MANIFEST.yaml.template`：modules 条目新增 tier + complexity_score；新增 trend 节
+- `modules.md.template`：按分级分组显示（Core 完整块 / Standard 适度块 / Lightweight 表格行）
+- `INDEX.md.template`：新鲜度概览新增 TODO markers + Trend rows
+
+**仓库级变更**：
+
+- `install.sh` / `install.ps1`：默认只安装 `blyy-ai-docs`
+- `README.md`：从"三个技能"重写为"一个技能三种模式"
+- `CLAUDE.md`：重写为单技能描述 + 四条核心原则
+- `docs/architecture.md`：仓库结构图仅保留 ai-docs；删除三技能边界表/数据契约
+- `docs/usage-guide.md`：重写为 Mode A/B/C 使用指南
+- `docs/customization.md`：更新为 ai-docs 模板路径和资源文件清单
+
+**删除**：
+
+- `skills/blyy-init-docs/` — 整个目录
+- `skills/blyy-doc-sync/` — 整个目录
+
+---
+
 ## [0.4.0] — 2026-04-12
 
 ### 新增 — 第三个 Skill：`blyy-ai-docs`
@@ -173,6 +235,7 @@
 - 多 AI 工具兼容（Gemini / Codex / Cursor / Claude Code）
 - Windows / Linux / macOS 安装脚本
 
+[0.5.0]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.5.0
 [0.4.0]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.4.0
 [0.3.2]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.3.2
 [0.3.1]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.3.1

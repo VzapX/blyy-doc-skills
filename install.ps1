@@ -7,7 +7,7 @@
 .PARAMETER TargetProject
     目标项目的根目录路径
 .PARAMETER Skills
-    要安装的技能列表，默认安装全部。可选值：blyy-init-docs, blyy-doc-sync, blyy-ai-docs
+    要安装的技能列表，默认安装全部。可选值：blyy-ai-docs
 .PARAMETER Tool
     指定 AI 工具，跳过自动检测。可选值：gemini, claude, cursor, all
 .EXAMPLE
@@ -15,13 +15,13 @@
 .EXAMPLE
     .\install.ps1 -TargetProject "C:\my-project" -Tool claude
 .EXAMPLE
-    .\install.ps1 -TargetProject "C:\my-project" -Skills blyy-init-docs
+    .\install.ps1 -TargetProject "C:\my-project" -Skills blyy-ai-docs
 #>
 param(
     [Parameter(Mandatory = $true)]
     [string]$TargetProject,
 
-    [string[]]$Skills = @("blyy-init-docs", "blyy-doc-sync", "blyy-ai-docs"),
+    [string[]]$Skills = @("blyy-ai-docs"),
 
     [ValidateSet("gemini", "claude", "cursor", "all", "")]
     [string]$Tool = ""
@@ -140,9 +140,8 @@ if ($installedCount -gt 0) {
     Write-Host "✅ 安装完成！共安装 $installedCount 个技能。" -ForegroundColor Green
     Write-Host ""
     Write-Host "下一步：" -ForegroundColor White
-    Write-Host "  1. 使用 blyy-init-docs 初始化人类可读的 docs/（在 AI 工具中提及该技能名即可）" -ForegroundColor Gray
-    Write-Host "  2. 后续代码变更时，blyy-doc-sync 会自动提醒更新 docs/" -ForegroundColor Gray
-    Write-Host "  3. 如需生成 AI 专用索引 ai-docs/，调用 blyy-ai-docs（支持 init/sync/audit 三模式）" -ForegroundColor Gray
+    Write-Host "  在 AI 工具中提及 blyy-ai-docs 即可生成 AI 专用索引 ai-docs/" -ForegroundColor Gray
+    Write-Host "  技能会根据 MANIFEST.yaml 状态自动分派 Init / Sync / Audit 三种模式" -ForegroundColor Gray
 }
 else {
     Write-Host "⚠️  没有新技能被安装（可能全部已存在）。" -ForegroundColor Yellow

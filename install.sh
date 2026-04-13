@@ -20,7 +20,7 @@ SKILLS_SOURCE_DIR="$SCRIPT_DIR/skills"
 # Defaults
 TARGET_PROJECT=""
 TOOL=""
-SKILLS="blyy-init-docs,blyy-doc-sync,blyy-ai-docs"
+SKILLS="blyy-ai-docs"
 
 # --- Parse Arguments ---
 while [[ $# -gt 0 ]]; do
@@ -39,7 +39,7 @@ while [[ $# -gt 0 ]]; do
             echo "示例:"
             echo "  $0 /path/to/project"
             echo "  $0 /path/to/project --tool claude"
-            echo "  $0 /path/to/project --skills blyy-init-docs"
+            echo "  $0 /path/to/project --skills blyy-ai-docs"
             exit 0
             ;;
         *)
@@ -159,9 +159,8 @@ if [[ $installed_count -gt 0 ]]; then
     echo "✅ 安装完成！共安装 $installed_count 个技能。"
     echo ""
     echo "下一步："
-    echo "  1. 使用 blyy-init-docs 初始化人类可读的 docs/（在 AI 工具中提及该技能名即可）"
-    echo "  2. 后续代码变更时，blyy-doc-sync 会自动提醒更新 docs/"
-    echo "  3. 如需生成 AI 专用索引 ai-docs/，调用 blyy-ai-docs（支持 init/sync/audit 三模式）"
+    echo "  在 AI 工具中提及 blyy-ai-docs 即可生成 AI 专用索引 ai-docs/"
+    echo "  技能会根据 MANIFEST.yaml 状态自动分派 Init / Sync / Audit 三种模式"
 else
     echo "⚠️  没有新技能被安装（可能全部已存在）。"
 fi

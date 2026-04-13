@@ -42,6 +42,8 @@ code_anchors: []
 | Anchors tracked | {{ANCHOR_COUNT}} |
 | Stale docs | {{STALE_COUNT}} of {{TOTAL_DOC_COUNT}} |
 | UNVERIFIED items | {{UNVERIFIED_COUNT}} |
+| TODO markers | {{TODO_COUNT}} |
+| Trend rows | {{TREND_ROW_COUNT}} |
 
 ## Module Quick Index
 
