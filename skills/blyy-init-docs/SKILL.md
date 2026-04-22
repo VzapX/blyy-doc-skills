@@ -156,7 +156,7 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 ```
 
 > **模板架构变更要点（v0.2.0+）**：
-> - 所有 `docs/*.template` 与 `modules/*.template` 的 YAML front matter 扩展了新字段：`audience` / `read_priority` / `max_lines` / `parent_doc` / `code_anchors` / `applicable_project_types` / `last_synced_commit`，详见 `resources/doc-guide.md` 七、YAML Front Matter 字段标准
+> - 所有 `docs/*.template` 与 `modules/*.template` 的 YAML front matter 扩展了新字段：`audience` / `read_priority` / `max_lines` / `parent_doc` / `code_anchors` / `applicable_project_types` / `last_synced_commit`，详见 `resources/front-matter-spec.md` 七、YAML Front Matter 字段标准
 > - **Phase 1 骨架按 `applicable_project_types` 字段自动过滤**：识别项目类型后，仅生成 front matter 中包含该类型的模板，无需依赖 AI 阅读项目类型适配指南
 > - 所有列表型字段必须包含「代码位置」列（`file:line` 格式）
 > - 所有 `<!-- TODO -->` 必须使用结构化格式 `<!-- TODO[priority,type,owner]: ... -->`
@@ -221,8 +221,8 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 
 **主 agent 负责：**
 
-1. **识别技术栈**：扫描项目清单文件，确认语言和框架（详见 `resources/doc-guide.md` 技术栈识别表）
-2. **两级模块识别**：先识别项目（第一级），再通过**架构布局检测**（Step 2.5）判断项目是领域组织还是分层组织，然后使用对应策略识别子模块。**对于分层架构项目，必须使用跨层业务领域提取（Step 2.6）**而非目录级识别（详见 `resources/doc-guide.md` 模块识别策略）
+1. **识别技术栈**：扫描项目清单文件，确认语言和框架（详见 `resources/tech-stack-matrix.md` 三、技术栈识别）
+2. **两级模块识别**：先识别项目（第一级），再通过**架构布局检测**（Step 2.5）判断项目是领域组织还是分层组织，然后使用对应策略识别子模块。**对于分层架构项目，必须使用跨层业务领域提取（Step 2.6）**而非目录级识别（详见 `resources/tech-stack-matrix.md` 五、模块识别策略）
 3. **确定性清单预扫描**：模块识别完成后、分配子代理任务前，执行确定性清单预扫描（详见下方）
 4. **加载旧文档提取产物**：若 Phase 1.5 生成了提取结果，读取各提取文件的摘要和条目清单，作为子代理任务分配的依据
 5. **分配子代理任务**：将可并行的分析工作分发给子代理，每个子代理同时接收代码扫描范围、**确定性清单（作为强制检查表）**和对应的旧文档提取产物
@@ -233,7 +233,7 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 
 **执行步骤：**
 
-1. **文件级清点** — 根据识别的技术栈，从 `resources/doc-guide.md` 确定性清点命令矩阵中选择对应命令，统计各类别文件精确数量：
+1. **文件级清点** — 根据识别的技术栈，从 `resources/tech-stack-matrix.md` 一、确定性清点命令矩阵中选择对应命令，统计各类别文件精确数量：
 
    ```bash
    # 示例输出格式（主 agent 需执行并记录结果）
@@ -369,9 +369,9 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 
 > **检查表核对要求**：你接收到的确定性清单是通过 shell 命令生成的完整文件列表。你**必须**为清单中的每一个文件产出对应条目。完成分析后，逐一核对清单，确保输出条目数与清单条目数一致。若某个文件确实不包含有价值的信息，仍需在输出中列出并标注原因。
 >
-> **事实级别标注要求**：每个分析条目必须标注 T1/T2/T3 级别和代码依据（详见 `resources/doc-guide.md` 三级事实分类）。T3 条目单独汇总在输出末尾的「待澄清项」区域。
+> **事实级别标注要求**：每个分析条目必须标注 T1/T2/T3 级别和代码依据（详见 `resources/fact-classification.md` 二、三级事实分类）。T3 条目单独汇总在输出末尾的「待澄清项」区域。
 >
-> **字段说明提取要求**：扫描实体类/模型类时，**必须同时提取每个属性/字段的注释文本**（文档注释、数据注解、迁移文件注释），作为 `data-model.md` 表结构详情表「说明」列的值。提取优先级和各技术栈注释来源详见 `resources/doc-guide.md` 四.2「字段说明必填」规则。禁止将说明列留空。
+> **字段说明提取要求**：扫描实体类/模型类时，**必须同时提取每个属性/字段的注释文本**（文档注释、数据注解、迁移文件注释），作为 `data-model.md` 表结构详情表「说明」列的值。提取优先级和各技术栈注释来源详见 `resources/tech-stack-matrix.md` 二、字段说明提取矩阵。禁止将说明列留空。
 >
 > **进度输出要求**：
 > 1. 每处理完 5 个文件，输出一行进度（含已处理/总数和最近处理的文件名）
@@ -546,7 +546,7 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 - 用户暂停后，可在新会话中通过 `docs/.init-temp/progress.md`（标准模式）或 `.init-docs/master-task.md`（大型模式）恢复进度
 - 已有文档优先：填充每个文档时先检查 Phase 1.5 提取产物中的对应信息
 
-**填充原则：**（详见 `resources/doc-guide.md` 四、Phase 2 填充规则 + 七、YAML Front Matter 字段标准）
+**填充原则：**（详见 `resources/fact-classification.md` 填充原则与三级事实分类 + `resources/front-matter-spec.md` YAML Front Matter 字段标准）
 
 - 穷举式枚举 + 确定性清单保障
 - 三级事实分类（T1/T2/T3）+ 填充前审查关卡
@@ -554,7 +554,7 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 - 已有文档优先
 - T3 推测性内容经审查关卡统一处理
 - **代码位置列必填**：所有列表型字段（实体表、文件清单、流程步骤、API 端点、配置项等）必须填充「源文件」或「定义位置」列，使用 `path/to/file.ext:行号` 格式（无确切行号时退化为 `path/to/file.ext`）。无代码位置的条目视为不可信，应标注 `<!-- UNVERIFIED -->`
-- **结构化 TODO 格式**：未确认内容必须使用 `<!-- TODO[priority,type,owner]: 简述 -->` 位置参数格式，详见 `resources/doc-guide.md` 七.4 — `priority` ∈ {p0,p1,p2,p3}，`type` ∈ {business-context,design-rationale,ops-info,security-info,external-link,metric-baseline}，`owner` ∈ {user,dev-team,ops-team,security-team,具体负责人名}
+- **结构化 TODO 格式**：未确认内容必须使用 `<!-- TODO[priority,type,owner]: 简述 -->` 位置参数格式，详见 `resources/front-matter-spec.md` 七.4 — `priority` ∈ {p0,p1,p2,p3}，`type` ∈ {business-context,design-rationale,ops-info,security-info,external-link,metric-baseline}，`owner` ∈ {user,dev-team,ops-team,security-team,具体负责人名}
 - **front matter 完整性**：每个文档必须填充 `last_updated`（当前日期）、`last_synced_commit`（初始化时填 `init`，由 doc-sync 后续维护）、`audience`、`read_priority`、`code_anchors`（实际代码目录/文件路径）字段，禁止保留模板占位符
 - **AI-READ-HINT 块完整性**：保留模板中的 `AI-READ-HINT` 块，根据当前文档实际内容调整 `READ-WHEN`/`SKIP-WHEN`/`PAIRED-WITH` 描述，禁止整块删除
 - **INCLUDE-IF 条件段处理**：模板中标注 `<!-- INCLUDE-IF: 条件 -->` 的段落，若项目不满足条件直接整段删除；满足条件时移除标记并填充内容
@@ -603,7 +603,10 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 
 | 文件 | 何时读取 | 用途 |
 |------|---------|------|
-| `resources/doc-guide.md` | Phase 1/2 填充时 | 文档架构、各文档职责、多语言锚点矩阵、Phase 2 填充规则详解 |
+| `resources/doc-guide.md` | Phase 1/Phase 3 | 文档架构总览、各文档职责、模块三级形态、项目类型适配（入口索引） |
+| `resources/tech-stack-matrix.md` | Phase 0.3 / Phase 2 扫描前 | 确定性清点命令矩阵、字段说明提取矩阵、技术栈/锚点/模块识别策略（Step 1-4）、配置识别策略 |
+| `resources/fact-classification.md` | Phase 2 子代理分发前 | Phase 2 填充原则（6 条）、三级事实分类（T1/T2/T3）、子代理输出格式 |
+| `resources/front-matter-spec.md` | Phase 1 骨架生成 / Phase 2 填写占位符时 | 模板占位符、YAML Front Matter 字段标准、AI 提示块、结构化 TODO（type/priority/owner 枚举唯一权威来源） |
 | `resources/legacy-extraction.md` | Phase 1.5 触发时 | 旧文档结构化提取的 4 步详细流程 |
 | `resources/large-project-mode.md` | 进入大型项目模式时 | Phase 2A-2D 完整流程 + 任务持久化机制 |
 | `resources/phase3-verification.md` | 进入 Phase 3 时 | 14 项检查项 + 基线快照 YAML schema + INIT-REPORT 模板 |

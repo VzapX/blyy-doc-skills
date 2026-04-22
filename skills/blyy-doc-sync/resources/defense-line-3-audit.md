@@ -22,7 +22,7 @@
 
 ## Step 1 — 全量确定性重扫
 
-使用 `blyy-init-docs` 的 `resources/doc-guide.md` 中的确定性清点命令矩阵，对整个项目重新执行文件级清点：
+使用 `blyy-init-docs/resources/tech-stack-matrix.md` 一、确定性清点命令矩阵，对整个项目重新执行文件级清点：
 
 ```
 📊 定期审计 — 全量清点:
@@ -52,7 +52,7 @@
 **执行步骤：**
 
 1. **读取当前分级基线**：从 `docs/doc-maintenance.md` 基线快照的 `module_tiers` 字段中提取每个模块的级别
-2. **全量重评分**：对每个模块执行复杂度评分（规则见 `blyy-init-docs/resources/doc-guide.md` 模块复杂度评分规则）：
+2. **全量重评分**：对每个模块执行复杂度评分（规则见 `blyy-init-docs/resources/doc-guide.md` 二、模块复杂度评分规则）：
    - 统计模块源文件数
    - 检查是否有 Entity/Model 文件
    - 检查是否有 Controller/Handler 文件
