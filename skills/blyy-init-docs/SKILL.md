@@ -577,6 +577,8 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 ### Phase 3 — 最终检查与完成报告
 
 > **执行**：进入 Phase 3 时**必须 Read `resources/phase3-verification.md`** 获取完整的 14 项检查项、基线快照 YAML schema 和 INIT-REPORT 模板。
+>
+> **版本号占位符**：写入基线快照前，必须读取 `skills/blyy-init-docs/VERSION` 文件的内容，用其替换 YAML 模板中的 `{{SKILL_VERSION}}` 占位符，以免硬编码版本号与实际发版脱节。
 
 **核心原则**：Phase 3 的完整性验证基于**确定性清单比对**（从 `inventory.md` 读取基线数量与文档实际覆盖比对），而非重新扫描代码。
 

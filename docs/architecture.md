@@ -176,5 +176,6 @@ description: 一句话描述触发时机
 
 每次发版必须：
 1. 更新 `docs/CHANGELOG.md`
-2. 同步更新 `phase3-verification.md` 中的 `skill_version` 字段
+2. 更新 `skills/blyy-init-docs/VERSION` 和 `skills/blyy-doc-sync/VERSION` 两个版本号文件（Phase 3 写入基线快照时从此处读取替换 `{{SKILL_VERSION}}` 占位符）
 3. 同步更新 `SKILL.md` 中的「模板架构变更要点」版本号引用
+4. （可选）更新 README 顶部的版本徽章

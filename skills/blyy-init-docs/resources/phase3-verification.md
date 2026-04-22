@@ -31,7 +31,7 @@
     snapshot_date: YYYY-MM-DD
     snapshot_commit: <git rev-parse HEAD 当前 commit>
     last_synced_commit: <同上，doc-sync 后续会更新此字段>
-    skill_version: blyy-init-docs v0.3.0
+    skill_version: blyy-init-docs v{{SKILL_VERSION}}
 
     inventory:
       modules: P
