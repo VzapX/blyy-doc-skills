@@ -123,9 +123,9 @@
 - 多 AI 工具兼容（Gemini / Codex / Cursor / Claude Code）
 - Windows / Linux / macOS 安装脚本
 
-[0.3.2]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.3.2
-[0.3.1]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.3.1
-[0.3.0]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.3.0
-[0.2.0]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.2.0
-[0.1.1]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.1.1
-[0.1.0]: https://github.com/wugl/blyy-doc-skills/releases/tag/v0.1.0
+[0.3.2]: https://github.com/VzapX/blyy-doc-skills/releases/tag/v0.3.2
+[0.3.1]: https://github.com/VzapX/blyy-doc-skills/releases/tag/v0.3.1
+[0.3.0]: https://github.com/VzapX/blyy-doc-skills/releases/tag/v0.3.0
+[0.2.0]: https://github.com/VzapX/blyy-doc-skills/releases/tag/v0.2.0
+[0.1.1]: https://github.com/VzapX/blyy-doc-skills/releases/tag/v0.1.1
+[0.1.0]: https://github.com/VzapX/blyy-doc-skills/releases/tag/v0.1.0
