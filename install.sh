@@ -70,6 +70,17 @@ for skill in "${SKILL_ARRAY[@]}"; do
     fi
 done
 
+# Warn if doc-sync installed without init-docs (cross-skill resource dependency)
+has_sync=false
+has_init=false
+for skill in "${SKILL_ARRAY[@]}"; do
+    [[ "$skill" == "blyy-doc-sync" ]] && has_sync=true
+    [[ "$skill" == "blyy-init-docs" ]] && has_init=true
+done
+if [[ "$has_sync" == "true" && "$has_init" == "false" ]]; then
+    echo "[WARN] 仅安装 blyy-doc-sync 会导致对 blyy-init-docs/resources/doc-guide.md 的跨 skill 引用失效。建议同时安装 blyy-init-docs（移除 --skills 参数即可）。" >&2
+fi
+
 # --- Detect AI Tools ---
 detect_tools() {
     local project_path="$1"

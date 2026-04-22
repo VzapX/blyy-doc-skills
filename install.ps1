@@ -45,6 +45,11 @@ foreach ($skill in $Skills) {
     }
 }
 
+# Warn if doc-sync installed without init-docs (cross-skill resource dependency)
+if (($Skills -contains "blyy-doc-sync") -and (-not ($Skills -contains "blyy-init-docs"))) {
+    Write-Host "[WARN] 仅安装 blyy-doc-sync 会导致对 blyy-init-docs/resources/doc-guide.md 的跨 skill 引用失效。建议同时安装 blyy-init-docs（移除 -Skills 参数即可）。" -ForegroundColor Yellow
+}
+
 # --- Detect AI Tools ---
 function Detect-AITools {
     param([string]$ProjectPath)
