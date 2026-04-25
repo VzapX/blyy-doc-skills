@@ -1,6 +1,6 @@
 ---
 name: blyy-init-docs
-description: 为项目一次性初始化完整的文档体系。当用户要求"初始化文档 / 建立文档骨架 / doc init / 生成文档结构"，或项目从零开始建立文档、从遗留项目接手梳理文档时触发。扫描代码生成架构/模块/数据模型/部署等全套文档，已有 docs/ 自动迁移到 docs-old/ 再做结构化提取。每个项目只运行一次；日常维护用 blyy-doc-sync，不要重复执行本 skill。
+description: 为项目一次性生成业务知识文档。当用户要求"初始化文档 / 建立文档骨架 / doc init / 生成文档结构"，或项目从零开始、从遗留项目接手梳理文档时触发。只生成业务语义层文档（架构总览、模块业务职责、业务术语映射、架构决策、跨模块流程），不生成 code-map、api-reference、data-model、deployment、runbook 等代码级或运营级文档——这些 AI 直接读代码或运维系统即可获取。已有 docs/ 自动迁移到 docs-old/ 再做结构化提取。每个项目只运行一次；日常维护用 blyy-doc-sync，不要重复执行。
 ---
 
 # blyy-init-docs — 项目文档初始化 Skill

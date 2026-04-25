@@ -1,6 +1,6 @@
 ---
 name: blyy-doc-sync
-description: 代码变更后保持文档与代码同步。任何新增/删除/修改源文件、配置、数据库 schema、API 后触发，以及用户说"同步文档 / 更新文档 / doc sync / 文档审计"时触发。执行三道防线：实时同步、提交前验证、定期审计（月/季度）。依赖项目已有 docs/doc-maintenance.md 基线（通常由 blyy-init-docs 生成），否则使用内置 fallback 矩阵。不要在没有任何文档体系的项目上强行执行。
+description: 代码变更后保持业务知识文档与代码同步。任何新增/删除/修改源文件、配置、数据库 schema、业务流程后触发，以及用户说"同步文档 / 更新文档 / doc sync / 文档审计"时触发。执行三道防线：实时同步、提交前验证、定期审计。仅维护由 blyy-init-docs 生成的业务知识文档（glossary、modules、core-flow、DECISIONS 等），不管理 code-map、api-reference 等代码级文档（AI 直接读源码）。依赖项目已有 docs/doc-maintenance.md 基线，否则使用内置 fallback 矩阵。不要在没有任何文档体系的项目上强行执行。
 ---
 
 # blyy-doc-sync — 代码-文档持续同步 Skill
