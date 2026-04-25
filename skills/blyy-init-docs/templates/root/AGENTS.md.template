@@ -35,8 +35,8 @@
 
 标准工作流：
 1. 读 `docs/ARCHITECTURE.md` → 确认任务类型，查「AI 任务路由表」
-2. 按路由表读对应的最小文档集（如 `modules/<m>/code-map.md`）
-3. 通过文档中的 `file:line` 代码锚点直接定位代码位置
+2. 按路由表读对应的最小文档集（如 `docs/modules/<m>.md`、`docs/glossary.md`）
+3. 通过文档中的「代码锚点」章节或 `file:line` 引用直接定位代码位置
 4. 只有在文档明确给出定位后，才去读/修改对应源码
 
 **禁止**在未读 `docs/ARCHITECTURE.md` 的情况下直接用 Grep/Glob 搜索代码作为任务的第一步。

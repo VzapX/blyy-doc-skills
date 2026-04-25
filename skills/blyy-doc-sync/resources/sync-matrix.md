@@ -6,45 +6,21 @@
 
 | 代码变更类型 | 需更新的文档 | 更新内容 |
 |-------------|-------------|---------|
-| 新增源文件 | `docs/code-map.md` | 在对应表格加一行 |
-| 重命名源文件 | `docs/code-map.md` | 更新所有引用 |
-| 删除源文件 | `docs/code-map.md` | 移除对应行，扫描死引用 |
-| 新增/修改配置项 | `docs/config.md` | 更新配置项列表 |
-| 删除配置项 | `docs/config.md` | 移除对应行 |
-| 组件关系变化 | `docs/ARCHITECTURE.md` | 更新架构图 |
-| 数据流变化 | `docs/ARCHITECTURE.md` | 更新数据流图 |
-| 新增模块 | `docs/modules.md` + 按评分创建对应文档 | 评分→注册表加一行 + 按级别创建文档（Core=目录/Standard=单文件/Lightweight=内联） |
-| 删除模块 | `docs/modules.md` + 对应模块文档 | 移除注册表行 + 归档模块文档（无论何种级别） |
-| 模块级别升级 | `docs/modules.md` + 模块文档 + `docs/doc-maintenance.md` | 转换文档形态（单文件→目录/内联→单文件）+ 更新注册表分组 + 更新基线 |
-| 模块级别降级 | `docs/modules.md` + 模块文档 + `docs/doc-maintenance.md` | 合并文档形态（目录→单文件/单文件→内联）+ 更新注册表分组 + 更新基线 |
-| 模块职责变更 | `docs/modules.md`（或模块级 `README.md`） | 更新职责描述 |
-| 跨模块业务流程变化 | `docs/core-flow.md` | 更新流程图和说明 |
-| 模块内业务流程变化 | `docs/modules/<name>/flow.md` | 更新模块内流程 |
-| 数据库表结构变更（公共） | `docs/data-model.md` | 更新公共模型 |
-| 数据库表结构变更（模块内） | `docs/modules/<name>/data-model.md` | 更新模块内模型 |
-| 新增功能 | `docs/features.md` | 功能列表加一行 |
-| 移除功能 | `docs/features.md` | 标记为已废弃 |
-| 构建/运行/测试命令变化 | `AGENTS.md` + `README.md` | 更新命令部分 |
+| 新增/删除模块 | `docs/modules.md` + `modules/<m>.md` | 注册表加减 + 创建/归档单文件 |
+| 模块职责/边界变更 | `modules/<m>.md` | 更新职责与边界章节 |
+| 跨模块业务流程变化 | `docs/core-flow.md` | 更新流程图与说明 |
+| 模块内业务流程变化 | `modules/<m>.md` 的「核心业务流程」章节 | 更新模块内流程 |
+| 新增/移除用户可见功能 | `docs/modules.md` 的功能列表 | 功能表加/改一行（移除项标注 deprecated） |
+| 配置项的业务语义变更 | `docs/config.md` | 更新说明列（不记值/默认/类型） |
 | 新增架构决策 | `docs/DECISIONS.md` | 新增 ADR 条目 |
-| 发现新的运维故障模式 | `docs/runbook.md` | 新增事故剧本 |
-| 发布新版本 | `CHANGELOG.md` | 新增版本条目 |
-| 部署流程变化 | `docs/deployment.md` | 更新部署步骤 |
-| API 接口变更（模块内） | `docs/modules/<name>/api-reference.md` + `docs/api-reference.md`（索引） | 更新模块接口列表 + 全局索引接口数 |
-| API 认证/限流策略变更（全局） | `docs/api-reference.md` | 更新认证与限流章节 |
-| API 限流策略变更（模块级） | `docs/modules/<name>/api-reference.md` | 更新模块限流规则 |
-| 公共数据库表新增/修改 | `docs/data-model.md` + `docs/database/` | 更新公共模型 + 同步 schema 文件 |
-| 模块数据库表新增/修改 | `docs/modules/<name>/data-model.md` + `docs/modules/<name>/database/` | 更新模块模型 + 同步 schema 文件 |
-| 缓存 key/结构变更 | `docs/data-model.md` | 更新非关系型数据模型章节 |
-| 消息/事件 schema 变更 | `docs/data-model.md` | 更新消息/事件 Schema 章节 |
-| 测试策略/框架变更 | `docs/testing.md` | 更新测试分层和工具信息 |
-| 测试覆盖率要求变更 | `docs/testing.md` | 更新覆盖率要求 |
-| 监控指标变更 | `docs/monitoring.md`（若存在） | 更新核心指标表 |
-| 告警规则变更 | `docs/monitoring.md`（若存在） | 更新告警规则表 |
 | 新增/重命名核心实体类 | `docs/glossary.md` | 在「业务术语 ↔ 代码符号」表新增/更新映射行 |
 | 新增/废弃业务术语 | `docs/glossary.md` | 更新术语表，废弃项标注 deprecated |
+| 数据库字段增加/改变业务含义 | `docs/glossary.md` 的「字段业务语义」章节 | 新增/更新字段业务含义条目 |
 | 引入新缩写或别名 | `docs/glossary.md` | 在「同义词/缩写」段补充 |
+| 模块入向/出向依赖变化 | `modules/<m>.md` 的「依赖关系」章节 + `docs/modules.md` 模块间依赖表 | 更新依赖表两端 |
+| 构建/运行/测试命令变化 | `AGENTS.md` + `README.md` | 更新命令部分 |
 | 新增/修改文档文件 | `docs/ARCHITECTURE.md` | 更新文档索引和 AI 任务路由表 |
-| 模块入向/出向依赖变化 | `docs/modules/<name>/README.md` + `docs/modules.md` | 更新依赖表两端 |
+| 发布新版本 | `CHANGELOG.md` | 新增版本条目 |
 
 ## YAML 元数据更新规则
 

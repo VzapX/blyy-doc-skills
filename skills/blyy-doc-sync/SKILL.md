@@ -59,16 +59,15 @@ AI 工具在执行**任何代码修改任务**后，应自动触发 blyy-doc-syn
 
 | 变更涉及的区域 | 确定性扫描动作 | 比对目标 |
 |---------------|--------------|---------|
-| 实体/模型文件 | `fd -e {ext} -p "Entity\|Model" --type f` | `docs/data-model.md` + 模块级 `data-model.md` 中列出的实体数量 |
-| 控制器/路由 | `fd -e {ext} -p "Controller\|Handler" --type f` | `docs/api-reference.md` 或 `docs/features.md` 中的端点数量 |
-| 配置文件 | `fd "appsettings\|config\|.env" --type f` | `docs/config.md` 中列出的配置文件/配置项数量 |
-| 服务文件 | `fd -e {ext} -p "Service" --type f` | 各模块 `code-map.md` 中列出的服务数量 |
-| 模块目录 | 检查 `docs/modules/` 下目录 vs 代码中模块 | `docs/modules.md` 注册表条目数 |
+| 实体/模型文件 | `fd -e {ext} -p "Entity\|Model" --type f` | `docs/glossary.md` 术语表 + 字段语义表条目覆盖度 |
+| 控制器/路由/CLI 入口 | `fd -e {ext} -p "Controller\|Handler" --type f` | `docs/modules.md` 功能列表条目覆盖度 |
+| 配置文件 | `fd "appsettings\|config\|.env" --type f` | `docs/config.md` 中列出的配置项数量 |
+| 模块目录 | 检查 `docs/modules/` 下文件 vs 代码中模块 | `docs/modules.md` 注册表条目数 |
 
 **扫描结果处理：**
 
 - **数量一致** → 可能只需更新内容，按常规同步矩阵更新
-- **代码数量 > 文档数量** → 发现遗漏，必须补充。列出具体差异：`"代码中有 OrderService 但 code-map.md 中未列出"`
+- **代码数量 > 文档数量** → 发现遗漏，必须补充。列出具体差异：`"代码中有 OrderService 但 glossary.md 术语表中未登记"`
 - **代码数量 < 文档数量** → 文档引用了已删除的代码，必须清理
 
 #### Step 2.5 — 模块级别升降信号检测
@@ -158,15 +157,14 @@ AI 工具在执行**任何代码修改任务**后，应自动触发 blyy-doc-syn
 不仅靠 AI 阅读检查，还执行确定性命令验证：
 
 ```bash
-# 1. 检查 code-map.md 中的文件引用是否存在
-# 提取所有 markdown 链接中的文件路径，检查每个是否存在
+# 1. 检查文档间交叉引用是否存在
 rg -o '\[.*?\]\(((?!http)[^)]+)\)' docs/ --no-filename | \
   grep -oP '\(([^)]+)\)' | tr -d '()' | \
   while read f; do [ ! -e "$f" ] && echo "死链: $f"; done
 
-# 2. 检查 modules.md 注册表 vs 实际模块目录
+# 2. 检查 modules.md 注册表 vs 实际模块文件
 diff <(rg -oP '\| \[(\w+)\]' docs/modules.md | sort) \
-     <(ls docs/modules/ | sort) 
+     <(ls docs/modules/ | sort)
 
 # 3. 检查文档 last_updated 是否当天
 rg "last_updated:" docs/ --type md -l | \
@@ -176,15 +174,13 @@ rg "last_updated:" docs/ --type md -l | \
 #### 验证清单
 
 ```
-□ code-map.md 中所有文件路径存在（无死引用）— 用 shell 命令验证
 □ modules.md 注册表 vs docs/modules/ 目录一致 — 用 shell 命令验证
+□ glossary.md 业务术语条目覆盖代码中的核心实体/服务类
+□ modules.md 功能列表覆盖代码中的对外接口/CLI 命令/Web 页面入口
 □ config.md 中配置项数量 vs 代码中配置文件数量一致 — 确定性扫描
 □ 修改过的文档 last_updated 已更新为当天
 □ 无断链引用（文档间交叉引用有效）
-□ data-model.md 模块索引完整
-□ database/ schema 文件与代码中的表结构一致
 □ ARCHITECTURE.md 文档索引覆盖所有文档
-□ 新增/修改的 API 已在 api-reference.md 中更新（若存在）
 □ 无残留的 TODO 标记对应已实现的代码（可选检查）
 ```
 

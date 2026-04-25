@@ -82,30 +82,23 @@ baseline:
   git_commit: <!-- Phase 3 自动填充：当前 HEAD 短 SHA -->
   counts:
     modules: <!-- Phase 3 -->
-    entities_models: <!-- Phase 3 -->
-    controllers_routes: <!-- Phase 3 -->
-    services: <!-- Phase 3 -->
-    config_files: <!-- Phase 3 -->
-    test_files: <!-- Phase 3 -->
+    entities: <!-- Phase 3：业务术语候选（实体/服务类） -->
+    features: <!-- Phase 3：用户可见功能数 -->
+    config_items: <!-- Phase 3 -->
     docs_total: <!-- Phase 3 -->
-  module_tiers:
-    core: <!-- Phase 3: [模块名列表] -->
-    standard: <!-- Phase 3: [模块名列表] -->
-    lightweight: <!-- Phase 3: [模块名列表] -->
   markers:
     todo_total: <!-- Phase 3 -->
     unverified_total: <!-- Phase 3 -->
   layer_distribution:
-    layer_1: <!-- Phase 3 -->
-    layer_2: <!-- Phase 3 -->
-    layer_3: <!-- Phase 3 -->
-    layer_4: <!-- Phase 3 -->
+    layer_1: <!-- Phase 3：4（README/AGENTS/ARCHITECTURE/modules） -->
+    layer_2: <!-- Phase 3：模块数 -->
+    layer_3: <!-- Phase 3：6（core-flow/config/glossary/DECISIONS/doc-maintenance/CHANGELOG） -->
 ```
 
 ### 历史快照（趋势数据）
 
 > doc-sync 防线 3 每次审计后追加一行，用于发现文档质量退化。
 
-| 日期 | git commit | 模块 | 分级(C/S/L) | 实体 | TODO | UNVERIFIED | 备注 |
-|------|-----------|------|-------------|------|------|-----------|------|
-| <!-- Phase 3 --> | | | <!-- c/s/l --> | | | | 初始化基线 |
+| 日期 | git commit | 模块 | 业务术语 | 用户功能 | TODO | UNVERIFIED | 备注 |
+|------|-----------|------|---------|---------|------|-----------|------|
+| <!-- Phase 3 --> | | | | | | | 初始化基线 |

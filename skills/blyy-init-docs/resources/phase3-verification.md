@@ -11,18 +11,16 @@
 1. 确认所有文档的 YAML 元数据正确
 2. 确认 `ARCHITECTURE.md` 文档索引覆盖所有生成的文档
 3. 确认无断链引用
-4. **模块完整性**：对比确定性清单中识别到的所有模块与 `modules.md` 注册表，确认无遗漏
-5. **实体完整性**：对比确定性清单中的实体/模型文件数量与 `data-model.md`（含模块级）中列出的实体数量，未覆盖的必须逐一列出文件名并补充或标注原因
-6. **配置完整性**：对比确定性清单中的配置文件数量与 `config.md` 中列出的配置项数量，确认无遗漏
-7. **API 完整性**（若项目有 API）：对比确定性清单中的控制器/路由文件数量与 `api-reference.md` 或 `features.md` 中的端点数量
-8. **测试完整性**：确认 `testing.md` 中测试分层策略与实际测试目录结构一致
-9. **监控完整性**（若生成了 `monitoring.md`）：确认核心指标表与代码中的监控埋点一致
-10. **旧文档回收率**（仅当存在 `docs-old/` 时）：对比 Phase 1.5 提取的条目总数与新文档中实际包含的条目数，向用户报告回收情况及差异清单
-11. **文档可信度统计**：统计所有生成文档中的内容事实级别分布和 `<!-- UNVERIFIED -->` 标记数量：
-    - T1 确定性事实：N 个 (X%)
-    - T2 高置信推断：M 个 (Y%)
-    - T3 未验证推测：K 个 (Z%) — 逐一列出所在文档和位置
-12. **基线数据保留（供 doc-sync 使用）**：将确定性清单的精简版写入 `docs/doc-maintenance.md` 的「基线快照」章节。基线**必须**采用 YAML 格式（便于 doc-sync 防线 3 程序化解析），包含同步状态、清单计数、TODO/UNVERIFIED 标记统计、文档分层分布四类数据：
+4. **模块完整性**：对比确定性清单识别的模块 vs `modules.md` 注册表，未覆盖的必须逐一列出
+5. **术语完整性**：对比代码中核心实体/服务类 vs `glossary.md` 术语表条目
+6. **功能完整性**：对比代码中对外接口/CLI 命令/Web 页面入口 vs `modules.md` 功能列表
+7. **配置完整性**：对比确定性清单中的配置文件数量与 `config.md` 中列出的配置项数量，确认无遗漏
+8. **旧文档回收率**（仅当存在 `docs-old/` 时）：对比 Phase 1.5 提取的条目总数与新文档中实际包含的条目数，向用户报告回收情况及差异清单
+9. **文档可信度统计**：统计所有生成文档中的内容事实级别分布和 `<!-- UNVERIFIED -->` 标记数量：
+   - T1 确定性事实：N 个 (X%)
+   - T2 高置信推断：M 个 (Y%)
+   - T3 未验证推测：K 个 (Z%) — 逐一列出所在文档和位置
+10. **基线数据保留（供 doc-sync 使用）**：将确定性清单的精简版写入 `docs/doc-maintenance.md` 的「基线快照」章节。基线**必须**采用 YAML 格式（便于 doc-sync 防线 3 程序化解析），包含同步状态、清单计数、TODO/UNVERIFIED 标记统计、文档分层分布四类数据：
 
     ````markdown
     ## 基线快照（blyy-init-docs 自动生成）
@@ -35,12 +33,9 @@
 
     inventory:
       modules: P
-      entities: N
-      controllers: M
-      services: K
-      config_files: L
-      api_endpoints: Q
-      tests: T
+      entities: N          # 供 glossary 字段语义表完整性比对
+      features: F          # 供 modules.md 功能列表比对
+      config_items: L
 
     markers:
       todo_total: X
@@ -59,10 +54,9 @@
       unverified_total: Y
 
     layer_distribution:
-      layer1_core: 5         # ARCHITECTURE/README/AGENTS/modules/code-map
+      layer1_core: 4         # README/AGENTS/ARCHITECTURE/modules
       layer2_modules: P
-      layer3_aggregate: 7
-      layer4_ops: 6
+      layer3_aggregate: 6    # core-flow/config/glossary/DECISIONS/doc-maintenance/CHANGELOG
 
     fact_levels:
       t1_count: N1
@@ -74,14 +68,14 @@
 
     > doc-sync 防线 3 每次执行后追加一行，便于发现腐烂趋势。
 
-    | 日期 | commit | 实体 | 服务 | TODO 总数 | UNVERIFIED | 备注 |
-    |------|--------|------|------|-----------|------------|------|
-    | YYYY-MM-DD | abc1234 | N | K | X | Y | init |
+    | 日期 | commit | 模块 | 术语 | 功能 | TODO 总数 | UNVERIFIED | 备注 |
+    |------|--------|------|------|------|-----------|------------|------|
+    | YYYY-MM-DD | abc1234 | P | N | F | X | Y | init |
     ````
 
     此数据供 `blyy-doc-sync` 防线 3 定期审计时作为历史对比基准（对比 inventory 偏差、markers 增长趋势、layer_distribution 失衡情况）。
-13. 大型项目模式下，清理 `.init-docs/` 目录（或保留供后续参考，由用户决定）
-14. 标准模式下，清理 `docs/.init-temp/` 临时目录（但若用户在 Layer 交付时选择暂停，保留临时文件供后续恢复）
+11. 大型项目模式下，清理 `.init-docs/` 目录（或保留供后续参考，由用户决定）
+12. 标准模式下，清理 `docs/.init-temp/` 临时目录（但若用户在 Layer 交付时选择暂停，保留临时文件供后续恢复）
 
 ## 生成完成报告（`docs/INIT-REPORT.md`）
 
@@ -117,7 +111,7 @@
 |---------|---------|----------|
 | 项目愿景与目标 | README.md | [→ 前往补充](../README.md#项目简介) |
 | 核心业务场景描述 | core-flow.md | [→ 前往补充](core-flow.md#主流程) |
-| 运维联系人 | runbook.md | [→ 前往补充](runbook.md#联系人) |
+| 字段业务语义 | glossary.md | [→ 前往补充](glossary.md#字段业务语义) |
 | ... | ... | ... |
 
 ## 完整性校验（基于确定性清单比对）
@@ -125,13 +119,9 @@
 | 维度 | 确定性清单基线 | 文档中覆盖 | 覆盖率 | 未覆盖条目 |
 |------|-------------|------------|--------|-----------|
 | 模块 | N | M | M/N% | [逐一列出文件名] |
-| 实体/模型 | N | M | M/N% | [逐一列出文件名] |
-| 控制器/路由 | N | M | M/N% | [逐一列出文件名] |
-| 服务 | N | M | M/N% | [逐一列出文件名] |
-| 配置文件 | N | M | M/N% | [逐一列出文件名] |
-| API 端点 | N | M | M/N% | [逐一列出] |
-| 测试分层 | N | M | M/N% | [清单] |
-| 监控指标 | N | M | M/N% | [清单] |
+| 业务术语（实体/服务） | N | M | M/N% | [逐一列出文件名] |
+| 用户可见功能 | N | M | M/N% | [逐一列出] |
+| 配置项 | N | M | M/N% | [逐一列出文件名] |
 
 > 旧文档回收率：X/Y (Z%)（仅当存在 docs-old/ 时显示）
 

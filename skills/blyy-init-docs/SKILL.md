@@ -115,30 +115,17 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 ├── SECURITY.md              ← 按需，用户确认后生成
 └── docs/
     ├── ARCHITECTURE.md      ← 文档导航根节点（含 AI 任务路由表，≤150 行）
-    ├── code-map.md          ← 总览简述 + 各模块链接
-    ├── modules.md
-    ├── glossary.md          ← 业务术语 ↔ 代码符号映射
-    ├── core-flow.md
-    ├── config.md            ← 含配置优先级、密钥管理、环境差异
-    ├── features.md
-    ├── DECISIONS.md
+    ├── modules.md           ← 模块注册表 + 功能列表 + 依赖关系
+    ├── glossary.md          ← 业务术语 ↔ 代码符号 + 字段业务语义
+    ├── core-flow.md         ← 跨模块业务流程
+    ├── config.md            ← 配置项业务语义（不记值/默认）
+    ├── DECISIONS.md         ← 架构决策记录（ADR）
     ├── doc-maintenance.md   ← 含基线快照（供 doc-sync 防线 3 使用）
-    ├── data-model.md        ← 关系型 + 非关系型（缓存/消息/文档数据库，按需展开）
-    ├── testing.md           ← 测试策略、覆盖率、E2E 场景、安全扫描
-    ├── runbook.md           ← 健康检查 + 故障剧本（基础版）
-    ├── deployment.md        ← 含环境清单、回滚方案、密钥管理
-    ├── monitoring.md        ← 按需：核心指标、告警规则、仪表盘（告警的单一来源）
-    ├── api-reference.md     ← 按需：公共信息（认证/错误码）+ 模块接口索引
-    ├── database/            ← 公共/跨模块表 + 各模块链接
     └── modules/
-        └── <module-name>/
-            ├── README.md       ← 含入向/出向依赖
-            ├── flow.md         ← 步骤含代码位置列
-            ├── data-model.md
-            ├── api-reference.md ← 按需：该模块的接口详情
-            ├── code-map.md     ← 该模块的文件→职责映射
-            └── database/       ← 该模块的表 schema
+        └── <module-name>.md ← 每个模块一个单文件（5 章节：概述/职责与边界/依赖关系/核心业务流程/代码锚点）
 ```
+
+> **v1.0.0 文档定位**：业务知识文档。只生成 AI 读代码读不出的业务知识（业务术语、架构决策、跨模块流程、模块业务职责）。代码级文档（code-map / api-reference / data-model / database / testing 等）和运营级文档（deployment / runbook / monitoring）**不再生成**——AI 直接读源码或运维系统即可获取。
 
 > **模板架构变更要点（v0.2.0+）**：
 > - 所有 `docs/*.template` 与 `modules/*.template` 的 YAML front matter 扩展了新字段：`audience` / `read_priority` / `max_lines` / `parent_doc` / `code_anchors` / `applicable_project_types` / `last_synced_commit`，详见 `resources/front-matter-spec.md` 七、YAML Front Matter 字段标准
@@ -167,7 +154,7 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
    - 若该字段**包含**步骤 2 识别的项目类型之一 → 创建该文档骨架
    - 若该字段**不包含**任何识别的类型 → **跳过创建**，并在「跳过清单」中记录
    - 若 front matter 中无 `applicable_project_types` 字段 → 视为「全类型适用」，创建
-   - 此过滤完全基于 front matter，**禁止 AI 自由判断**「这个项目应不应该有 monitoring」
+   - 此过滤完全基于 front matter，**禁止 AI 自由判断**「这个项目应不应该有某文档」
 5. 在全新的 `docs/` 目录下按过滤结果创建文档骨架
 6. **根目录已有文档整合**：对于项目中已存在的根目录文档（`README.md`、`AGENTS.md`/`CLAUDE.md` 等、`CHANGELOG.md`）
    - 阅读已有文件，提取其中有价值的内容（项目描述、构建命令、配置说明、变更记录等）
@@ -293,12 +280,10 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 
 | 子代理任务 | 代码扫描范围 | 旧文档输入（若有） | 输出 |
 |-----------|------------|------------------|------|
-| 配置扫描 | 配置类/配置文件/环境变量 | Phase 1.5 配置提取结果 | `config.md` 填充素材（含优先级、密钥、环境差异） |
-| 实体/数据模型扫描 | 实体类/ORM/迁移/缓存配置/消息 schema | Phase 1.5 实体/数据模型提取结果 | `data-model.md` 填充素材（含非关系型） |
-| 构建/部署/监控扫描 | 构建脚本/CI 配置/发布脚本/监控配置 | Phase 1.5 部署/运维提取结果 | `deployment.md` + `monitoring.md` + `README.md` 构建命令 |
-| API/功能扫描 | 公共 API/命令行参数/认证配置 | Phase 1.5 API/功能提取结果 | `features.md` + `api-reference.md` 填充素材 |
-| 测试扫描 | 测试目录/测试框架配置/CI 测试步骤 | Phase 1.5 对应提取结果 | `testing.md` 填充素材 |
-| 单模块分析（**按模块并行拆分**） | 该模块源代码 | 该模块相关的架构提取结果 | 该模块的文档填充素材 |
+| 配置扫描 | 配置类/配置文件/环境变量 | Phase 1.5 配置提取结果 | `config.md` 填充素材（仅业务语义，不记值/默认） |
+| 实体/术语扫描 | 实体类/ORM/迁移/核心服务类 | Phase 1.5 实体/术语提取结果 | `glossary.md` 术语表 + 字段业务语义素材 |
+| 功能扫描 | 公共 API/CLI 命令/Web 页面入口 | Phase 1.5 功能提取结果 | `modules.md` 功能列表填充素材 |
+| 单模块分析（**按模块并行拆分**） | 该模块源代码 | 该模块相关的架构提取结果 | 该模块 `modules/<m>.md` 的填充素材（5 章节） |
 
 **子代理通用指令（附加到每个子代理的任务描述中）：**
 
@@ -306,7 +291,7 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 >
 > **事实级别标注要求**：每个分析条目必须标注 T1/T2/T3 级别和代码依据（详见 `resources/fact-classification.md` 二、三级事实分类）。T3 条目单独汇总在输出末尾的「待澄清项」区域。
 >
-> **字段说明提取要求**：扫描实体类/模型类时，**必须同时提取每个属性/字段的注释文本**（文档注释、数据注解、迁移文件注释），作为 `data-model.md` 表结构详情表「说明」列的值。提取优先级和各技术栈注释来源详见 `resources/tech-stack-matrix.md` 二、字段说明提取矩阵。禁止将说明列留空。
+> **字段业务语义提取要求**：扫描实体类/模型类时，**仅提取字段名推断不出业务含义的字段**（如 Status 枚举值、Type 编码、复杂业务约束），将其注释文本作为 `glossary.md` 字段业务语义表「业务含义」列的值。常见字段（id、created_at 等）不要列入。提取优先级和各技术栈注释来源详见 `resources/tech-stack-matrix.md` 二、字段说明提取矩阵。
 >
 > **进度输出要求**：
 > 1. 每处理完 5 个文件，输出一行进度（含已处理/总数和最近处理的文件名）
@@ -345,45 +330,31 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 | `README.md` | 项目名称、技术栈、构建命令 | 项目第一印象 |
 | `AGENTS.md` 等上下文文件 | 项目结构、构建/运行/测试命令、代码规范；**必须包含「Task Entry Protocol」章节**（指示 AI 先读 `docs/ARCHITECTURE.md`） | AI 工具上下文 |
 | `ARCHITECTURE.md` | 模块识别结果 → 系统总览 + 文档索引 | 文档入口 |
-| `modules.md` | 两级模块识别结果 → 模块注册表（含 Lightweight 模块的内联详情） | 模块概览 |
-| `code-map.md` | 项目总览目录树 + 各模块链接 | 代码导航 |
+| `modules.md` | 模块识别结果 → 模块注册表 + 功能列表 + 模块间依赖 | 模块概览 |
 
-> **Layer 1 交付点**：向用户呈现 5 个核心文档，确认无误。此时 AI 工具已有基本上下文记忆，用户可立即开始使用。
+> **Layer 1 交付点**：向用户呈现 4 个核心文档，确认无误。此时 AI 工具已有基本上下文记忆，用户可立即开始使用。
 > 询问用户：`"核心文档已就绪。继续生成模块级文档？(Y/继续 | 指定优先模块 | 暂停)"`
 >
 > **进度更新**：更新 `progress.md` — `current_layer: 1`，标记 `[x] Layer 1 核心文档`。
 
-**Layer 2 — 模块级文档（按模块分级交付）：**
+**Layer 2 — 模块级文档（统一单文件）：**
 
-按模块复杂度分级（步骤 6 结果）采用不同的文档形态：
+为每个识别到的模块生成 `docs/modules/<m>.md`，使用 `templates/modules/_module.md.template`。子代理产出按 5 章节填充：
 
-**Core 模块**（完整目录）：
-
-| 文档 | 填充来源 |
+| 章节 | 填充来源 |
 |------|---------|
-| 模块级 `README.md` | 子代理产出 → 模块职责、边界、接口 |
-| 模块级 `flow.md` | 子代理产出 → 模块内业务流程 |
-| 模块级 `code-map.md` | 子代理产出 → 文件→职责映射 |
-| 模块级 `data-model.md` | 子代理产出 → 模块内数据模型 |
-| 模块级 `api-reference.md` | 子代理产出 → 模块接口详情（仅有 API 的模块） |
-| 模块级 `database/` | 子代理产出 → 模块内表 schema |
-
-**Standard 模块**（单文件 `modules/<m>.md`）：
-
-使用 `templates/modules-single.md.template`，将上述所有内容合并为一个文档的不同章节。子代理产出与 Core 模块相同，但主 agent 整合时写入单文件而非目录。
-
-**Lightweight 模块**（内联到 `modules.md`）：
-
-不生成独立文件。子代理产出中提取关键信息（职责、代码位置、关键类），以展开段落形式写入 `modules.md` 的模块注册表中。
+| 概述 | 子代理产出 → 模块定位（一句话） |
+| 职责与边界 | 子代理产出 → 模块负责什么 / 不负责什么 |
+| 依赖关系 | 静态扫描结果 → 入向/出向依赖 |
+| 核心业务流程 | 子代理产出 → 模块内主要业务流程 |
+| 代码锚点 | 子代理产出 → 模块入口、主要 Service / Controller / 实体 / migration 位置 |
 
 **交付策略：**
-- Core 模块优先交付（通常是核心业务模块，最需要完整文档）
 - 若用户指定了优先模块 → 按指定顺序逐个生成
-- 若未指定 → 先 Core（按代码量从大到小），再 Standard（批量交付），最后 Lightweight（在 Layer 1 的 `modules.md` 中已完成）
-- 每个 Core 模块完成后单独向用户汇报；Standard 模块可批量汇报
+- 若未指定 → 按代码量从大到小逐个生成，可批量汇报
 - 用户可随时暂停
 
-> **Layer 2 交付点**：Core 模块每完成一个即交付；Standard 模块可批量交付。`"✅ [订单模块](Core) 文档完成（6 个文件）。继续下一个？(Y | 跳到 Layer 3 | 暂停)"`
+> **Layer 2 交付点**：每完成一个模块即交付，可批量汇报：`"✅ 已完成模块文档：orders / users / payments。继续？(Y | 跳到 Layer 3 | 暂停)"`
 >
 > **进度更新**：每完成一个模块，更新 `progress.md` — 将该模块加入 `completed_modules`，更新 `current_layer: 2`。
 
@@ -391,32 +362,16 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 
 | 文档 | 填充来源 |
 |------|---------|
-| `core-flow.md` | 各模块流程分析 → 跨模块核心业务流程 |
-| `config.md` | 子代理产出合并 → 全局配置项列表 |
-| `data-model.md` | 子代理产出合并 → 公共数据模型 + 模块索引 |
-| `features.md` | 子代理产出合并 → 功能列表 |
+| `core-flow.md` | 各模块流程分析 → 跨模块业务流程 |
+| `config.md` | 子代理产出合并 → 配置项业务语义（不记值/默认） |
+| `glossary.md` | 实体/术语扫描合并 → 术语表 + 字段业务语义 |
 | `DECISIONS.md` | 架构决策识别 → ADR 条目 |
-| `database/` | 公共/跨模块表 + 各模块链接 |
+| `doc-maintenance.md` | 同步矩阵 + 基线清点 | 必须（供 doc-sync 使用） |
 | `CHANGELOG.md` | **用户可选**：询问是否从 Git 历史自动填充 |
 
-> **Layer 3 交付点**：`"汇总文档已完成。继续生成运营文档？(Y | 暂停)"`
+> **Layer 3 交付点**：`"汇总文档已完成，文档体系已就绪。"`
 >
-> **进度更新**：更新 `progress.md` — `current_layer: 3`，标记 `[x] Layer 3 汇总文档`。
-
-**Layer 4 — 运营与参考文档（按需，用户可选择跳过）：**
-
-| 文档 | 填充来源 | 是否必须 |
-|------|---------|---------|
-| `deployment.md` | 子代理产出 → 部署流程 | 参考项目类型适配矩阵 |
-| `testing.md` | 子代理产出 → 测试策略 | 参考项目类型适配矩阵 |
-| `runbook.md` | 子代理产出 → 运维剧本 | 参考项目类型适配矩阵 |
-| `monitoring.md` | 子代理产出 → 监控指标 | 可选 |
-| `api-reference.md` | 子代理产出 → API 参考 | 可选 |
-| `doc-maintenance.md` | 同步矩阵 + 基线清点 | 必须（供 doc-sync 使用） |
-
-> **Layer 4 交付前**：根据 `resources/doc-guide.md` 项目类型适配矩阵，向用户推荐需要生成的文档，用户选择后生成。
->
-> **Layer 4 交付后进度更新**：更新 `progress.md` — `current_layer: 4`，标记 `[x] Layer 4 运营文档`，`current_phase: phase3`。
+> **进度更新**：更新 `progress.md` — `current_layer: 3`，标记 `[x] Layer 3 汇总文档`，`current_phase: phase3`。
 
 **跨层规则：**
 - 子代理在 Layer 2 启动时已并行分析所有模块，产出持久化到临时文件
@@ -474,8 +429,8 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 | 目录 | 内容 |
 |------|------|
 | `templates/root/` | 根目录文档模板：`README.md`、`AGENTS.md`、`CHANGELOG.md`、`CONTRIBUTING.md`、`SECURITY.md` |
-| `templates/docs/` | `docs/` 目录下所有文档模板（含 `testing.md`、`monitoring.md`、`api-reference.md`、`runbook.md` 等） |
-| `templates/modules/` | 模块级文档模板：`README.md`、`flow.md`、`data-model.md`、`code-map.md`、`database/` |
+| `templates/docs/` | `docs/` 目录下文档模板：`ARCHITECTURE.md`、`modules.md`、`glossary.md`、`core-flow.md`、`config.md`、`DECISIONS.md`、`doc-maintenance.md` |
+| `templates/modules/` | 模块单文件模板：`_module.md.template`（每个模块一个 `modules/<m>.md`） |
 
 ## 资源文件
 

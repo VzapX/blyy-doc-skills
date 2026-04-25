@@ -55,7 +55,7 @@
 3. 读锚点文件 → 核心服务 → 数据模型 → 测试（抽样）
 4. 将 Phase 1.5 提取产物中该模块相关条目与代码扫描结果**逐条对照合并**（合并规则同标准模式）
 5. **每个分析条目标注 T1/T2/T3 事实级别**和代码依据（详见 `resources/fact-classification.md` 二、三级事实分类）
-5.1. **字段说明提取**：扫描实体类/模型类时，必须同时提取每个属性的注释文本（文档注释、数据注解、迁移文件注释），作为 `data-model.md`「说明」列的值（详见 `resources/tech-stack-matrix.md` 二、字段说明提取矩阵）
+5.1. **字段业务语义提取**：扫描实体类/模型类时，**仅提取字段名推断不出业务含义的字段**（如 Status 枚举值、Type 编码、复杂业务约束），其注释文本作为 `glossary.md` 字段业务语义表「业务含义」列的值（详见 `resources/tech-stack-matrix.md` 二、字段说明提取矩阵）。常见字段（id、created_at 等）不要列入。
 6. 输出标准化模块分析报告 → **立即持久化**到 `.init-docs/modules/<name>-analysis.md`
 7. T3 推测性条目单独汇总在报告末尾的「待澄清项」区域
 8. **进度输出**：每 5 个文件一行进度，每个子类别完成一行小结，完成时输出结构化摘要（含清单覆盖率）
@@ -74,10 +74,9 @@
 
 | 层级 | 文档 | 执行者 |
 |------|------|--------|
-| **Layer 1 核心** | `README.md`, `AGENTS.md`, `ARCHITECTURE.md`, `modules.md`, `code-map.md` | 主 agent |
-| **Layer 2 模块** | `modules/<m>/README.md`, `flow.md`, `code-map.md`, `data-model.md`, `api-reference.md`(按需), `database/` | 子代理并行 |
-| **Layer 3 汇总** | `core-flow.md`, `config.md`, `data-model.md`(全局), `features.md`, `DECISIONS.md`, `database/`(全局), `CHANGELOG.md` | 主 agent |
-| **Layer 4 运营** | `deployment.md`, `testing.md`, `runbook.md`, `monitoring.md`, `api-reference.md`, `doc-maintenance.md` | 主 agent |
+| **Layer 1 核心** | `README.md`, `AGENTS.md`, `ARCHITECTURE.md`, `modules.md` | 主 agent |
+| **Layer 2 模块** | `modules/<m>.md`（每个模块一个单文件，5 章节） | 子代理并行 |
+| **Layer 3 汇总** | `core-flow.md`, `config.md`, `glossary.md`, `DECISIONS.md`, `doc-maintenance.md`, `CHANGELOG.md` | 主 agent |
 
 每层交付后询问用户是否继续。用户可在任意层后暂停（大型模式下进度已持久化到 `.init-docs/`，可跨会话恢复）。
 
@@ -100,11 +99,9 @@
     ├── docs-old-manifest.md     ← Phase 1.5 旧文档清单
     ├── extractions/             ← Phase 1.5 结构化提取结果
     │   ├── extraction-architecture.md
-    │   ├── extraction-data-model.md
+    │   ├── extraction-glossary.md
     │   ├── extraction-config.md
     │   ├── extraction-features.md
-    │   ├── extraction-testing.md
-    │   ├── extraction-deployment.md
     │   └── extraction-other.md
     └── modules/
         ├── <name>-analysis.md   ← 各模块分析报告（含子任务清单 + T1/T2/T3 标注）

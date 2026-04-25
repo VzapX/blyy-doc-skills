@@ -106,13 +106,13 @@ change_triggers:
 每个 `read_priority ≥ 2` 的模板都应在 H1 标题后紧跟一个 AI 提示块，告诉 AI 何时读、何时跳过：
 
 ```markdown
-# 运维手册
+# 业务术语 ↔ 代码符号映射
 
 <!-- AI-READ-HINT
-PURPOSE: 排查线上故障、制定运维操作步骤。
-READ-WHEN: 用户提到「告警 / 宕机 / 性能问题 / 备份恢复 / 监控异常」。
-SKIP-WHEN: 写新代码、改业务逻辑、修业务 bug（除非 bug 与运维相关）。
-PAIRED-WITH: monitoring.md（指标）, deployment.md（发布）
+PURPOSE: 业务术语 ↔ 代码符号映射 + 字段业务语义。
+READ-WHEN: 用户用业务术语提问或需要理解某个字段的业务含义时。
+SKIP-WHEN: 用户已直接给出代码符号或文件名，且不涉及字段语义。
+PAIRED-WITH: modules.md（功能列表）, modules/<m>.md（模块业务文档）
 -->
 ```
 

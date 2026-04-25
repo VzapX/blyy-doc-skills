@@ -28,8 +28,10 @@ change_triggers:
 PURPOSE: 文档导航根节点。AI 每次任务都从此文档开始，按「任务路由表」决定下一步读哪些文档，避免一次性把所有文档读入上下文。
 READ-WHEN: 任何任务的开始（除非用户明确指定要读的文档）。
 SKIP-WHEN: 永不跳过。
-PAIRED-WITH: modules.md（模块清单）, code-map.md（代码导航）, glossary.md（术语映射）
+PAIRED-WITH: modules.md（模块清单）, glossary.md（术语映射）
 -->
+
+> **本文档集定位**：业务知识文档。只沉淀 AI 读代码读不出的信息（业务术语、架构决策、跨模块流程、模块业务职责）。代码结构、API 详情、表结构请让 AI 直接读源码；数据库字段的业务语义集中在 [glossary.md](glossary.md)。
 
 ## 一句话定位
 
@@ -39,40 +41,27 @@ PAIRED-WITH: modules.md（模块清单）, code-map.md（代码导航）, glossa
 
 > AI 工具按任务类型选读最少必要文档，避免上下文窗口被无用信息吃满。
 
-> **模块文档路径约定**：Core 模块 → `modules/<m>/README.md`（及子文件）；Standard 模块 → `modules/<m>.md`（单文件含全部章节）；Lightweight 模块 → 查 `modules.md` 中的内联段落。下表中「模块文档」泛指对应级别的入口。
-
 | 任务类型 | 必读 | 按需读 | 不要读 |
 |---------|------|--------|--------|
-| 修复某模块 bug | 该模块文档（Core: `README.md` → `flow.md` → `code-map.md`；Standard: 对应章节） | 模块 `data-model.md` 章节 | 其他模块、`core-flow.md` |
-| 新增功能 / API | 该模块文档中的代码地图 + API 参考章节 | `data-model.md`(全局) | `runbook.md`、`deployment.md` |
-| 修改配置项 | `config.md` | 调用方模块文档 | 模块内业务流程文档 |
-| 排查线上故障 | `runbook.md` → `monitoring.md` | 相关模块流程章节 | `features.md`、`DECISIONS.md` |
-| 新增/修改数据库表 | `data-model.md`(模块或全局) → `database/` | `DECISIONS.md` | `runbook.md`、`monitoring.md` |
-| 理解整体架构 | 本文档 → `modules.md` | `core-flow.md`、`DECISIONS.md` | 模块内部文档 |
-| 用业务语言找代码 | `glossary.md` → 对应模块文档 | — | 全局参考型文档 |
-| 修复测试 / CI | `testing.md` | `AGENTS.md` | 业务文档 |
-| 写部署 / 发布脚本 | `deployment.md` | `config.md`、`monitoring.md` | 业务文档 |
+| 修复某模块 bug | `modules/<m>.md` | `core-flow.md`（涉及跨模块时） | 其他模块文档 |
+| 新增功能 / API | `modules/<m>.md` → `glossary.md` | `DECISIONS.md`、`core-flow.md` | — |
+| 修改配置项 | `config.md` | 调用方模块文档 | — |
+| 新增/修改数据库表 | `glossary.md`（业务含义）+ 代码中的实体类/migration（字段定义） | `DECISIONS.md` | — |
+| 理解整体架构 | 本文档 → `modules.md` | `core-flow.md`、`DECISIONS.md` | 模块内部 |
+| 用业务语言找代码 | `glossary.md` → `modules/<m>.md` | — | — |
+| 修改 API 接口 | `modules/<m>.md`（职责边界）+ 直接读 Controller 代码 | — | — |
 
 ## 文档索引
 
 | 文档 | 目的 | Layer |
 |------|------|-------|
-| [modules.md](modules.md) | 模块注册表 + 模块间依赖 | 1 |
-| [code-map.md](code-map.md) | 项目目录地图 + 各模块代码地图索引 | 1 |
-| [glossary.md](glossary.md) | 业务术语 ↔ 代码符号映射 | 1 |
-| [modules/](modules/) | 模块级文档（README/flow/code-map/data-model/database） | 2 |
-| [core-flow.md](core-flow.md) | 跨模块核心业务流程 | 3 |
-| [config.md](config.md) | 完整配置参考 | 3 |
-| [data-model.md](data-model.md) | 公共数据模型 + 模块索引 | 3 |
-| [features.md](features.md) | 功能列表与状态 | 3 |
+| [modules.md](modules.md) | 模块注册表 + 功能列表 + 依赖关系 | 1 |
+| [glossary.md](glossary.md) | 业务术语 ↔ 代码符号 + 字段业务语义 | 1 |
+| [modules/](modules/) | 各模块业务文档 | 2 |
+| [core-flow.md](core-flow.md) | 跨模块业务流程 | 3 |
+| [config.md](config.md) | 配置项业务语义 | 3 |
 | [DECISIONS.md](DECISIONS.md) | 架构决策记录（ADR） | 3 |
-| [database/](database/) | 公共数据库 schema | 3 |
-| [deployment.md](deployment.md) | 部署流程（按需） | 4 |
-| [testing.md](testing.md) | 测试策略（按需） | 4 |
-| [runbook.md](runbook.md) | 运维手册（按需） | 4 |
-| [monitoring.md](monitoring.md) | 监控与可观测性（按需） | 4 |
-| [api-reference.md](api-reference.md) | API 参考（按需） | 4 |
-| [doc-maintenance.md](doc-maintenance.md) | 文档维护规则（AI 工具用） | 4 |
+| [doc-maintenance.md](doc-maintenance.md) | 文档维护规则（AI 运行时） | 4 |
 
 ### 根目录文档
 
