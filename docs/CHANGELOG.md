@@ -2,6 +2,81 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 格式。
 
+## [1.0.0] — 2026-04-25
+
+> 🎓 **毕业版本 — 进入维护模式**。
+>
+> - 定位声明：[STATUS.md](../STATUS.md)
+> - 升级指南：[MIGRATION-v1.md](./MIGRATION-v1.md)
+> - 安全策略：[SECURITY.md](../SECURITY.md)
+>
+> 这是 1.x 的起点，也是最后一个主动迭代的版本。1.0.x 仅接受 bug 修复。
+
+### 重大定位调整
+
+从"全量文档生成器"收敛为"**业务知识文档 Skill**"。只生成 AI 读代码读不出来的业务知识层（业务术语、架构决策、跨模块流程、模块业务职责），其他让 AI 直接读代码。
+
+### 移除（破坏性变更）
+
+**全局级文档移除**：
+- `code-map.md` —— AI grep 代码即可
+- `api-reference.md` —— AI 读 Controller 即可
+- `data-model.md` —— AI 读实体/migration 即可；字段业务语义合并到 `glossary.md` 字段语义章节
+- `database/` —— schema 原文无需重复
+- `deployment.md` / `runbook.md` / `monitoring.md` —— 运维职责，不是 AI 辅助编码所需
+- `testing.md` —— AI 读测试目录即可
+- `features.md` —— 合并为 `modules.md` 的"功能列表"章节
+
+**模块级文档移除**：
+- 模块三级分化（Core / Standard / Lightweight）**全部删除**
+- 所有模块统一用 `modules/<m>.md` 单文件，5 章节结构
+- 模块级 `code-map.md` / `api-reference.md` / `data-model.md` / `database/` / `flow.md` / `README.md` 等子文件模板删除
+- 复杂度评分、升降级检测、`module_tiers` 字段全部移除
+
+### 保留（v1.0 文档清单）
+
+**全局**：
+- `ARCHITECTURE.md`（文档入口 + 任务路由表）
+- `modules.md`（模块注册表 + 功能列表 + 依赖关系）
+- `glossary.md`（业务术语 ↔ 代码符号 + 字段业务语义）
+- `core-flow.md`（跨模块业务流程）
+- `config.md`（配置项业务语义，不记值/默认）
+- `DECISIONS.md`（ADR）
+- `doc-maintenance.md`（AI 运行时依赖）
+
+**模块**：`modules/<m>.md` 单文件
+
+### 新增
+
+- `STATUS.md` —— 项目状态、设计哲学、版本策略声明
+- `SECURITY.md` —— 安全问题报告流程
+- `docs/MIGRATION-v1.md` —— v0.3.x 升级指南
+- `skills/*/VERSION` 升级到 `1.0.0`
+- README 顶部维护模式 / 版本 / License 徽章
+- `glossary.md` 模板新增"字段业务语义"章节
+- `modules.md` 模板新增"功能列表"章节
+- `templates/modules/_module.md.template`（模块统一单文件模板）
+
+### 修复
+
+- TODO `type` 枚举在两处定义冲突（v1.0-P0-1）
+- `skill_version` 硬编码版本号脱节（v1.0-P0-2）
+- CHANGELOG 仓库 URL 用户名不一致（v1.0-P0-3）
+
+### 改进
+
+- 两个 SKILL.md 的 `description` 显式化触发条件和负面边界（v1.0-P1-1）
+- 明确声明 `blyy-doc-sync` 对 `blyy-init-docs` 的安装依赖（v1.0-P1-2）
+- 全项目术语统一为"业务知识文档"
+
+### 版本策略（从本版开始生效）
+
+- 1.0.x：仅 bug 修复
+- 不会有 1.1 / 1.2 minor 版本
+- 若出现根本性方向变化（如转为 MCP），作为独立项目 v2 发布
+
+---
+
 ## [0.3.2] — 2026-04-10
 
 ### 新增
