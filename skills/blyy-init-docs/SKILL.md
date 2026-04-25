@@ -221,12 +221,10 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 3. **清单汇报** — 向用户展示清点结果：
    ```
    📊 项目清点完成（确定性扫描）:
-   - 实体/模型文件: 23 个
-   - 控制器/路由文件: 12 个
-   - 服务文件: 18 个
+   - 模块: 8 个
+   - 实体/服务类（业务术语候选）: 41 个
+   - 用户可见功能（控制器/CLI/页面入口）: 12 个
    - 配置文件: 5 个
-   - 测试文件: 40 个
-   - 数据库迁移: 15 个
    ```
 
 4. **清单持久化** — 将完整清单写入临时文件：
@@ -235,11 +233,7 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 
 5. **按模块拆分清单** — 根据模块识别结果，将清单按模块分组，形成每个模块的子清单
 
-6. **模块复杂度评分与分级** — 根据拆分后的子清单，对每个模块自动评分并确定文档形态（Core / Standard / Lightweight 三级）。**评分全部基于确定性清单的 shell 命令结果，不依赖 AI 判断**。分级结果决定 Phase 1 骨架：Core → 完整目录、Standard → 单文件、Lightweight → 内联到 `modules.md`。分级结果持久化到 `docs/.init-temp/module-tiers.md`（标准模式）或 `.init-docs/module-tiers.md`（大型项目模式）。
-
-   > **执行**：进入此步骤时**必须 Read `resources/module-tiering.md`** 获取完整的评分规则、分级结果表、用户确认格式。
-
-7. **初始化进度文件**（标准模式）— 在 `docs/.init-temp/progress.md` 创建进度追踪文件：
+6. **初始化进度文件**（标准模式）— 在 `docs/.init-temp/progress.md` 创建进度追踪文件：
 
    ```yaml
    ---
@@ -250,10 +244,6 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
    current_phase: phase2-analysis
    current_layer: 0
    modules: [{{模块列表}}]
-   module_tiers:
-     core: [{{Core 模块列表}}]
-     standard: [{{Standard 模块列表}}]
-     lightweight: [{{Lightweight 模块列表}}]
    completed_modules: []
    t3_clarified: false
    ---
@@ -268,7 +258,6 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
      - [ ] Layer 1 核心文档
      - [ ] Layer 2 模块文档
      - [ ] Layer 3 汇总文档
-     - [ ] Layer 4 运营文档
    - [ ] Phase 3 — 最终检查
    ```
 
@@ -437,10 +426,9 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 | 文件 | 何时读取 | 用途 |
 |------|---------|------|
 | `resources/tool-init-detection.md` | Phase 0.1 | 工具 /init 检测表（Gemini/Codex/Claude Code/Cursor/Copilot/Windsurf）+ 硬性前置执行策略 |
-| `resources/doc-guide.md` | Phase 1/Phase 3 | 文档架构总览、各文档职责、模块三级形态、项目类型适配（入口索引） |
-| `resources/tech-stack-matrix.md` | Phase 0.3 / Phase 2 扫描前 | 确定性清点命令矩阵、字段说明提取矩阵、技术栈/锚点/模块识别策略（Step 1-4）、配置识别策略 |
-| `resources/module-tiering.md` | Phase 0.3 Step 6（模块复杂度评分） | 评分规则 + Core/Standard/Lightweight 分级表 + 用户确认格式 |
-| `resources/fact-classification.md` | Phase 2 子代理分发前 | Phase 2 填充原则（6 条）、三级事实分类（T1/T2/T3）、子代理输出格式 |
+| `resources/doc-guide.md` | Phase 1/Phase 3 | 文档架构总览、各文档职责、项目类型适配（入口索引） |
+| `resources/tech-stack-matrix.md` | Phase 0.3 / Phase 2 扫描前 | 确定性清点命令矩阵、字段业务语义提取矩阵、技术栈/锚点/模块识别策略（Step 1-4）、配置识别策略 |
+| `resources/fact-classification.md` | Phase 2 子代理分发前 | Phase 2 填充原则、三级事实分类（T1/T2/T3）、子代理输出格式 |
 | `resources/pre-fill-review.md` | Phase 2 子代理完成 → 文档填充前 | 填充前审查关卡 5 步流程（覆盖率检查/T3 收集/批量澄清/响应整合/持久化） |
 | `resources/front-matter-spec.md` | Phase 1 骨架生成 / Phase 2 填写占位符时 | 模板占位符、YAML Front Matter 字段标准、AI 提示块、结构化 TODO（type/priority/owner 枚举唯一权威来源） |
 | `resources/legacy-extraction.md` | Phase 1.5 触发时 | 旧文档结构化提取的 4 步详细流程 |

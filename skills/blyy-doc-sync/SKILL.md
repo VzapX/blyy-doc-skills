@@ -70,42 +70,14 @@ AI 工具在执行**任何代码修改任务**后，应自动触发 blyy-doc-syn
 - **代码数量 > 文档数量** → 发现遗漏，必须补充。列出具体差异：`"代码中有 OrderService 但 glossary.md 术语表中未登记"`
 - **代码数量 < 文档数量** → 文档引用了已删除的代码，必须清理
 
-#### Step 2.5 — 模块级别升降信号检测
-
-> 仅当本次变更涉及**模块内文件增删**时执行（如新增 Controller、新增 Entity 等）。纯内容修改不触发。
-
-对变更涉及的模块，检查其当前文档级别是否仍然匹配：
-
-1. **读取当前级别**：
-   - 若模块有 `modules/<m>/README.md` 且 front matter 无 `module_tier` 字段或值为空 → 视为 Core
-   - 若模块有 `modules/<m>.md` 且 front matter 含 `module_tier: standard` → Standard
-   - 若模块仅在 `modules.md` 中有内联条目 → Lightweight
-2. **快速重评分**：对该模块执行复杂度评分（规则见 `blyy-init-docs/resources/doc-guide.md` 二、模块复杂度评分规则）
-3. **比对**：
-   - 评分结果与当前级别一致 → 无操作
-   - 评分结果**高于**当前级别 → 输出升级信号（不自动执行）：
-     ```
-     ⬆️ 模块级别升级建议: [Notifications] Standard → Core
-        原因: 源文件数 8→17, 新增 3 个 Controller, 新增 2 张表
-        操作: 将 modules/Notifications.md 拆分为 modules/Notifications/ 目录
-        执行？(Y | 稍后 | 忽略)
-     ```
-   - 评分结果**低于**当前级别 → 仅记录信号，不提示（降级在防线 3 定期审计中集中处理，避免频繁打扰）
-
-4. **用户确认升级时的执行步骤**：
-   - **Lightweight → Standard**：从 `modules.md` 内联内容提取，创建 `modules/<m>.md` 单文件；更新 `modules.md` 注册表中该模块的链接
-   - **Standard → Core**：读取 `modules/<m>.md` 单文件，按章节拆分为 `modules/<m>/README.md`、`flow.md`、`code-map.md`、`data-model.md`、`api-reference.md`、`database/README.md`；删除原单文件；更新 `modules.md` 注册表中该模块的链接和分组
-   - **Lightweight → Core**：先执行 Lightweight → Standard，再执行 Standard → Core
-   - 升级后更新 `docs/doc-maintenance.md` 基线快照中的 `module_tiers` 字段
-
 #### Step 3 — 文档更新
 
 1. 逐一更新受影响的文档
 2. **确定性差异优先**：先处理 Step 2 发现的数量差异（补充遗漏 / 清理过时），再处理内容变更
 3. **代码位置同步**：若变更涉及文件重命名/移动，必须更新文档列表型字段中的「源文件」/「定义位置」列（`file:line` 格式），以及 front matter 的 `code_anchors`
 4. 更新文档的 YAML `last_updated` 为当天日期，**同时更新 `last_synced_commit` 为当前 commit hash**（`git rev-parse HEAD`）
-5. 新增模块 → 在 `modules.md` 注册 + 按复杂度评分确定级别 + 创建对应形态的模块文档
-6. 删除模块 → 从 `modules.md` 移除 + 归档模块级文档（无论何种级别）
+5. 新增模块 → 在 `modules.md` 注册表登记 + 创建 `modules/<m>.md` 单文件（使用 init-docs 的 `_module.md.template` 5 章节结构）
+6. 删除模块 → 从 `modules.md` 移除 + 归档/删除 `modules/<m>.md`
 
 #### Step 4 — TODO/UNVERIFIED 递减检查
 
@@ -135,15 +107,13 @@ AI 工具在执行**任何代码修改任务**后，应自动触发 blyy-doc-syn
 □ 识别代码变更类型
 □ 对变更区域执行确定性扫描（shell 命令）
 □ 比对扫描结果 vs 文档内容，列出数量差异
-□ 若涉及模块内文件增删 → 检测模块级别升级信号
 □ 补充遗漏 / 清理过时引用
 □ 按同步矩阵更新受影响文档内容
 □ 更新 last_updated 元数据
-□ 若新增模块 → 评分 + 注册 + 按级别创建模块文档
-□ 若删除模块 → 移除 + 归档模块文档
-□ 若模块升级已确认 → 执行文档形态转换
+□ 若新增模块 → 注册 + 创建 modules/<m>.md 单文件
+□ 若删除模块 → 移除 + 归档 modules/<m>.md
 □ 检查涉及区域的 TODO/UNVERIFIED 标记，尝试填充
-□ 向用户汇报同步结果（含差异修复、级别变更和 TODO 填充情况）
+□ 向用户汇报同步结果（含差异修复和 TODO 填充情况）
 ```
 
 ---

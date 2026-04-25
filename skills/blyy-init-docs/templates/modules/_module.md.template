@@ -1,0 +1,94 @@
+---
+last_updated: {{DATE}}
+last_synced_commit: init
+audience: ai-and-human
+read_priority: 2
+max_lines: 400
+parent_doc: ../modules.md
+code_anchors:
+  - <!-- Phase 2 自动填充：本模块代码根目录 -->
+applicable_project_types:
+  - backend-service
+  - microservice
+  - fullstack
+  - frontend-spa
+  - cli-tool
+  - library
+  - data-pipeline
+  - infrastructure
+change_triggers:
+  - 模块职责/边界变更
+  - 模块依赖变化
+  - 模块内业务流程变化
+  - 模块入口/主要类位置变化
+---
+
+# {{MODULE_NAME}} 模块
+
+<!-- AI-READ-HINT
+PURPOSE: 本模块的业务文档（5 章节）。代码细节（API 详情、文件→职责映射、表结构）AI 直接读源码获取，本文档不重复。
+READ-WHEN: 任何与本模块相关的任务（修 bug、加功能、改实现）。
+SKIP-WHEN: 不涉及本模块。
+PAIRED-WITH: ../modules.md（模块注册表 + 功能列表）, ../glossary.md（业务术语 + 字段语义）
+-->
+
+> 返回 [模块注册表](../modules.md)
+
+## 概述
+
+<!-- Phase 2 自动填充：基于模块入口类/Service/Controller 分析，一句话定位。≤80 字。 -->
+
+## 职责与边界
+
+**负责：**
+
+<!-- Phase 2 自动填充：从主要 Service/Handler 的方法签名提取，列出本模块的核心业务能力 -->
+
+- <!-- Phase 2 -->
+
+**不负责：**
+
+<!-- TODO[p1,design-rationale,user]: 必须明确"不负责什么"，避免 AI 在职责模糊时把代码塞进本模块。 -->
+
+## 依赖关系
+
+### 出向依赖（本模块调用谁）
+
+<!-- Phase 2 自动填充：从 import / DI 容器扫描 -->
+
+| 依赖目标 | 类型 | 用途 |
+|---------|------|------|
+| <!-- Phase 2 --> | <!-- 模块 / 外部服务 / 数据库 / 消息队列 --> | |
+
+### 入向依赖（谁调用本模块）
+
+<!-- Phase 2 自动填充：反向引用扫描 -->
+
+| 调用方 | 调用本模块的接口 | 调用方式 |
+|--------|----------------|---------|
+| <!-- Phase 2 --> | | <!-- 直接调用 / 事件订阅 / HTTP --> |
+
+## 核心业务流程
+
+<!-- 若本模块无复杂业务流程（纯工具/纯 CRUD），可删除本章节 -->
+
+### 流程：<!-- Phase 2 自动填充：流程名 -->
+
+- **触发**：<!-- Phase 2 -->
+- **入口**：<!-- 例：OrderController.Create -->
+
+简述流程步骤（≤7 步），每步只描述业务语义，不描述代码细节：
+
+1. <!-- Phase 2 -->
+
+## 代码锚点
+
+> 本模块的关键代码位置。AI 可据此直接读源码获取详细信息，本文档不再重复。
+
+| 类型 | 位置 | 说明 |
+|------|------|------|
+| 模块入口 | <!-- 例：src/Modules/Orders/ --> | |
+| 主要 Service | <!-- 例：OrderService.cs --> | |
+| 主要 Controller / Handler | <!-- 例：OrderController.cs --> | |
+| 数据模型 | <!-- 例：OrderEntity.cs --> | |
+| 数据库 migration | <!-- 例：Migrations/*.Orders_*.cs --> | |
