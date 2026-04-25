@@ -64,24 +64,9 @@ description: 为项目一次性初始化完整的文档体系。当用户要求"
 
 #### 0.1 开发工具 /init 命令检测
 
-检查当前运行环境的开发工具是否自带文档初始化命令：
+检查当前运行环境的开发工具是否自带文档初始化命令；若支持，**必须先执行**工具自带命令再进入 Phase 0.2。**禁止静默跳过** — 无论执行还是跳过都必须向用户输出结果。
 
-| 工具 | 初始化命令 | 产物 |
-|------|----------|------|
-| Gemini (Google) | 自动生成 | `AGENTS.md` |
-| Codex (OpenAI) | 自动生成 | `AGENTS.md` |
-| Claude Code | `/init` | `CLAUDE.md` |
-| Cursor | 自动/手动 | `.cursorrules` 或 `CURSOR.md` |
-| Copilot | — | — |
-| Windsurf | 自动 | `.windsurfrules` |
-
-**执行策略（硬性前置）：**
-1. 对照上表检查当前工具。若工具支持初始化命令（如 Claude Code 的 `/init`）：
-   - **必须先执行**工具自带的初始化命令，等待其完成后才能进入 Phase 0.2
-   - 若执行失败，向用户报告错误并询问：重试 or 跳过（用户明确选择跳过才可继续）
-   - 记录生成的文件（如 `CLAUDE.md`）供 Phase 1 整合
-2. 若工具确实不支持初始化（如 Copilot）或为未识别工具 → 跳过，但**必须明确告知用户**："当前工具不支持 /init，已跳过此步"
-3. **禁止静默跳过** — 无论执行还是跳过，都必须向用户输出结果
+> **执行**：进入 Phase 0.1 时**必须 Read `resources/tool-init-detection.md`** 获取完整的工具/init 检测表（Gemini / Codex / Claude Code / Cursor / Copilot / Windsurf）和硬性前置执行策略。
 
 #### 0.2 AI 上下文记忆文件识别
 
@@ -263,59 +248,9 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 
 5. **按模块拆分清单** — 根据模块识别结果，将清单按模块分组，形成每个模块的子清单
 
-6. **模块复杂度评分与分级** — 根据拆分后的子清单，对每个模块自动评分并确定文档形态：
+6. **模块复杂度评分与分级** — 根据拆分后的子清单，对每个模块自动评分并确定文档形态（Core / Standard / Lightweight 三级）。**评分全部基于确定性清单的 shell 命令结果，不依赖 AI 判断**。分级结果决定 Phase 1 骨架：Core → 完整目录、Standard → 单文件、Lightweight → 内联到 `modules.md`。分级结果持久化到 `docs/.init-temp/module-tiers.md`（标准模式）或 `.init-docs/module-tiers.md`（大型项目模式）。
 
-   **评分规则**（全部基于确定性清单的 shell 命令结果，不依赖 AI 判断）：
-
-   | 信号 | 检测方式 | 得分 |
-   |------|---------|------|
-   | 模块源文件数 > 15 | `fd --type f <module_dir> \| wc -l` | +2 |
-   | 模块源文件数 5-15 | 同上 | +1 |
-   | 模块源文件数 < 5 | 同上 | 0 |
-   | 有数据库实体/模型文件 | 清单中该模块含 Entity/Model 文件 | +1 |
-   | 有 API 端点（Controller/Handler） | 清单中该模块含 Controller/Handler 文件 | +1 |
-   | 被 ≥ 3 个其他模块依赖 | 反向引用扫描（`rg "import.*<module>" --type-add ...`） | +1 |
-
-   **分级结果**：
-
-   | 总分 | 级别 | 文档形态 | 说明 |
-   |------|------|---------|------|
-   | ≥ 3 | **Core** | 完整目录 `modules/<m>/`（6 个子文件） | 当前模板不变 |
-   | 1-2 | **Standard** | 单文件 `modules/<m>.md` | 使用 `modules-single.md.template` |
-   | 0 | **Lightweight** | 无独立文件，内联到 `modules.md` | 在模块注册表中展开为详细段落 |
-
-   **执行步骤**：
-
-   a. 对每个模块执行评分命令，计算总分
-   b. 向用户展示分级结果并确认：
-      ```
-      📊 模块复杂度分级（共 {N} 个模块）：
-      
-      Core（完整文档目录）— {n1} 个：
-        - Orders (5分): 22文件, 8表, 12端点, 被5个模块依赖
-        - Users (4分): 18文件, 5表, 8端点, 被7个模块依赖
-        ...
-      
-      Standard（单文件文档）— {n2} 个：
-        - Notifications (2分): 8文件, 2表
-        - Logging (1分): 6文件
-        ...
-      
-      Lightweight（内联到 modules.md）— {n3} 个：
-        - StringUtils (0分): 2文件
-        - Constants (0分): 1文件
-        ...
-      
-      预计文档数: {Core×6 + Standard×1 + 全局} 个（vs 无分级: {N×6 + 全局} 个）
-      
-      确认分级？(Y | 调整某模块级别)
-      ```
-   c. 用户确认后，将分级结果持久化：
-      - 标准模式：`docs/.init-temp/module-tiers.md`
-      - 大型项目模式：`.init-docs/module-tiers.md`
-   d. Phase 1 骨架生成时，按分级结果决定每个模块的文档结构
-
-   > **分级结果影响 Phase 1 骨架**：Core 模块创建完整 `modules/<m>/` 目录；Standard 模块创建单个 `modules/<m>.md` 文件；Lightweight 模块不创建独立文件。
+   > **执行**：进入此步骤时**必须 Read `resources/module-tiering.md`** 获取完整的评分规则、分级结果表、用户确认格式。
 
 7. **初始化进度文件**（标准模式）— 在 `docs/.init-temp/progress.md` 创建进度追踪文件：
 
@@ -393,66 +328,9 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 
 #### 填充前审查关卡（Pre-Fill Review Gate）
 
-> 在所有子代理分析完成后、开始文档填充之前，主 agent **必须**执行此审查关卡。**此步骤完成前禁止开始文档填充。**
-
-**Step 1 — 清单覆盖率检查：**
-
-1. 从确定性清单文件中读取各类别的文件总数
-2. 从各子代理的落盘分析产出中统计已覆盖的条目数
-3. 对比：若覆盖率 < 100%，列出未覆盖的具体文件名，重新分发给子代理补充分析
-4. 向用户汇报覆盖率：
-   ```
-   📊 清单覆盖率检查：
-   - 实体/模型: 23/23 ✓
-   - 控制器: 12/12 ✓
-   - 服务: 17/18 ✗ → 缺失: PaymentService.cs（重新分析中...）
-   ```
-
-**Step 2 — T3 推测性内容收集：**
-
-1. 从所有子代理的落盘产出中收集所有 T3（推测性）条目
-2. 按类别分组（业务流程类、模块边界类、数据模型类、配置类、设计决策类等）
-
-**Step 3 — 批量用户澄清：**
-
-将所有 T3 条目一次性呈现给用户，格式：
-
-```
-📋 填充前审查：发现 {N} 个推测性内容（T3）需确认
-
-**业务流程类** ({n1} 项):
-1. [T3] 订单创建流程顺序
-   最佳猜测: 创建 → 库存锁定 → 支付 → 确认 (置信度: 中)
-   代码依据: OrderService.CreateAsync() 调用链
-   → 确认 / 纠正: ___
-
-2. [T3] ...
-
-**模块边界类** ({n2} 项):
-3. [T3] Auth 模块是否同时负责权限管理？
-   最佳猜测: 是（AuthService 中包含 CheckPermission 方法）(置信度: 高)
-   代码依据: AuthService.cs 第 45 行
-   → 确认 / 纠正: ___
-
-**设计决策类** ({n3} 项):
-...
-```
-
-**Step 4 — 用户响应整合：**
-
-- 用户确认的 T3 → 升级为 T2，正式写入文档（移除 `UNVERIFIED` 标记）
-- 用户纠正的 T3 → 按用户输入修正后写入文档
-- 用户选择跳过的 T3 → 保留 `<!-- UNVERIFIED: {简述} -->` 标记写入文档
-
-> 若无 T3 条目（所有内容均为 T1/T2），直接跳过 Step 2-4，进入文档填充。
-
-**Step 5 — 澄清结果持久化：**
-
-将用户的 T3 澄清结果写入临时文件，避免跨会话重复提问：
-- 标准模式：`docs/.init-temp/clarifications.md`
-- 大型项目模式：`.init-docs/clarifications.md`（已有此规则）
-
-同步更新进度文件中的 `t3_clarified: true`。
+> 在所有子代理分析完成后、开始文档填充之前，主 agent **必须**执行此审查关卡：清单覆盖率检查 → T3 推测性内容收集 → 批量用户澄清 → 用户响应整合 → 澄清结果持久化。**此步骤完成前禁止开始文档填充。**
+>
+> **执行**：进入此关卡时**必须 Read `resources/pre-fill-review.md`** 获取完整的 5 步流程、用户呈现格式和持久化规则。若无 T3 条目（所有内容均为 T1/T2），跳过 Step 2-4 直接进入文档填充。
 
 #### 渐进式分层交付
 
@@ -603,9 +481,12 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 
 | 文件 | 何时读取 | 用途 |
 |------|---------|------|
+| `resources/tool-init-detection.md` | Phase 0.1 | 工具 /init 检测表（Gemini/Codex/Claude Code/Cursor/Copilot/Windsurf）+ 硬性前置执行策略 |
 | `resources/doc-guide.md` | Phase 1/Phase 3 | 文档架构总览、各文档职责、模块三级形态、项目类型适配（入口索引） |
 | `resources/tech-stack-matrix.md` | Phase 0.3 / Phase 2 扫描前 | 确定性清点命令矩阵、字段说明提取矩阵、技术栈/锚点/模块识别策略（Step 1-4）、配置识别策略 |
+| `resources/module-tiering.md` | Phase 0.3 Step 6（模块复杂度评分） | 评分规则 + Core/Standard/Lightweight 分级表 + 用户确认格式 |
 | `resources/fact-classification.md` | Phase 2 子代理分发前 | Phase 2 填充原则（6 条）、三级事实分类（T1/T2/T3）、子代理输出格式 |
+| `resources/pre-fill-review.md` | Phase 2 子代理完成 → 文档填充前 | 填充前审查关卡 5 步流程（覆盖率检查/T3 收集/批量澄清/响应整合/持久化） |
 | `resources/front-matter-spec.md` | Phase 1 骨架生成 / Phase 2 填写占位符时 | 模板占位符、YAML Front Matter 字段标准、AI 提示块、结构化 TODO（type/priority/owner 枚举唯一权威来源） |
 | `resources/legacy-extraction.md` | Phase 1.5 触发时 | 旧文档结构化提取的 4 步详细流程 |
 | `resources/large-project-mode.md` | 进入大型项目模式时 | Phase 2A-2D 完整流程 + 任务持久化机制 |
