@@ -1,5 +1,9 @@
 # blyy-skills-doc
 
+[![Status](https://img.shields.io/badge/status-maintenance_mode-yellow.svg)](./STATUS.md)
+[![Version](https://img.shields.io/badge/version-v1.0.0-blue.svg)](./docs/CHANGELOG.md)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
+
 [English](#english) | [中文](#中文)
 
 ---
@@ -52,8 +56,10 @@ cp -r skills/blyy-doc-sync .agents/skills/
 
 ### How It Works
 
-- **blyy-init-docs**: Scans your codebase, identifies modules, and generates a complete documentation set (architecture, code map, data model, deployment guide, etc.) with a baseline snapshot
-- **blyy-doc-sync**: After each code change, checks what documentation needs updating using a three-line-of-defense strategy (real-time sync / pre-commit gate / periodic audit)
+**blyy-skills-doc** generates and maintains **business knowledge documentation** — the information that AI cannot infer from source code alone. Code-level details (file maps, API specs, table schemas) are deliberately NOT generated; AI reads those directly from source.
+
+- **blyy-init-docs**: Scans your codebase and generates the business knowledge docs (architecture overview, module business responsibilities, glossary of business terms and field semantics, architecture decisions, cross-module flows)
+- **blyy-doc-sync**: Keeps these docs in sync with code changes via a three-line-of-defense strategy (real-time sync / pre-commit gate / periodic audit)
 
 ### Usage Scenarios
 
@@ -154,8 +160,10 @@ cp -r skills/blyy-doc-sync .agents/skills/
 
 ### 工作原理
 
-- **blyy-init-docs**：扫描代码库，识别模块，生成完整文档集（架构总览、代码地图、数据模型、部署指南等），并写入基线快照
-- **blyy-doc-sync**：每次代码变更后，通过三道防线策略检查哪些文档需要更新（实时同步 / 提交前门禁 / 定期审计）
+**blyy-skills-doc** 生成并维护**业务知识文档**——这些是 AI 无法仅凭源码推断出的信息。代码级细节（文件映射、API 规范、表结构）有意**不**生成，AI 直接读源码即可获取。
+
+- **blyy-init-docs**：扫描代码库，生成业务知识文档（架构总览、模块业务职责、业务术语词汇表与字段业务语义、架构决策、跨模块流程）
+- **blyy-doc-sync**：通过三道防线（实时同步 / 提交前门禁 / 定期审计）保持文档与代码同步
 
 ### 使用场景
 
