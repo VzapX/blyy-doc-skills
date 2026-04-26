@@ -29,9 +29,8 @@ blyy-doc-skills/
     │   │   └── operational-conventions.md
     │   └── templates/             ← 文档模板
     │       ├── root/              ← 根目录文档（README/AGENTS/CHANGELOG/...）
-    │       ├── docs/              ← docs/ 下文档
-    │       ├── modules/           ← Core 模块完整目录模板（6 个子文件）
-    │       └── modules-single.md.template  ← Standard 模块单文件模板
+    │       ├── docs/              ← docs/ 下文档（ARCHITECTURE/modules/glossary/core-flow/config/DECISIONS/doc-maintenance）
+    │       └── modules/           ← 模块单文件模板 `_module.md.template`（5 章节，每模块一个 modules/<m>.md）
     └── blyy-doc-sync/             ← Skill 2：持续同步
         ├── SKILL.md               ← AI 入口
         └── resources/
@@ -79,7 +78,7 @@ blyy-init-docs/SKILL.md（~470 行，约 6.7K tokens，每次必加载）
     ├─ Phase 1/Phase 3（架构总览 / 项目类型适配）
     │     └─ Read resources/doc-guide.md（~240 行）
     │
-    ├─ Phase 0.3/Phase 2 扫描前（清点命令 / 锚点 / 模块识别）
+    ├─ Phase 1 项目类型识别 / Phase 2 扫描前（清点命令 / 锚点 / 模块识别）
     │     └─ Read resources/tech-stack-matrix.md（~400 行）
     │
     ├─ Phase 2 子代理分发前（填充原则 / 三级事实分类）
@@ -115,22 +114,6 @@ blyy-doc-sync/SKILL.md（~250 行，约 3.5K tokens，每次必加载）
 2. **资源文件清单必须明示「何时读取」** — SKILL.md 的「资源文件」表格采用三列结构（文件 / 何时读取 / 用途），让 AI 一眼判断是否需加载
 3. **避免循环引用** — resource 文件之间不互相 Read，仅由 SKILL.md 路由
 4. **资源文件单一职责** — 每个文件聚焦一个 Phase 或一类规范，命名需体现触发场景
-
-## 模块复杂度分级体系（v0.3.2）
-
-模块文档采用三级形态，根据复杂度评分自动决定，解决大型项目文档过多的问题：
-
-| 级别 | 条件（评分） | 文档形态 | 文件数/模块 |
-|------|------------|---------|-----------|
-| **Core** | ≥ 3 分 | 完整目录 `modules/<m>/`（README + flow + code-map + data-model + api-reference + database） | 6 |
-| **Standard** | 1-2 分 | 单文件 `modules/<m>.md`，所有章节合并 | 1 |
-| **Lightweight** | 0 分 | 无独立文件，内联到 `modules.md` | 0 |
-
-**评分信号**（全部基于 shell 命令，不依赖 AI 判断）：源文件数 >15（+2）/5-15（+1）、有 Entity/Model 文件（+1）、有 Controller/Handler 文件（+1）、被 ≥3 模块依赖（+1）。
-
-**动态复评闭环**：
-- **防线 1 Step 2.5**：每次代码变更后检测升级信号（实时，仅升级方向）
-- **防线 3 Step 2.5**：定期全量复评（月/季度，升降双向）
 
 ## 三道防线的层级
 
@@ -189,5 +172,4 @@ description: 一句话描述触发时机
 每次发版必须：
 1. 更新 `docs/CHANGELOG.md`
 2. 更新 `skills/blyy-init-docs/VERSION` 和 `skills/blyy-doc-sync/VERSION` 两个版本号文件（Phase 3 写入基线快照时从此处读取替换 `{{SKILL_VERSION}}` 占位符）
-3. 同步更新 `SKILL.md` 中的「模板架构变更要点」版本号引用
-4. （可选）更新 README 顶部的版本徽章
+3. （可选）更新 README 顶部的版本徽章
