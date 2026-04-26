@@ -70,7 +70,7 @@
 
 ## Phase 2D — 渐进式文档生成与填充
 
-> 目标：基于已确认的分析结果，**按层级渐进式**填充文档框架。同标准模式的 Layer 1-4 分层策略。
+> 目标：基于已确认的分析结果，**按层级渐进式**填充文档框架。同标准模式的 Layer 1-3 分层策略。
 
 | 层级 | 文档 | 执行者 |
 |------|------|--------|
@@ -98,11 +98,7 @@
     ├── clarifications.md        ← 用户澄清记录（T3 确认结果，避免跨会话重复提问）
     ├── docs-old-manifest.md     ← Phase 1.5 旧文档清单
     ├── extractions/             ← Phase 1.5 结构化提取结果
-    │   ├── extraction-architecture.md
-    │   ├── extraction-glossary.md
-    │   ├── extraction-config.md
-    │   ├── extraction-features.md
-    │   └── extraction-other.md
+    │   └── extraction-<category>.md  ← 按 Phase 1.5 子代理类别命名（架构/术语/配置/功能/其他），不强制清单
     └── modules/
         ├── <name>-analysis.md   ← 各模块分析报告（含子任务清单 + T1/T2/T3 标注）
         └── ...

@@ -364,7 +364,7 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 
 **跨层规则：**
 - 子代理在 Layer 2 启动时已并行分析所有模块，产出持久化到临时文件
-- Layer 3/4 直接从临时文件读取子代理产出，不重新分析
+- Layer 3 直接从临时文件读取子代理产出，不重新分析
 - 用户暂停后，可在新会话中通过 `docs/.init-temp/progress.md`（标准模式）或 `.init-docs/master-task.md`（大型模式）恢复进度
 - 已有文档优先：填充每个文档时先检查 Phase 1.5 提取产物中的对应信息
 
@@ -392,20 +392,20 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 **核心特征：**
 - 通过 `.init-docs/` 目录持久化任务进度（详见 `resources/large-project-mode.md` 任务持久化机制章节）
 - 子代理在独立上下文中分析单个模块，结果立即落盘到 `.init-docs/modules/<name>-analysis.md`
-- 填充阶段同标准模式 Layer 1-4，每层交付后用户可暂停，跨会话从 `.init-docs/master-task.md` 恢复
+- 填充阶段同标准模式 Layer 1-3，每层交付后用户可暂停，跨会话从 `.init-docs/master-task.md` 恢复
 
 ---
 
 ### Phase 3 — 最终检查与完成报告
 
-> **执行**：进入 Phase 3 时**必须 Read `resources/phase3-verification.md`** 获取完整的 14 项检查项、基线快照 YAML schema 和 INIT-REPORT 模板。
+> **执行**：进入 Phase 3 时**必须 Read `resources/phase3-verification.md`** 获取完整的 12 项检查项、基线快照 YAML schema 和 INIT-REPORT 模板。
 >
 > **版本号占位符**：写入基线快照前，必须读取 `skills/blyy-init-docs/VERSION` 文件的内容，用其替换 YAML 模板中的 `{{SKILL_VERSION}}` 占位符，以免硬编码版本号与实际发版脱节。
 
 **核心原则**：Phase 3 的完整性验证基于**确定性清单比对**（从 `inventory.md` 读取基线数量与文档实际覆盖比对），而非重新扫描代码。
 
 **关键产出：**
-1. 完整性校验报告（模块/实体/配置/API/测试/监控/旧文档回收率）
+1. 完整性校验报告（模块/业务术语/用户可见功能/配置项/旧文档回收率）
 2. 文档可信度统计（T1/T2/T3 分布）
 3. **基线快照写入 `docs/doc-maintenance.md`** — 必须采用 YAML 格式，含 `inventory` / `markers` / `layer_distribution` / `fact_levels` 四类数据，供 `blyy-doc-sync` 防线 3 程序化解析
 4. 一次性完成报告 `docs/INIT-REPORT.md`（含未覆盖条目清单 + T3 待确认条目位置链接）
@@ -433,7 +433,7 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 | `resources/front-matter-spec.md` | Phase 1 骨架生成 / Phase 2 填写占位符时 | 模板占位符、YAML Front Matter 字段标准、AI 提示块、结构化 TODO（type/priority/owner 枚举唯一权威来源） |
 | `resources/legacy-extraction.md` | Phase 1.5 触发时 | 旧文档结构化提取的 4 步详细流程 |
 | `resources/large-project-mode.md` | 进入大型项目模式时 | Phase 2A-2D 完整流程 + 任务持久化机制 |
-| `resources/phase3-verification.md` | 进入 Phase 3 时 | 14 项检查项 + 基线快照 YAML schema + INIT-REPORT 模板 |
+| `resources/phase3-verification.md` | 进入 Phase 3 时 | 12 项检查项 + 基线快照 YAML schema + INIT-REPORT 模板 |
 | `resources/operational-conventions.md` | 子代理调度 + 全程参考 | 进度通报规范、上下文保护「边读边落盘」、异常容错、文件过滤规则 |
 
 ## 进度通报、上下文保护、异常容错、文件过滤

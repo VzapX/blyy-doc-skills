@@ -130,7 +130,7 @@ AI 工具在执行**任何代码修改任务**后，应自动触发 blyy-doc-syn
 # 1. 检查文档间交叉引用是否存在
 rg -o '\[.*?\]\(((?!http)[^)]+)\)' docs/ --no-filename | \
   grep -oP '\(([^)]+)\)' | tr -d '()' | \
-  while read f; do [ ! -e "$f" ] && echo "死链: $f"; done
+  while read f; do [ ! -e "docs/$f" ] && [ ! -e "$f" ] && echo "死链: $f"; done
 
 # 2. 检查 modules.md 注册表 vs 实际模块文件
 diff <(rg -oP '\| \[(\w+)\]' docs/modules.md | sort) \
