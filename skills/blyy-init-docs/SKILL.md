@@ -127,12 +127,6 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 
 > **v1.0.0 文档定位**：业务知识文档。只生成 AI 读代码读不出的业务知识（业务术语、架构决策、跨模块流程、模块业务职责）。代码级文档（code-map / api-reference / data-model / database / testing 等）和运营级文档（deployment / runbook / monitoring）**不再生成**——AI 直接读源码或运维系统即可获取。
 
-> **模板架构变更要点（v0.2.0+）**：
-> - 所有 `docs/*.template` 与 `modules/*.template` 的 YAML front matter 扩展了新字段：`audience` / `read_priority` / `max_lines` / `parent_doc` / `code_anchors` / `applicable_project_types` / `last_synced_commit`，详见 `resources/front-matter-spec.md` 七、YAML Front Matter 字段标准
-> - **Phase 1 骨架按 `applicable_project_types` 字段自动过滤**：识别项目类型后，仅生成 front matter 中包含该类型的模板，无需依赖 AI 阅读项目类型适配指南
-> - 所有列表型字段必须包含「代码位置」列（`file:line` 格式）
-> - 所有 `<!-- TODO -->` 必须使用结构化格式 `<!-- TODO[priority,type,owner]: ... -->`
-
 > **项目类型适配**：不同类型的项目对文档的侧重点不同，详见 `resources/doc-guide.md` 项目类型适配指南。部分文档可根据项目类型跳过。
 
 **操作步骤：**
@@ -379,7 +373,6 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 - **结构化 TODO 格式**：未确认内容必须使用 `<!-- TODO[priority,type,owner]: 简述 -->` 位置参数格式，详见 `resources/front-matter-spec.md` 七.4 — `priority` ∈ {p0,p1,p2,p3}，`type` ∈ {business-context,design-rationale,ops-info,security-info,external-link,metric-baseline}，`owner` ∈ {user,dev-team,ops-team,security-team,具体负责人名}
 - **front matter 完整性**：每个文档必须填充 `last_updated`（当前日期）、`last_synced_commit`（初始化时填 `init`，由 doc-sync 后续维护）、`audience`、`read_priority`、`code_anchors`（实际代码目录/文件路径）字段，禁止保留模板占位符
 - **AI-READ-HINT 块完整性**：保留模板中的 `AI-READ-HINT` 块，根据当前文档实际内容调整 `READ-WHEN`/`SKIP-WHEN`/`PAIRED-WITH` 描述，禁止整块删除
-- **INCLUDE-IF 条件段处理**：模板中标注 `<!-- INCLUDE-IF: 条件 -->` 的段落，若项目不满足条件直接整段删除；满足条件时移除标记并填充内容
 
 ---
 
@@ -427,7 +420,7 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
 |------|---------|------|
 | `resources/tool-init-detection.md` | Phase 0.1 | 工具 /init 检测表（Gemini/Codex/Claude Code/Cursor/Copilot/Windsurf）+ 硬性前置执行策略 |
 | `resources/doc-guide.md` | Phase 1/Phase 3 | 文档架构总览、各文档职责、项目类型适配（入口索引） |
-| `resources/tech-stack-matrix.md` | Phase 0.3 / Phase 2 扫描前 | 确定性清点命令矩阵、字段业务语义提取矩阵、技术栈/锚点/模块识别策略（Step 1-4）、配置识别策略 |
+| `resources/tech-stack-matrix.md` | Phase 1 项目类型识别 / Phase 2 扫描前 | 确定性清点命令矩阵、字段业务语义提取矩阵、技术栈/锚点/模块识别策略（Step 1-4）、配置识别策略 |
 | `resources/fact-classification.md` | Phase 2 子代理分发前 | Phase 2 填充原则、三级事实分类（T1/T2/T3）、子代理输出格式 |
 | `resources/pre-fill-review.md` | Phase 2 子代理完成 → 文档填充前 | 填充前审查关卡 5 步流程（覆盖率检查/T3 收集/批量澄清/响应整合/持久化） |
 | `resources/front-matter-spec.md` | Phase 1 骨架生成 / Phase 2 填写占位符时 | 模板占位符、YAML Front Matter 字段标准、AI 提示块、结构化 TODO（type/priority/owner 枚举唯一权威来源） |

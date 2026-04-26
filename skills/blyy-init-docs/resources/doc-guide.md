@@ -4,7 +4,7 @@
 
 > **v1.0.0 定位**：业务知识文档。只生成 AI 读代码读不出的业务知识层（业务术语、架构决策、跨模块流程、模块业务职责）。代码级文档（code-map / api-reference / data-model / database / testing 等）和运营级文档（deployment / runbook / monitoring）一律不再生成——AI 直接读源码或运维系统即可获取。
 
-v0.3.3 起本文件已拆分，具体的技术栈矩阵、填充规则与 YAML Front Matter 规范另见：
+v1.0.0 起本文件已拆分，具体的技术栈矩阵、填充规则与 YAML Front Matter 规范另见：
 
 | 子资源文件 | 内容 |
 |-----------|------|

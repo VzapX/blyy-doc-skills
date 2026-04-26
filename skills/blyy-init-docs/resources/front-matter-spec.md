@@ -54,7 +54,7 @@ last_synced_commit: a1b2c3d        # 最后一次与代码同步时的 Git short
 
 # === 结构性字段 ===
 audience: ai-and-human             # 取值: ai-only | human-only | ai-and-human
-read_priority: 2                   # 取值: 1-4，对应 Layer 1-4 渐进式披露层级
+read_priority: 2                   # 取值: 1-4，对应 Layer 1-3 渐进式披露层级（4 = 按需查阅，不属于任何交付层）
 max_lines: 200                     # 体积硬约束。doc-sync 防线 2 在超标时告警，提示拆分
 parent_doc: ARCHITECTURE.md        # 文档树上的父节点，根节点为空
 code_anchors:                      # 本文档对应的代码路径（用于 AI 反向定位）
@@ -80,7 +80,7 @@ change_triggers:
 | `last_synced_commit` | string | 是 | Git short SHA（7 位）或 `init` | 与代码同步基线。doc-sync 防线 3 据此判断"自上次同步是否真有相关变更" |
 | `audience` | enum | 是 | `ai-only` / `human-only` / `ai-and-human` | AI 是否应读取此文档 |
 | `read_priority` | int | 是 | 1 / 2 / 3 / 4 | Layer 层级。1 = 核心入口（每次都读），4 = 按需查阅 |
-| `max_lines` | int | 是 | 推荐: 入口型 ≤150, 模块型 ≤300, 参考型 ≤500 | 体积上限。超标告警 |
+| `max_lines` | int | 是 | 推荐: 入口型 ≤150, 模块型 ≤400, 参考型 ≤500 | 体积上限。超标告警 |
 | `parent_doc` | path | 否 | 相对路径或为空 | 文档树父节点，构建文档导航关系 |
 | `code_anchors` | list | 否 | 文件/目录路径 | 反向定位代码用 |
 | `applicable_project_types` | list | 否 | 见下表 | Phase 1 骨架按此过滤生成 |

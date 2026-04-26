@@ -8,6 +8,8 @@
 
 Phase 2 「穷举式枚举」原则依赖确定性清单预扫描。主 agent 在 Phase 2 开始前必须使用 shell 命令（`fd` / `rg`，非 AI 阅读）按下表生成项目的完整文件清单：
 
+> **执行命令时**：表格中的 `\|` 是 Markdown 表格转义符。复制到 shell 时需去掉反斜杠，使用 `"Entity|Model"` 形式。
+
 | 技术栈 | 实体/模型清点 | 控制器/路由清点 | 服务清点 | 配置清点 |
 |--------|-------------|---------------|---------|---------|
 | C# / .NET | `fd -e cs -p "Entity\|Model" --type f` | `fd -e cs -p "Controller" --type f` | `fd -e cs -p "Service" --type f` | `fd "appsettings" --type f` |
