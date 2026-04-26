@@ -145,7 +145,7 @@ fd --type f --exclude .git --exclude node_modules --exclude bin --exclude obj --
      - **递归列出** `docs-old/` 下所有 `.md` 文件清单，以便 Phase 2 填充阶段参考
    - **若 `docs/` 不存在** → **跳过迁移，不创建 `docs-old/`**，直接进入步骤 2
 2. **项目类型识别**（Phase 1 骨架过滤的前置步骤）：
-   - 根据 Phase 0.3 的项目清点结果，结合 `resources/doc-guide.md` 五.适配矩阵 + 「条件判断方法」表，自动判定项目类型（取一个或多个枚举值：`backend-service` / `microservice` / `fullstack` / `frontend-spa` / `cli-tool` / `library` / `data-pipeline` / `infrastructure`）
+   - 根据 Phase 0.3 的项目清点结果，结合 `resources/doc-guide.md` 五.适配矩阵，自动判定项目类型（取一个或多个枚举值：`backend-service` / `microservice` / `fullstack` / `frontend-spa` / `cli-tool` / `library` / `data-pipeline` / `infrastructure`）
    - 向用户确认识别结果：`"识别到的项目类型: {types}。是否正确？(Y/纠正)"` — 用户纠正后才进入步骤 3
    - 将识别结果记录到 `.init-docs/project-type.md`（大型模式）或在主 agent 上下文中保留（标准模式）
 3. 阅读 `templates/root/`、`templates/docs/`、`templates/modules/` 下的所有模板

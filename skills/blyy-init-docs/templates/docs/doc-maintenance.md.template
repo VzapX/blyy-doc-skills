@@ -76,29 +76,48 @@ PAIRED-WITH: blyy-doc-sync/resources/sync-matrix.md（通用同步矩阵）
 > AI 工具可读，但**不应手动编辑此章节** — 必须由确定性扫描命令的实际输出覆盖。
 
 ```yaml
-# Phase 2 自动填充：由 init-docs Phase 3 写入
-baseline:
-  generated_at: {{DATE}}
-  git_commit: <!-- Phase 3 自动填充：当前 HEAD 短 SHA -->
-  counts:
-    modules: <!-- Phase 3 -->
-    entities: <!-- Phase 3：业务术语候选（实体/服务类） -->
-    features: <!-- Phase 3：用户可见功能数 -->
-    config_items: <!-- Phase 3 -->
-    docs_total: <!-- Phase 3 -->
-  markers:
-    todo_total: <!-- Phase 3 -->
-    unverified_total: <!-- Phase 3 -->
-  layer_distribution:
-    layer_1: <!-- Phase 3：4（README/AGENTS/ARCHITECTURE/modules） -->
-    layer_2: <!-- Phase 3：模块数 -->
-    layer_3: <!-- Phase 3：6（core-flow/config/glossary/DECISIONS/doc-maintenance/CHANGELOG） -->
+snapshot_date: {{DATE}}
+snapshot_commit: <!-- Phase 3 自动填充：当前 HEAD 短 SHA -->
+last_synced_commit: <!-- Phase 3 自动填充：同 snapshot_commit，doc-sync 后续会更新此字段 -->
+skill_version: blyy-init-docs v{{SKILL_VERSION}}
+
+inventory:
+  modules: <!-- Phase 3 -->
+  entities: <!-- Phase 3：业务术语候选（实体/服务类）— 供 glossary 字段语义表完整性比对 -->
+  features: <!-- Phase 3：用户可见功能数 — 供 modules.md 功能列表比对 -->
+  config_items: <!-- Phase 3 -->
+
+markers:
+  todo_total: <!-- Phase 3 -->
+  todo_by_priority:
+    p0: <!-- Phase 3 -->
+    p1: <!-- Phase 3 -->
+    p2: <!-- Phase 3 -->
+    p3: <!-- Phase 3 -->
+  todo_by_type:
+    business-context: <!-- Phase 3 -->
+    design-rationale: <!-- Phase 3 -->
+    ops-info: <!-- Phase 3 -->
+    security-info: <!-- Phase 3 -->
+    external-link: <!-- Phase 3 -->
+    metric-baseline: <!-- Phase 3 -->
+  unverified_total: <!-- Phase 3 -->
+
+layer_distribution:
+  layer1_core: <!-- Phase 3：4（README/AGENTS/ARCHITECTURE/modules） -->
+  layer2_modules: <!-- Phase 3：模块数 -->
+  layer3_aggregate: <!-- Phase 3：6（core-flow/config/glossary/DECISIONS/doc-maintenance/CHANGELOG） -->
+
+fact_levels:
+  t1_count: <!-- Phase 3 -->
+  t2_count: <!-- Phase 3 -->
+  t3_count: <!-- Phase 3 -->
 ```
 
-### 历史快照（趋势数据）
+## 历史快照趋势
 
-> doc-sync 防线 3 每次审计后追加一行，用于发现文档质量退化。
+> doc-sync 防线 3 每次执行后追加一行，便于发现腐烂趋势。
 
-| 日期 | git commit | 模块 | 业务术语 | 用户功能 | TODO | UNVERIFIED | 备注 |
-|------|-----------|------|---------|---------|------|-----------|------|
-| <!-- Phase 3 --> | | | | | | | 初始化基线 |
+| 日期 | commit | 模块 | 术语 | 功能 | TODO 总数 | UNVERIFIED | 备注 |
+|------|--------|------|------|------|-----------|------------|------|
+| <!-- Phase 3 --> | | | | | | | init |

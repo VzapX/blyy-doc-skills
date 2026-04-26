@@ -20,22 +20,22 @@ change_triggers:
 # 核心流程
 
 <!-- AI-READ-HINT
-PURPOSE: 描述跨模块的核心业务流程（仅跨模块的，模块内部流程在各模块的 flow.md）。
+PURPOSE: 描述跨模块的核心业务流程（仅跨模块的，模块内部流程在各模块 modules/<m>.md 的「核心业务流程」章节）。
 READ-WHEN: 用户问「整个流程怎么走 / 业务从哪里开始 / 跨模块的链路」。
-SKIP-WHEN: 修改单个模块的内部逻辑（直接读模块的 flow.md）。
-PAIRED-WITH: modules.md（模块清单）, modules/<m>/flow.md（模块内流程）
+SKIP-WHEN: 修改单个模块的内部逻辑（直接读模块 modules/<m>.md 的「核心业务流程」章节）。
+PAIRED-WITH: modules.md（模块清单）, modules/<m>.md 的「核心业务流程」章节（模块内流程）
 -->
 
 > 返回 [架构文档](ARCHITECTURE.md)
 
-> 本文档仅描述**跨模块的核心业务流程**。模块内部流程请查阅 `modules/<m>/flow.md`。
+> 本文档仅描述**跨模块的核心业务流程**。模块内部流程请查阅 `modules/<m>.md` 的「核心业务流程」章节。
 
 ## 主流程概览
 
 ```mermaid
 flowchart TD
     %% AI-RULE: 此图基于实际入口点 → 跨模块调用链生成。
-    %% 仅展示跨模块的步骤；模块内步骤放在模块级 flow.md。
+    %% 仅展示跨模块的步骤；模块内步骤放在 modules/<m>.md 的「核心业务流程」章节。
     %% 若无法生成 ≥3 个真实节点，删除整个代码块。
 ```
 
